@@ -7,7 +7,9 @@ import '../../services/audio_service.dart';
 import '../lesson/vocabulary_detail_screen.dart';
 
 class DictionaryScreen extends StatefulWidget {
-  const DictionaryScreen({super.key});
+  final bool initialShowFavorites;
+
+  const DictionaryScreen({super.key, this.initialShowFavorites = false});
 
   @override
   State<DictionaryScreen> createState() => _DictionaryScreenState();
@@ -15,7 +17,13 @@ class DictionaryScreen extends StatefulWidget {
 
 class _DictionaryScreenState extends State<DictionaryScreen> {
   final _searchController = TextEditingController();
-  int _selectedHskFilter = 0; // 0 = Semua level
+  late int _selectedHskFilter; // 0 = Semua, 1-6 = HSK Level, -1 = Koleksi Kata / Favorit
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedHskFilter = widget.initialShowFavorites ? -1 : 0;
+  }
 
   @override
   void dispose() {
@@ -29,7 +37,18 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
     final query = _searchController.text.trim();
 
     List<VocabularyItem> results;
-    if (query.isEmpty) {
+    if (_selectedHskFilter == -1) {
+      // Tampilkan kata favorit / tersimpan
+      results = vocab.favoriteVocabulary;
+      if (query.isNotEmpty) {
+        final q = query.toLowerCase();
+        results = results.where((item) =>
+          item.hanzi.toLowerCase().contains(q) ||
+          item.pinyin.toLowerCase().contains(q) ||
+          item.artiIndonesia.toLowerCase().contains(q)
+        ).toList();
+      }
+    } else if (query.isEmpty) {
       if (_selectedHskFilter == 0) {
         results = vocab.currentLevelVocabulary;
       } else {
@@ -94,7 +113,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
               ),
             ),
 
-            // HSK Level Filters
+            // HSK Level Filters + Koleksi Kata Favorit
             SizedBox(
               height: 40,
               child: ListView(
@@ -102,6 +121,8 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
                   _buildFilterChip('Semua Level', 0),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('⭐ Koleksi Kata (${vocab.favoriteVocabIds.length})', -1),
                   const SizedBox(width: 8),
                   _buildFilterChip('HSK 1', 1),
                   const SizedBox(width: 8),
@@ -125,7 +146,9 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
               child: Row(
                 children: [
                   Text(
-                    'Menampilkan ${results.length} kosakata',
+                    _selectedHskFilter == -1
+                        ? 'Koleksi ${results.length} kosakata tersimpan'
+                        : 'Menampilkan ${results.length} kosakata',
                     style: const TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600),
                   ),
                 ],
@@ -139,10 +162,13 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('🔍', style: TextStyle(fontSize: 48)),
+                          Text(_selectedHskFilter == -1 ? '⭐' : '🔍', style: const TextStyle(fontSize: 48)),
                           const SizedBox(height: 12),
                           Text(
-                            'Tidak ada kosakata ditemukan untuk "$query"',
+                            _selectedHskFilter == -1
+                                ? 'Belum ada kosakata di Koleksi Kata.\nKetuk ikon bintang pada kata untuk menyimpannya.'
+                                : 'Tidak ada kosakata ditemukan untuk "$query"',
+                            textAlign: TextAlign.center,
                             style: const TextStyle(color: AppColors.textMuted),
                           ),
                         ],
@@ -153,7 +179,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                       itemCount: results.length,
                       itemBuilder: (context, index) {
                         final item = results[index];
-                        return _buildWordCard(item);
+                        return _buildWordCard(context, item, vocab);
                       },
                     ),
             ),
@@ -192,7 +218,9 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
     );
   }
 
-  Widget _buildWordCard(VocabularyItem item) {
+  Widget _buildWordCard(BuildContext context, VocabularyItem item, VocabularyProvider vocab) {
+    final isFav = vocab.isFavorite(item.id);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -254,6 +282,16 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Bookmark/Favorite Button (Koleksi Kata)
+            IconButton(
+              icon: Icon(
+                isFav ? Icons.star_rounded : Icons.star_border_rounded,
+                color: isFav ? AppColors.coinGold : AppColors.textLight,
+                size: 22,
+              ),
+              onPressed: () => vocab.toggleFavorite(item.id),
+            ),
+            // Audio TTS Button
             IconButton(
               icon: const Icon(Icons.volume_up_rounded, color: AppColors.primaryDark, size: 22),
               onPressed: () => AudioService.instance.speak(item.hanzi),

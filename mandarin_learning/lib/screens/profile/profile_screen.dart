@@ -160,7 +160,7 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const DictionaryScreen()),
+                        MaterialPageRoute(builder: (_) => const DictionaryScreen(initialShowFavorites: true)),
                       );
                     },
                   ),

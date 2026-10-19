@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/vocabulary_model.dart';
+import '../../models/quiz_attempt_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../../services/audio_service.dart';
@@ -154,15 +155,33 @@ class _QuizScreenState extends State<QuizScreen> {
       rewardCoins = 5;
     }
 
+    final attemptId = 'quiz_${DateTime.now().millisecondsSinceEpoch}';
+    final auth = context.read<AuthProvider>();
+    final vocab = context.read<VocabularyProvider>();
+
     if (rewardCoins > 0) {
-      final auth = context.read<AuthProvider>();
       await auth.addCoins(
         rewardCoins,
         'quiz_reward',
         'Skor kuis utama: $score% ($rewardCoins koin)',
-        attemptId: 'quiz_${DateTime.now().millisecondsSinceEpoch}',
+        attemptId: attemptId,
       );
     }
+
+    // Rekam attempt kuis untuk pemantauan progres (PB-05 & FR-15)
+    await vocab.recordQuizAttempt(
+      QuizAttempt(
+        id: attemptId,
+        userId: auth.profile?.id ?? 'guest_local_user',
+        hskLevel: vocab.selectedLevel,
+        quizType: 'tebak_arti_pinyin',
+        score: score,
+        totalQuestions: total,
+        correctAnswers: _correctCount,
+        coinsEarned: rewardCoins,
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   // Bantuan Kuis (FR-19: 20 Koin)
