@@ -8,7 +8,7 @@ Dokumen ini merupakan PRD terpadu yang memuat kebutuhan produk, fitur, prioritas
 
 ### **1. Ringkasan Produk (Overview)** 
 
-Aplikasi ini adalah aplikasi mobile untuk membantu pengguna pemula belajar Bahasa Mandarin secara mandiri, terutama kosakata level HSK 1–2. Materi menggabungkan Hanzi, pinyin, arti Bahasa Indonesia, contoh penggunaan, audio pelafalan, latihan pengenalan nada, dan aktivitas interaktif. 
+Aplikasi ini adalah aplikasi mobile untuk membantu pengguna pemula belajar Bahasa Mandarin secara mandiri, terutama kosakata level HSK 1–6. Materi menggabungkan Hanzi, pinyin, arti Bahasa Indonesia, contoh penggunaan, audio pelafalan, latihan pengenalan nada, dan aktivitas interaktif. 
 
 Alur belajar utama adalah Materi → Kuis Tebak Arti dan Pinyin → Latihan Pelafalan. Setelah menyelesaikan materi, pengguna dapat berlatih mengucapkan kosakata melalui mikrofon. Sistem menganalisis hasil pengenalan ujaran dan kontur nada untuk memberikan umpan balik pembelajaran. 
 
@@ -32,7 +32,7 @@ Fitur pendukung meliputi Kamus Mandarin, Hanzi Matching, Hanzi Stroke Challenge,
 
 |**Fitur**|**Deskripsi**|
 |---|---|
-|Materi Mandarin|Materi HSK 1–2 dengan Hanzi, pinyin bertanda nada,<br>arti, contoh, dan audio.|
+|Materi Mandarin|Materi HSK 1–6 dengan Hanzi, pinyin bertanda nada,<br>arti, contoh, dan audio.|
 |Kuis utama|Kuis tebakartidanpinyinsetelah materi.|
 |Latihan Pelafalan|Rekam suara pengguna, deteksi ujaran dan evaluasi<br>kontur nada dengan umpan balik.|
 |Kamus Mandarin|Pencarian berdasarkan Hanzi, pinyin, atau arti Bahasa<br>Indonesia.|
@@ -92,7 +92,7 @@ Target angka ditetapkan setelah uji coba awal, karena baseline performa dan juml
 
 ### **4. Target Pengguna (User Persona)** 
 
-Pengguna utama adalah pemula Bahasa Mandarin, seperti pelajar atau mahasiswa yang ingin belajar kosakata HSK 1–2 secara mandiri. Pengguna membutuhkan penjelasan berbahasa Indonesia, latihan singkat, audio yang mudah diputar ulang, serta umpan balik yang sederhana dan tidak mengintimidasi. 
+Pengguna utama adalah pemula Bahasa Mandarin, seperti pelajar atau mahasiswa yang ingin belajar kosakata HSK 1–6 secara mandiri. Pengguna membutuhkan penjelasan berbahasa Indonesia, latihan singkat, audio yang mudah diputar ulang, serta umpan balik yang sederhana dan tidak mengintimidasi. 
 
 ### **5. Ruang Lingkup (Scope)** 
 
@@ -100,7 +100,7 @@ Pengguna utama adalah pemula Bahasa Mandarin, seperti pelajar atau mahasiswa yan
 
 - Registrasi, login, dan penyimpanan profil/progres. 
 
-- Materi kosakata HSK 1–2 berisi Hanzi, pinyin dengan tanda nada, arti, contoh kalimat, dan audio. 
+- Materi kosakata HSK 1–6 berisi Hanzi, pinyin dengan tanda nada, arti, contoh kalimat, dan audio. 
 
 - Kuis utama tebak arti dan pinyin setelah materi. 
 
@@ -147,7 +147,7 @@ Pengguna utama adalah pemula Bahasa Mandarin, seperti pelajar atau mahasiswa yan
 |**ID**|**Persyaratan**|
 |---|---|
 |FR-01 Akun|Sistem menyediakan registrasi, login, logout, dan<br>penyimpanan progres sesuai akun pengguna.|
-|FR-02 Materi|Sistem menampilkan kosakata HSK 1–2 berupa Hanzi,<br>pinyin bertanda nada, arti, contoh penggunaan, dan<br>audio pelafalan.|
+|FR-02 Materi|Sistem menampilkan kosakata HSK 1–6 berupa Hanzi,<br>pinyin bertanda nada, arti, contoh penggunaan, dan<br>audio pelafalan.|
 |FR-03 Kuis utama|Setelah materi, sistem menyediakan kuis tebak arti dan<br>pinyin serta menyimpan hasilnya.|
 |FR-04 Latihan pelafalan|Setelah materi/kuis pada alur utama, pengguna dapat<br>merekam suara melalui mikrofon. Sistem memproses<br>rekaman dan menampilkan hasil pengenalan ujaran<br>serta umpan balik nada jika analisis tersedia.|
 |FR-05 Analisis nada|Sistem membandingkan kontur nada rekaman dengan<br>contoh referensi untuk kosakata yang sedang dilatih dan<br>menampilkan indikasi perbaikan. Sistem menampilkan<br>pesan tidak dapat dinilai bila audio tidak jelas atau<br>analisis gagal.|
@@ -290,7 +290,7 @@ Referensi teknis awal: dokumentasi dan repositori FunASR untuk model pengenalan 
 
 |**Prioritas**|**Fitur**|
 |---|---|
-|Must Have|Akun, materi HSK 1–2, kuis utama, latihan pelafalan<br>dan evaluasi nada, kamus, Hanzi Matching, Hanzi<br>Stroke Challenge, dua mini game berbasis sensor,<br>Mandarin Direction Explorer (LBS + kompas), konversi<br>mata uang, konversi waktu termasuk CST, AI<br>Tutor/LLM, progres, notifikasi, reward koin dan streak,<br>serta fitur/ketentuan lain yang diwajibkan dosen.|
+|Must Have|Akun, materi HSK 1–6, kuis utama, latihan pelafalan<br>dan evaluasi nada, kamus, Hanzi Matching, Hanzi<br>Stroke Challenge, dua mini game berbasis sensor,<br>Mandarin Direction Explorer (LBS + kompas), konversi<br>mata uang, konversi waktu termasuk CST, AI<br>Tutor/LLM, progres, notifikasi, reward koin dan streak,<br>serta fitur/ketentuan lain yang diwajibkan dosen.|
 |Should Have|Riwayat latihan lebih detail, pengaturan pengingat yang<br>lebih lengkap, filter kategori tempat, penyimpanan<br>kosakata favorit.|
 |Could Have|Statistik penguasaan kosakata, personalisasi<br>rekomendasi materi, mode latihan tambahan.|
 |Won’t Have (versi ini)|Tutor manusia langsung, interaksi sosial real-time,<br>transaksi perjalanan, sertifikasi resmi, toko/pembelian<br>avatar, dan blockchain publik.|
@@ -337,7 +337,7 @@ Durasi dan tanggal setiap tahap ditentukan setelah pembagian tugas kelompok dan 
 
 ### **13. Kriteria Penerimaan (Acceptance Criteria)** 
 
-- Pengguna dapat login dan membuka materi HSK 1–2 tanpa error. 
+- Pengguna dapat login dan membuka materi HSK 1–6 tanpa error. 
 
 - Materi menampilkan Hanzi, pinyin bertanda nada, arti, contoh, dan audio yang sesuai. 
 
