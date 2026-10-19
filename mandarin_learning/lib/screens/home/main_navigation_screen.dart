@@ -47,10 +47,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),
@@ -58,13 +58,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(0, Icons.home_rounded, 'Beranda'),
-                _buildNavItem(1, Icons.menu_book_rounded, 'Materi'),
-                _buildNavItem(2, Icons.sports_esports_rounded, 'Latihan'),
+                _buildNavItem(1, Icons.menu_book_rounded, 'Kursus'),
+                _buildNavItem(2, Icons.auto_awesome_rounded, 'Praktik'),
                 _buildNavItem(3, Icons.bar_chart_rounded, 'Progres'),
                 _buildNavItem(4, Icons.person_rounded, 'Profil'),
               ],
@@ -85,7 +85,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight : Colors.transparent,
+          color: isSelected ? const Color(0xFFDCFCE7) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -93,7 +93,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primaryDark : AppColors.textMuted,
+              color: isSelected ? AppColors.primaryDark : AppColors.textLight,
               size: 24,
             ),
             if (isSelected) ...[

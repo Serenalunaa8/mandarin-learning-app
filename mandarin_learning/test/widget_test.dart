@@ -6,7 +6,7 @@ import 'package:mandarin_learning/providers/vocabulary_provider.dart';
 import 'package:mandarin_learning/screens/auth/welcome_screen.dart';
 
 void main() {
-  testWidgets('WelcomeScreen renders title and buttons properly', (WidgetTester tester) async {
+  testWidgets('WelcomeScreen renders title, mascot, and buttons according to mockup design', (WidgetTester tester) async {
     await tester.pumpWidget(
       MultiProvider(
         providers: [
@@ -19,10 +19,13 @@ void main() {
       ),
     );
 
-    // Verifikasi teks judul
-    expect(find.text('Learn Languages.\nLevel Up Your World.'), findsOneWidget);
-    // Verifikasi tombol
-    expect(find.text('Mulai Belajar'), findsOneWidget);
-    expect(find.text('Eksplorasi Mode Tamu (Tanpa Akun)'), findsOneWidget);
+    // Verifikasi teks judul sesuai referensi mockup Screen 1
+    expect(find.text('Selamat Datang!'), findsOneWidget);
+    expect(find.text('Ayo mulai perjalanan belajarmu\nbahasa Mandarin!'), findsOneWidget);
+    // Verifikasi tombol masuk dan form
+    expect(find.text('Masuk'), findsOneWidget);
+    expect(find.text('Coba Langsung Tanpa Akun (Mode Tamu)'), findsOneWidget);
+    expect(find.text('Belum punya akun? '), findsOneWidget);
+    expect(find.text('Daftar'), findsOneWidget);
   });
 }
