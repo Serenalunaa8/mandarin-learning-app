@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../providers/vocabulary_provider.dart';
+import '../coins/coin_ledger_screen.dart';
+import '../games/hanzi_matching_screen.dart';
+import '../games/mandarin_catcher_screen.dart';
+import '../games/stroke_challenge_screen.dart';
+import '../games/tilt_to_answer_screen.dart';
 import 'dictionary_screen.dart';
 import 'quiz_screen.dart';
 import 'speech_practice_screen.dart';
@@ -17,9 +23,7 @@ class PracticeHubScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.mintBackground,
-      appBar: AppBar(
-        title: const Text('Latihan & Fitur Belajar'),
-      ),
+      appBar: AppBar(title: const Text('Latihan & Fitur Belajar')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -81,7 +85,9 @@ class PracticeHubScreen extends StatelessWidget {
                 if (target != null) {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => SpeechPracticeScreen(item: target)),
+                    MaterialPageRoute(
+                      builder: (_) => SpeechPracticeScreen(item: target),
+                    ),
                   );
                 }
               },
@@ -122,10 +128,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '🧩',
               color: const Color(0xFFFFFBEB),
               tag: 'Streak Koin',
-              isComingSoon: true,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Hanzi Matching dijadwalkan pada Sprint 5 / Tahap 5')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const HanziMatchingScreen(),
+                  ),
                 );
               },
             ),
@@ -138,10 +146,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '✍️',
               color: const Color(0xFFEFF6FF),
               tag: 'Stroke Goresan',
-              isComingSoon: true,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Stroke Challenge dijadwalkan pada Sprint 5 / Tahap 5')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const StrokeChallengeScreen(),
+                  ),
                 );
               },
             ),
@@ -154,10 +164,45 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '📱',
               color: const Color(0xFFF0FDF4),
               tag: 'Sensor Gerak',
-              isComingSoon: true,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Tilt to Answer dijadwalkan pada Sprint 5')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TiltToAnswerScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+
+            _buildFeatureCard(
+              context,
+              title: 'Mandarin Catcher',
+              desc: 'Tangkap kosakata target dengan menggerakkan perangkat atau tombol kontrol',
+              emoji: '🧺',
+              color: const Color(0xFFECFDF5),
+              tag: 'Sensor Gerak',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MandarinCatcherScreen(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+
+            _buildFeatureCard(
+              context,
+              title: 'Saldo & Riwayat Koin',
+              desc:
+                  'Lihat saldo, reward, dan koin yang digunakan untuk bantuan',
+              emoji: '🪙',
+              color: const Color(0xFFFFF7ED),
+              tag: 'Reward Koin',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CoinLedgerScreen()),
                 );
               },
             ),
@@ -229,7 +274,10 @@ class PracticeHubScreen extends StatelessWidget {
                           ),
                           if (isComingSoon)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFFEF3C7),
                                 borderRadius: BorderRadius.circular(10),
@@ -267,7 +315,10 @@ class PracticeHubScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.textLight),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.textLight,
+                ),
               ],
             ),
           ),

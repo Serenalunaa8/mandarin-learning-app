@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../core/config/supabase_config.dart';
 import '../models/user_profile_model.dart';
 import '../models/vocabulary_model.dart';
@@ -93,8 +94,9 @@ class SupabaseService {
     int limit = 200,
   }) async {
     try {
-      PostgrestFilterBuilder<List<Map<String, dynamic>>> filterBuilder =
-          client.from('vocabulary').select();
+      PostgrestFilterBuilder<List<Map<String, dynamic>>> filterBuilder = client
+          .from('vocabulary')
+          .select();
 
       if (hskLevel != null) {
         filterBuilder = filterBuilder.eq('hsk_level', hskLevel);
@@ -102,11 +104,17 @@ class SupabaseService {
 
       if (query != null && query.trim().isNotEmpty) {
         final term = query.trim();
-        filterBuilder = filterBuilder.or('hanzi.ilike.%$term%,pinyin.ilike.%$term%,arti_indonesia.ilike.%$term%');
+        filterBuilder = filterBuilder.or(
+          'hanzi.ilike.%$term%,pinyin.ilike.%$term%,arti_indonesia.ilike.%$term%',
+        );
       }
 
-      final List<dynamic> res = await filterBuilder.order('id', ascending: true).limit(limit);
-      return res.map((e) => VocabularyItem.fromJson(e as Map<String, dynamic>)).toList();
+      final List<dynamic> res = await filterBuilder
+          .order('id', ascending: true)
+          .limit(limit);
+      return res
+          .map((e) => VocabularyItem.fromJson(e as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       debugPrint('[SupabaseService] fetchVocabulary error: $e');
       return [];
@@ -171,15 +179,6 @@ class SupabaseService {
         'coins_earned': coinsEarned,
       });
 
-      if (coinsEarned > 0) {
-        await addCoinTransaction(
-          userId: userId,
-          amount: coinsEarned,
-          transactionType: 'quiz_reward',
-          description: 'Hadiah Kuis HSK $hskLevel (Skor: $score)',
-          attemptId: attemptId,
-        );
-      }
       return true;
     } catch (e) {
       debugPrint('[SupabaseService] saveQuizAttempt error: $e');

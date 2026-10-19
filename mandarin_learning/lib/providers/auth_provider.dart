@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../models/coin_transaction_model.dart';
 import '../models/user_profile_model.dart';
 import '../services/supabase_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   UserProfile? _profile;
+  final List<CoinTransaction> _coinTransactions = [];
   bool _isLoading = false;
   String? _errorMessage;
   bool _isGuest = false;
 
   UserProfile? get profile => _profile;
+  List<CoinTransaction> get coinTransactions =>
+      List.unmodifiable(_coinTransactions);
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _profile != null;
@@ -44,20 +49,28 @@ class AuthProvider extends ChangeNotifier {
         final user = SupabaseService.instance.currentUser;
         if (user != null) {
           final p = await SupabaseService.instance.getProfile(user.id);
-          _profile = p ?? UserProfile(
-            id: user.id,
-            fullName: user.userMetadata?['full_name'] ?? 'Pelajar Mandarin',
-            avatarUrl: '',
-            currentHskLevel: 1,
-            streak: 1,
-            lastActiveDate: DateTime.now(),
-            totalXp: 0,
-            coins: 50,
-          );
+          _profile =
+              p ??
+              UserProfile(
+                id: user.id,
+                fullName: user.userMetadata?['full_name'] ?? 'Pelajar Mandarin',
+                avatarUrl: '',
+                currentHskLevel: 1,
+                streak: 1,
+                lastActiveDate: DateTime.now(),
+                totalXp: 0,
+                coins: 50,
+              );
         }
       }
     } catch (e) {
       debugPrint('[AuthProvider] checkSession error: $e');
+    }
+
+    if (_profile != null && !_isGuest) {
+      _coinTransactions
+        ..clear()
+        ..addAll(await SupabaseService.instance.fetchCoinHistory(_profile!.id));
     }
 
     _isLoading = false;
@@ -91,6 +104,11 @@ class AuthProvider extends ChangeNotifier {
           totalXp: 0,
           coins: 50,
         );
+        _coinTransactions
+          ..clear()
+          ..addAll(
+            await SupabaseService.instance.fetchCoinHistory(_profile!.id),
+          );
 
         _isLoading = false;
         notifyListeners();
@@ -169,58 +187,111 @@ class AuthProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('is_guest_mode');
     _profile = null;
+    _coinTransactions.clear();
     _isGuest = false;
     notifyListeners();
   }
 
-  Future<void> addCoins(int amount, String type, String description, {String? attemptId}) async {
+  Future<void> addCoins(
+    int amount,
+    String type,
+    String description, {
+    String? attemptId,
+  }) async {
     if (_profile == null || amount <= 0) return;
 
-    final newCoins = _profile!.coins + amount;
-    final newXp = _profile!.totalXp + amount;
-    _profile = _profile!.copyWith(coins: newCoins, totalXp: newXp);
-    notifyListeners();
+    final profile = _profile!;
+    final transactionId =
+        attemptId ?? '${type}_${DateTime.now().microsecondsSinceEpoch}';
+    if (_coinTransactions.any(
+      (transaction) => transaction.attemptId == transactionId,
+    )) {
+      return;
+    }
 
     if (!_isGuest) {
-      await SupabaseService.instance.addCoinTransaction(
-        userId: _profile!.id,
+      final saved = await SupabaseService.instance.addCoinTransaction(
+        userId: profile.id,
         amount: amount,
         transactionType: type,
         description: description,
-        attemptId: attemptId,
+        attemptId: transactionId,
       );
-      await SupabaseService.instance.updateProfile(_profile!.id, {
-        'coins': newCoins,
-        'total_xp': newXp,
-      });
+      if (!saved) return;
     } else {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('guest_coins', newCoins);
-      await prefs.setInt('guest_xp', newXp);
+      await prefs.setInt('guest_coins', profile.coins + amount);
+      await prefs.setInt('guest_xp', profile.totalXp + amount);
     }
+
+    final newCoins = profile.coins + amount;
+    final newXp = profile.totalXp + amount;
+    _profile = profile.copyWith(coins: newCoins, totalXp: newXp);
+    if (!_isGuest) {
+      await SupabaseService.instance.updateProfile(profile.id, {
+        'total_xp': newXp,
+      });
+    }
+    _coinTransactions.insert(
+      0,
+      CoinTransaction(
+        id: 'local_${DateTime.now().microsecondsSinceEpoch}',
+        userId: profile.id,
+        attemptId: transactionId,
+        amount: amount,
+        transactionType: type,
+        description: description,
+        createdAt: DateTime.now(),
+      ),
+    );
+    notifyListeners();
   }
 
-  Future<bool> deductCoins(int amount, String type, String description) async {
+  Future<bool> deductCoins(
+    int amount,
+    String type,
+    String description, {
+    String? attemptId,
+  }) async {
     if (_profile == null || _profile!.coins < amount) return false;
 
-    final newCoins = _profile!.coins - amount;
-    _profile = _profile!.copyWith(coins: newCoins);
-    notifyListeners();
+    final profile = _profile!;
+    final transactionId =
+        attemptId ?? '${type}_${DateTime.now().microsecondsSinceEpoch}';
+    if (_coinTransactions.any(
+      (transaction) => transaction.attemptId == transactionId,
+    )) {
+      return false;
+    }
 
     if (!_isGuest) {
-      await SupabaseService.instance.addCoinTransaction(
-        userId: _profile!.id,
+      final saved = await SupabaseService.instance.addCoinTransaction(
+        userId: profile.id,
         amount: -amount,
         transactionType: type,
         description: description,
+        attemptId: transactionId,
       );
-      await SupabaseService.instance.updateProfile(_profile!.id, {
-        'coins': newCoins,
-      });
+      if (!saved) return false;
     } else {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('guest_coins', newCoins);
+      await prefs.setInt('guest_coins', profile.coins - amount);
     }
+
+    _profile = profile.copyWith(coins: profile.coins - amount);
+    _coinTransactions.insert(
+      0,
+      CoinTransaction(
+        id: 'local_${DateTime.now().microsecondsSinceEpoch}',
+        userId: profile.id,
+        attemptId: transactionId,
+        amount: -amount,
+        transactionType: type,
+        description: description,
+        createdAt: DateTime.now(),
+      ),
+    );
+    notifyListeners();
     return true;
   }
 
