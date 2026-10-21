@@ -4,7 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../../widgets/mascot_widget.dart';
-import '../auth/welcome_screen.dart';
+import '../auth/landing_screen.dart';
 import '../practice/dictionary_screen.dart';
 import '../tools/feedback_screen.dart';
 import '../settings/settings_screen.dart';
@@ -243,7 +243,7 @@ class ProfileScreen extends StatelessWidget {
                         if (context.mounted) {
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                            MaterialPageRoute(builder: (_) => const LandingScreen()),
                             (route) => false,
                           );
                         }
