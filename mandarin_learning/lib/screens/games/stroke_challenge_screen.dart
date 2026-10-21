@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -127,8 +126,9 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading)
+    if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     if (_words.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: const Text('Stroke Challenge')),

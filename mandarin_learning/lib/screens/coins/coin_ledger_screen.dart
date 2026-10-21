@@ -34,7 +34,7 @@ class CoinLedgerScreen extends StatelessWidget {
                       vertical: 12,
                     ),
                     itemCount: transactions.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (context, i) =>
                         _buildTransactionTile(transactions[i]),
                   ),
@@ -180,16 +180,19 @@ class CoinLedgerScreen extends StatelessWidget {
   }
 
   String _getLabel(String reason) {
-    if (reason.contains('hanzi_matching_streak'))
+    if (reason.contains('hanzi_matching_streak')) {
       return 'Bonus Streak Hanzi Matching';
+    }
     if (reason.contains('hanzi_matching')) return 'Hanzi Matching';
-    if (reason.contains('hint') || reason.contains('bantuan'))
+    if (reason.contains('hint') || reason.contains('bantuan')) {
       return 'Penggunaan Bantuan';
+    }
     if (reason.contains('tilt')) return 'Tilt to Answer';
     if (reason.contains('catcher')) return 'Mandarin Catcher';
     if (reason.contains('stroke')) return 'Stroke Challenge';
-    if (reason.contains('quiz') || reason.contains('kuis'))
+    if (reason.contains('quiz') || reason.contains('kuis')) {
       return 'Kuis Tebak Arti';
+    }
     if (reason.contains('daily')) return 'Bonus Harian';
     return reason.replaceAll('_', ' ').toUpperCase();
   }

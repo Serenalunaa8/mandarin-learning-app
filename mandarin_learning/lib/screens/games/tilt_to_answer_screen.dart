@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -100,15 +100,15 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
     if (_answered) return;
     // Zones: left(-x) = option 0, right(+x) = option 1, up(-y) = option 2, down(+y) = option 3
     int h = -1;
-    if (_tiltX < -_tiltThreshold.toDouble())
+    if (_tiltX < -_tiltThreshold.toDouble()) {
       h = 0; // left
-    else if (_tiltX > _tiltThreshold.toDouble())
+    } else if (_tiltX > _tiltThreshold.toDouble()) {
       h = 1; // right
-    else if (_tiltY < -_tiltThreshold.toDouble())
+    } else if (_tiltY < -_tiltThreshold.toDouble()) {
       h = 2; // up
-    else if (_tiltY > _tiltThreshold.toDouble())
+    } else if (_tiltY > _tiltThreshold.toDouble()) {
       h = 3; // down
-
+    }
     if (h != _highlightedOption) {
       _highlightedOption = h;
       // Auto-select after holding 1.5s is complex — use tap to confirm instead
@@ -198,7 +198,7 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
     await auth.addCoins(
       coins,
       'tilt_reward',
-      'Hadiah Tilt to Answer (${_correct}/$_totalQuestions benar)',
+      'Hadiah Tilt to Answer ($_correct/$_totalQuestions benar)',
       attemptId: attemptId,
     );
     vocab.recordQuizAttempt(
