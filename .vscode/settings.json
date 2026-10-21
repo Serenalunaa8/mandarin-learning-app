@@ -1,0 +1,6 @@
+{
+  "dart.projectSearchPaths": [
+    "mandarin_learning"
+  ],
+  "cmake.sourceDirectory": "${workspaceFolder}/mandarin_learning/windows"
+}

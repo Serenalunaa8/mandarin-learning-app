@@ -32,6 +32,7 @@ class AppColors {
   static const Color textLight = Color(0xFF94A3B8);
   static const Color white = Colors.white;
   static const Color cardBg = Colors.white;
+  static const Color cardBackground = Colors.white;
   static const Color border = Color(0xFFE2E8F0);
   static const Color borderLight = Color(0xFFDCFCE7);
   static const Color divider = Color(0xFFF1F5F9);

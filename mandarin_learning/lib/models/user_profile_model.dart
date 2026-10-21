@@ -1,5 +1,7 @@
 class UserProfile {
   final String id;
+  final String username;
+  final String email;
   final String fullName;
   final String avatarUrl;
   final int currentHskLevel;
@@ -10,6 +12,8 @@ class UserProfile {
 
   UserProfile({
     required this.id,
+    this.username = '',
+    this.email = '',
     required this.fullName,
     required this.avatarUrl,
     required this.currentHskLevel,
@@ -22,6 +26,8 @@ class UserProfile {
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
       id: (json['id'] ?? '').toString(),
+      username: (json['username'] ?? '').toString(),
+      email: (json['email'] ?? '').toString(),
       fullName: (json['full_name'] ?? 'Pelajar Mandarin').toString(),
       avatarUrl: (json['avatar_url'] ?? '').toString(),
       currentHskLevel: (json['current_hsk_level'] as num?)?.toInt() ?? 1,
@@ -36,6 +42,8 @@ class UserProfile {
 
   Map<String, dynamic> toJson() => {
     'id': id,
+    'username': username,
+    'email': email,
     'full_name': fullName,
     'avatar_url': avatarUrl,
     'current_hsk_level': currentHskLevel,
@@ -46,6 +54,8 @@ class UserProfile {
   };
 
   UserProfile copyWith({
+    String? username,
+    String? email,
     String? fullName,
     String? avatarUrl,
     int? currentHskLevel,
@@ -56,6 +66,8 @@ class UserProfile {
   }) {
     return UserProfile(
       id: id,
+      username: username ?? this.username,
+      email: email ?? this.email,
       fullName: fullName ?? this.fullName,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       currentHskLevel: currentHskLevel ?? this.currentHskLevel,

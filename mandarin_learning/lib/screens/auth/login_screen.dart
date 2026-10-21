@@ -6,7 +6,9 @@ import '../home/main_navigation_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final String? initialUsername;
+
+  const LoginScreen({super.key, this.initialUsername});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -14,23 +16,31 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.initialUsername != null && widget.initialUsername!.isNotEmpty) {
+      _usernameController.text = widget.initialUsername!;
+    }
+  }
+
+  @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> _submit() async {
+  Future<void> _submitLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
     final auth = context.read<AuthProvider>();
     final success = await auth.login(
-      _emailController.text,
+      _usernameController.text,
       _passwordController.text,
     );
 
@@ -45,7 +55,35 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.errorMessage ?? 'Gagal masuk. Periksa email dan password.'),
+          content: Text(auth.errorMessage ?? 'Gagal masuk. Periksa username dan password.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleBiometricLogin() async {
+    final auth = context.read<AuthProvider>();
+    final success = await auth.loginWithBiometrics();
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Autentikasi biometrik berhasil! Selamat datang.'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        (route) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(auth.errorMessage ?? 'Biometrik gagal atau dibatalkan.'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -73,14 +111,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 Center(
                   child: Container(
                     padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.primaryLight,
                       shape: BoxShape.circle,
                     ),
                     child: const Text('🐼', style: TextStyle(fontSize: 48)),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 const Text(
                   'Selamat Datang Kembali!',
                   textAlign: TextAlign.center,
@@ -90,38 +128,63 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: AppColors.textDark,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 const Text(
-                  'Lanjutkan progres belajar Mandarin HSK Anda',
+                  'Masuk dengan username & password terenkripsi',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: AppColors.textMuted, fontSize: 14),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
 
-                // Email
+                // Info Keamanan & Database
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBackground,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.security, color: AppColors.primary, size: 22),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Terenkripsi SHA-256 • Tersimpan di Database Lokal & Online • Sesi Aktif',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: Colors.grey.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Field Username
                 const Text(
-                  'Email',
+                  'Username',
                   style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
+                  controller: _usernameController,
                   decoration: const InputDecoration(
-                    hintText: 'nama@email.com',
-                    prefixIcon: Icon(Icons.email_outlined, color: AppColors.primary),
+                    hintText: 'Masukkan username Anda',
+                    prefixIcon: Icon(Icons.person_outline, color: AppColors.primary),
                   ),
                   validator: (val) {
-                    if (val == null || val.trim().isEmpty) return 'Email wajib diisi';
-                    if (!val.contains('@')) return 'Format email tidak valid';
+                    if (val == null || val.trim().isEmpty) return 'Username wajib diisi';
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
 
-                // Password
+                // Field Password
                 const Text(
-                  'Kata Sandi',
+                  'Kata Sandi (Password)',
                   style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark),
                 ),
                 const SizedBox(height: 8),
@@ -147,26 +210,43 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
 
                 // Tombol Masuk
                 SizedBox(
-                  height: 54,
+                  height: 52,
                   child: ElevatedButton(
-                    onPressed: auth.isLoading ? null : _submit,
+                    onPressed: auth.isLoading ? null : _submitLogin,
                     child: auth.isLoading
                         ? const SizedBox(
                             width: 24,
                             height: 24,
                             child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                           )
-                        : const Text('Masuk'),
+                        : const Text('Masuk ke Akun'),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
-                // Opsi Masuk Sebagai Tamu (Offline Demo)
-                OutlinedButton(
+                // Tombol Login Biometrik (Sidik Jari / Face ID)
+                SizedBox(
+                  height: 50,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.fingerprint, size: 26, color: AppColors.primaryDark),
+                    label: const Text(
+                      'Masuk dengan Biometrik / Sidik Jari',
+                      style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.primaryDark),
+                    ),
+                    onPressed: auth.isLoading ? null : _handleBiometricLogin,
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.primaryDark, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Opsi Masuk Sebagai Tamu
+                TextButton(
                   onPressed: auth.isLoading
                       ? null
                       : () async {
@@ -179,9 +259,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           }
                         },
-                  child: const Text('Masuk sebagai Tamu (Mode Offline)'),
+                  child: const Text(
+                    'Masuk sebagai Tamu (Mode Offline)',
+                    style: TextStyle(color: AppColors.textMuted),
+                  ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
 
                 // Belum punya akun?
                 Row(
@@ -205,6 +288,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
               ],
             ),
           ),

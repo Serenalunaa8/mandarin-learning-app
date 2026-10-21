@@ -17,7 +17,8 @@ class ProfileScreen extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final vocab = context.watch<VocabularyProvider>();
     final user = auth.profile;
-    final fullName = user?.fullName ?? 'Aria L';
+    final fullName = user?.fullName ?? 'Pelajar Mandarin';
+    final username = user?.username ?? '';
 
     return Scaffold(
       backgroundColor: AppColors.mintBackground,
@@ -84,6 +85,17 @@ class ProfileScreen extends StatelessWidget {
                             color: AppColors.textDark,
                           ),
                         ),
+                        if (username.isNotEmpty) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            '@$username',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryDark,
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
@@ -136,44 +148,64 @@ class ProfileScreen extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: _buildProfileStatCard(
-                          icon: '🥈',
-                          title: 'Peringkat',
-                          value: 'Silver',
-                          unit: 'Top 12%',
+                          icon: '🪙',
+                          title: 'Koin',
+                          value: '${auth.coins}',
+                          unit: 'Tersedia',
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 24),
 
-                  // Menu Items (Hasil Belajar, Koleksi Kata, Pengaturan, Bantuan & FAQ, Tentang Aplikasi)
+                  // Section Title
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Menu Pembelajaran',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Menu Items
                   _buildMenuItem(
                     context,
-                    icon: Icons.receipt_long_rounded,
-                    title: 'Hasil Belajar',
+                    icon: Icons.auto_stories_rounded,
+                    title: 'Hasil & Progres Belajar',
                     onTap: () {
                       _showStudySummary(context, vocab, auth);
                     },
                   ),
+
                   _buildMenuItem(
                     context,
-                    icon: Icons.bookmark_border_rounded,
-                    title: 'Koleksi Kata',
+                    icon: Icons.menu_book_rounded,
+                    title: 'Kamus Lengkap HSK 1–6',
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const DictionaryScreen(initialShowFavorites: true)),
+                        MaterialPageRoute(builder: (_) => const DictionaryScreen()),
                       );
                     },
                   ),
+
                   _buildMenuItem(
                     context,
-                    icon: Icons.settings_outlined,
-                    title: 'Pengaturan',
+                    icon: Icons.rate_review_outlined,
+                    title: 'Beri Ulasan & Masukan (Feedback)',
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const FeedbackScreen()),
+                      );
                     },
                   ),
+
                   _buildMenuItem(
                     context,
                     icon: Icons.help_outline_rounded,
@@ -182,17 +214,7 @@ class ProfileScreen extends StatelessWidget {
                       _showFaqDialog(context);
                     },
                   ),
-                  _buildMenuItem(
-                    context,
-                    icon: Icons.rate_review_outlined,
-                    title: 'Umpan Balik & Saran',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const FeedbackScreen()),
-                      );
-                    },
-                  ),
+
                   _buildMenuItem(
                     context,
                     icon: Icons.info_outline_rounded,
@@ -215,7 +237,7 @@ class ProfileScreen extends StatelessWidget {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                       ),
                       icon: const Icon(Icons.logout_rounded, size: 20),
-                      label: const Text('Keluar dari Akun', style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: const Text('Keluar dari Akun (Logout)', style: TextStyle(fontWeight: FontWeight.bold)),
                       onPressed: () async {
                         await auth.logout();
                         if (context.mounted) {
@@ -390,13 +412,13 @@ class ProfileScreen extends StatelessWidget {
             MascotWidget(size: 60, pose: MascotPose.headOnly),
             SizedBox(height: 12),
             Text(
-              'Aplikasi Pembelajaran Mandarin untuk Pemula\nVersi 1.0 (Tahap 4 - Suara & AI)',
+              'Aplikasi Pembelajaran Mandarin untuk Pemula\nVersi 1.0 (HSK 1-6)',
               textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
             Text(
-              'Mendukung materi HSK 1–6, Kuis Utama, Latihan Pelafalan dengan Analisis Nada, dan AI Tutor Mandarin.',
+              'Dilengkapi Autentikasi Enkripsi SHA-256, Sesi Login, Biometrik Sidik Jari, Penyimpanan Database Lokal SQLite & Online Supabase.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: AppColors.textMuted),
             ),
