@@ -6,6 +6,7 @@ import 'providers/vocabulary_provider.dart';
 import 'services/supabase_service.dart';
 import 'services/audio_service.dart';
 import 'screens/auth/welcome_screen.dart';
+import 'screens/auth/landing_screen.dart';
 import 'screens/home/main_navigation_screen.dart';
 
 void main() async {
@@ -80,7 +81,7 @@ class _MandarinLearningAppState extends State<MandarinLearningApp> {
             )
           : auth.isAuthenticated
               ? const MainNavigationScreen()
-              : const WelcomeScreen(),
+              : const LandingScreen(),
     );
   }
 }
