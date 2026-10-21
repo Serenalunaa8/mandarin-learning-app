@@ -7,6 +7,7 @@ import '../../widgets/mascot_widget.dart';
 import '../auth/welcome_screen.dart';
 import '../practice/dictionary_screen.dart';
 import '../tools/feedback_screen.dart';
+import '../settings/settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -25,7 +26,7 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: AppColors.textDark),
-            onPressed: () => _showSettingsDialog(context, auth, vocab),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
           ),
         ],
       ),
@@ -170,7 +171,7 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.settings_outlined,
                     title: 'Pengaturan',
                     onTap: () {
-                      _showSettingsDialog(context, auth, vocab);
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
                     },
                   ),
                   _buildMenuItem(
@@ -348,67 +349,6 @@ class ProfileScreen extends StatelessWidget {
               subtitle: const Text('Koin dapat digunakan untuk petunjuk kuis & mini game'),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  void _showSettingsDialog(BuildContext context, AuthProvider auth, VocabularyProvider vocab) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Pengaturan Aplikasi'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('Target Level HSK'),
-              subtitle: Text('HSK ${vocab.selectedLevel}'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showLevelPicker(context, vocab, auth);
-              },
-            ),
-            SwitchListTile(
-              title: const Text('Pengingat Belajar Harian'),
-              subtitle: const Text('Pukul 19:00 WIB'),
-              value: true,
-              onChanged: (val) {},
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Tutup')),
-        ],
-      ),
-    );
-  }
-
-  void _showLevelPicker(BuildContext context, VocabularyProvider vocab, AuthProvider auth) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Pilih Target Level HSK'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(6, (idx) {
-            final lvl = idx + 1;
-            return ListTile(
-              title: Text('HSK Level $lvl'),
-              selected: vocab.selectedLevel == lvl,
-              trailing: vocab.selectedLevel == lvl
-                  ? const Icon(Icons.check_circle_rounded, color: AppColors.primary)
-                  : null,
-              onTap: () {
-                vocab.setLevel(lvl);
-                auth.setHskLevel(lvl);
-                Navigator.pop(ctx);
-              },
-            );
-          }),
         ),
       ),
     );
