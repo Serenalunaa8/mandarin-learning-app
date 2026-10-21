@@ -6,6 +6,7 @@ import '../../providers/vocabulary_provider.dart';
 import '../../widgets/mascot_widget.dart';
 import '../auth/welcome_screen.dart';
 import '../practice/dictionary_screen.dart';
+import '../tools/feedback_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -178,6 +179,17 @@ class ProfileScreen extends StatelessWidget {
                     title: 'Bantuan & FAQ',
                     onTap: () {
                       _showFaqDialog(context);
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.rate_review_outlined,
+                    title: 'Umpan Balik & Saran',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const FeedbackScreen()),
+                      );
                     },
                   ),
                   _buildMenuItem(

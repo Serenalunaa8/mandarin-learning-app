@@ -12,6 +12,10 @@ import 'dictionary_screen.dart';
 import 'quiz_screen.dart';
 import 'speech_practice_screen.dart';
 import 'ai_tutor_screen.dart';
+import '../tools/direction_explorer_screen.dart';
+import '../tools/currency_converter_screen.dart';
+import '../tools/time_converter_screen.dart';
+import '../tools/feedback_screen.dart';
 
 class PracticeHubScreen extends StatelessWidget {
   const PracticeHubScreen({super.key});
@@ -203,6 +207,84 @@ class PracticeHubScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const CoinLedgerScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+
+            const Text(
+              'Fitur Kontekstual & Alat Bantu (Tahap 6)',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // 1. Direction Explorer (PB-15, FR-11)
+            _buildFeatureCard(
+              context,
+              title: 'Mandarin Direction Explorer',
+              desc: 'Eksplorasi tempat sekitar, kompas arah mata angin (方向), dan jarak dengan LBS',
+              emoji: '🧭',
+              color: const Color(0xFFF0FDF4),
+              tag: 'LBS & Kompas',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DirectionExplorerScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // 2. Konversi Mata Uang (PB-16, FR-12)
+            _buildFeatureCard(
+              context,
+              title: 'Konversi Mata Uang (CNY / IDR / USD)',
+              desc: 'Kalkulator kurs Yuan (人民币), Rupiah, dan Dolar dengan tabel belanja Mandarin',
+              emoji: '💱',
+              color: const Color(0xFFFFFBEB),
+              tag: 'Kurs Uang',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CurrencyConverterScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // 3. Konversi Waktu (PB-17, FR-13)
+            _buildFeatureCard(
+              context,
+              title: 'Konversi Zona Waktu Dunia',
+              desc: 'Komparasi jam Beijing (CST), WIB, WITA, WIT, dan London dengan Daylight Saving',
+              emoji: '⏰',
+              color: const Color(0xFFEFF6FF),
+              tag: 'Zona Waktu',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TimeConverterScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // 4. Umpan Balik (PB-18, FR-21)
+            _buildFeatureCard(
+              context,
+              title: 'Umpan Balik & Saran',
+              desc: 'Kirim kritik, saran materi, dan penilaian aplikasi langsung ke pengembang',
+              emoji: '💌',
+              color: const Color(0xFFFAF5FF),
+              tag: 'Feedback',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FeedbackScreen()),
                 );
               },
             ),
