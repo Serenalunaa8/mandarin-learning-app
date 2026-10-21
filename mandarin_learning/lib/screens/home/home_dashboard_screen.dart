@@ -7,6 +7,7 @@ import '../../widgets/mascot_widget.dart';
 import '../practice/speech_practice_screen.dart';
 import '../practice/ai_tutor_screen.dart';
 import '../practice/dictionary_screen.dart';
+import '../coins/coin_ledger_screen.dart';
 
 class HomeDashboardScreen extends StatelessWidget {
   final Function(int) onNavigateTab;
@@ -87,7 +88,9 @@ class HomeDashboardScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   // Diamond/Coins Pill
-                  Container(
+                  GestureDetector(
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CoinLedgerScreen())),
+                    child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -114,6 +117,7 @@ class HomeDashboardScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
                   ),
                   const SizedBox(width: 8),
                   // Bell notification
