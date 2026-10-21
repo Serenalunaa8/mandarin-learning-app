@@ -7,8 +7,39 @@ import '../home/main_navigation_screen.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 
-class LandingScreen extends StatelessWidget {
+/// Landing Page Onboarding Screen
+/// Tampilan visual mengikuti referensi mockup:
+/// - Bagian atas (~55%): Langit cerah, awan, bukit, maskot chibi di atas pedestal,
+///   anak-anak mengintip dari semak, 6 lencana mengambang, dan tepi bukit
+///   hijau tua bergelombang berlapis berbentuk segitiga terbalik.
+/// - Bagian bawah: Kontainer hijau tua (#16300E) dengan tipografi, tombol CTA
+///   "Start Learning", dan tautan navigasi ke "Log in".
+class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
+
+  @override
+  State<LandingScreen> createState() => _LandingScreenState();
+}
+
+class _LandingScreenState extends State<LandingScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _floatController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Animasi mengambang halus untuk 6 lencana ikon
+    _floatController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2600),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _floatController.dispose();
+    super.dispose();
+  }
 
   void _onStartLearning(BuildContext context) {
     showModalBottomSheet(
@@ -41,11 +72,6 @@ class LandingScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Pilih cara masukmu untuk memulai materi HSK 1–6:',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: AppColors.textMuted),
-            ),
             const SizedBox(height: 20),
 
             // Opsi 1: Daftar Akun Baru (Disimpan ke Cloud)
@@ -121,104 +147,276 @@ class LandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final topHeight = size.height * 0.52;
+    final screenWidth = size.width;
+    final screenHeight = size.height;
+
+    // Proporsi tinggi area ilustrasi atas (~55% layar, termasuk tepi bergelombang)
+    final topHeight = (screenHeight * 0.55).clamp(360.0, 520.0);
+
+    // Tinggi area tepi bukit hijau tua bergelombang berlapis
+    final scallopHeight = topHeight * 0.36;
+
+    // Ukuran maskot (sekaligus dipakai untuk posisi tengah)
+    final mascotWidth = (screenWidth * 0.41).clamp(140.0, 190.0);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0C2B14), // Deep forest green
+      backgroundColor: const Color(0xFF16300E), // Hijau tua solid sesuai mockup
       body: Stack(
         children: [
-          // Top Half: Sunny Grassland, Hills, Mascot, Pedestal & Floating Badges
+          // =========================================================
+          // 1. ILUSTRASI ATAS (LANGIT, BUKIT, MASKOT, ANAK, IKON-IKON)
+          // =========================================================
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            height: topHeight + 50,
-            child: CustomPaint(
-              painter: _LandingSceneryPainter(),
-              child: const SizedBox.expand(),
+            height: topHeight,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // 1A. Gradien Langit: biru muda -> hijau pucat
+                Positioned.fill(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [0.0, 0.30, 0.65, 1.0],
+                        colors: [
+                          Color(0xFFA9DDF2), // Biru langit muda
+                          Color(0xFFDDF0C4), // Transisi pucat
+                          Color(0xFFD6EC9C), // Hijau kekuningan
+                          Color(0xFFC4E38A), // Hijau muda bawah
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 1B. Awan Kiri
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 10,
+                  left: 0,
+                  width: (screenWidth * 0.35).clamp(110.0, 160.0),
+                  child: Image.asset(
+                    'assets/image/landing_page/09_awan_kiri.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+
+                // 1C. Awan Kanan
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 20,
+                  right: 0,
+                  width: (screenWidth * 0.25).clamp(80.0, 120.0),
+                  child: Image.asset(
+                    'assets/image/landing_page/10_awan_kanan.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+
+                // 1D. Bukit Hijau (11_lahan_hijau.png)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Image.asset(
+                    'assets/image/landing_page/11_lahan_hijau.png',
+                    width: screenWidth,
+                    fit: BoxFit.fitWidth,
+                  ),
+                ),
+
+                // 1E. Maskot Chibi di atas Pedestal Emas (01_maskot.png)
+                Positioned(
+                  left: (screenWidth - mascotWidth) / 2,
+                  bottom: topHeight * 0.25,
+                  width: mascotWidth,
+                  child: Image.asset(
+                    'assets/image/landing_page/01_maskot.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+
+                // 1F. Anak-anak Mengintip di Semak Kanan (08_anak_anak.png)
+                Positioned(
+                  right: -2,
+                  bottom: topHeight * 0.16,
+                  width: (screenWidth * 0.34).clamp(115.0, 165.0),
+                  child: Image.asset(
+                    'assets/image/landing_page/08_anak_anak.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+
+                // 1G. 6 Lencana Ikon Mengambang + Bintang Berkilau (Sparkles)
+                AnimatedBuilder(
+                  animation: _floatController,
+                  builder: (context, _) {
+                    final floatVal = _floatController.value;
+                    final dy1 = math.sin(floatVal * math.pi) * 5.0;
+                    final dy2 = math.cos(floatVal * math.pi) * 4.5;
+                    final dy3 = math.sin((floatVal + 0.5) * math.pi) * 4.0;
+                    final badgeSize = (screenWidth * 0.125).clamp(42.0, 56.0);
+
+                    // cx, cy = titik tengah lencana (proporsi lebar / tinggi area atas)
+                    Widget badge(String asset, double cx, double cy, double dy) {
+                      return Positioned(
+                        left: screenWidth * cx - badgeSize / 2,
+                        top: topHeight * cy - badgeSize / 2 + dy,
+                        width: badgeSize,
+                        height: badgeSize,
+                        child: Image.asset(asset, fit: BoxFit.contain),
+                      );
+                    }
+
+                    Widget sparkle(double fx, double fy, double dy, double s) {
+                      return Positioned(
+                        left: screenWidth * fx,
+                        top: topHeight * fy + dy,
+                        child: _SparkleStar(size: s),
+                      );
+                    }
+
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        // Ikon 1: Jeruk Oranye (Kiri Atas)
+                        badge('assets/image/landing_page/03_ikon_jeruk.png',
+                            0.29, 0.39, dy1),
+
+                        // Ikon 2: Panah Ungu Ganda (Kiri Tengah Luar)
+                        badge('assets/image/landing_page/02_ikon_ungu_panah.png',
+                            0.14, 0.48, dy2),
+
+                        // Ikon 3: Bintang Pink (Kiri Bawah)
+                        badge('assets/image/landing_page/05_ikon_pink_bintang.png',
+                            0.29, 0.59, dy3),
+
+                        // Ikon 4: Centang Kuning (Kanan Atas)
+                        badge('assets/image/landing_page/04_ikon_kuning_centang.png',
+                            0.755, 0.40, dy2),
+
+                        // Ikon 5: Perisai Teal (Kanan Tengah Luar)
+                        badge('assets/image/landing_page/06_ikon_teal_perisai_1.png',
+                            0.86, 0.52, dy1),
+
+                        // Ikon 6: Lonceng Biru (Kanan Bawah)
+                        badge('assets/image/landing_page/07_ikon_teal_perisai_2.png',
+                            0.72, 0.60, dy3),
+
+                        // Sparkle Berkilau Kuning
+                        sparkle(0.22, 0.42, dy3, 10),
+                        sparkle(0.64, 0.37, dy1, 11),
+                        sparkle(0.07, 0.56, dy2, 9),
+                        sparkle(0.20, 0.66, dy1, 10),
+                        sparkle(0.80, 0.66, dy2, 10),
+                      ],
+                    );
+                  },
+                ),
+              ],
             ),
           ),
 
-          // Bottom Half: Deep Forest Green Card Content
+          // =========================================================
+          // 2. KARTU BAWAH (TEKS, CTA BUTTON, LOGIN LINK)
+          // =========================================================
           Positioned(
-            top: topHeight,
+            top: topHeight - 8,
             left: 0,
             right: 0,
             bottom: 0,
             child: Container(
-              color: const Color(0xFF0C2B14),
+              color: const Color(0xFF16300E),
               child: SafeArea(
                 top: false,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 28),
                   child: Column(
                     children: [
+                      // Jarak aman agar teks berada rapi di bawah puncak lengkungan bukit
+                      SizedBox(
+                        height: (72 - 0.13 * scallopHeight + 14).clamp(56.0, 74.0),
+                      ),
                       const Spacer(flex: 1),
 
-                      // Headline: "Learn Languages. Level Up Your World."
+                      // Headline
                       const Text(
                         'Learn Languages.\nLevel Up Your World.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 27,
+                          fontSize: 26,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
-                          height: 1.22,
-                          letterSpacing: -0.3,
+                          height: 1.25,
+                          letterSpacing: -0.2,
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 10),
 
-                      // Subtitle: "Master new languages with fun lessons, real conversations, and daily practice."
+                      // Subtitle
                       const Text(
                         'Master new languages with fun lessons,\nreal conversations, and daily practice.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 13.5,
+                          fontSize: 13,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFFA5C4AC),
-                          height: 1.45,
+                          color: Color(0xFFB4C8AE),
+                          height: 1.5,
                         ),
                       ),
 
                       const Spacer(flex: 2),
 
-                      // CTA Button: "Start Learning"
-                      SizedBox(
+                      // CTA Button: "Start Learning" (efek 3D tepi bawah gelap)
+                      Container(
                         width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF22C55E), // Vibrant lime green
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shadowColor: const Color(0x6022C55E),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(28),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0xFF2D8A1A),
+                              offset: Offset(0, 4),
+                              blurRadius: 0,
                             ),
-                          ),
-                          onPressed: () => _onStartLearning(context),
-                          child: const Text(
-                            'Start Learning',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.2,
+                          ],
+                        ),
+                        child: SizedBox(
+                          height: 52,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF47B82A),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                            ),
+                            onPressed: () => _onStartLearning(context),
+                            child: const Text(
+                              'Start Learning',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.2,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
 
-                      // Footer: "Already have an account? Log in"
+                      // Footer Link: "Already have an account? Log in"
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
                             'Already have an account? ',
                             style: TextStyle(
-                              fontSize: 13.5,
-                              color: Color(0xFF8BAE93),
+                              fontSize: 12.5,
+                              color: Color(0xFF9DB596),
                             ),
                           ),
                           GestureDetector(
@@ -226,19 +424,37 @@ class LandingScreen extends StatelessWidget {
                             child: const Text(
                               'Log in',
                               style: TextStyle(
-                                fontSize: 13.5,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF4ADE80), // Bright green
+                                color: Color(0xFF58D13A),
                               ),
                             ),
                           ),
                         ],
                       ),
 
-                      const SizedBox(height: 16),
+                      // Ruang fleksibel bawah agar tombol dan teks login terangkat naik proporsional
+                      const Spacer(flex: 2),
+                      const SizedBox(height: 12),
                     ],
                   ),
                 ),
+              ),
+            ),
+          ),
+
+          // =========================================================
+          // 3. TEPI BUKIT HIJAU TUA BERGELOMBANG BERLAPIS
+          //    (segitiga terbalik, menimpa sambungan ilustrasi & kartu bawah)
+          // =========================================================
+          Positioned(
+            top: topHeight - scallopHeight + 72, // makin besar angka, makin turun
+            left: 0,
+            right: 0,
+            height: scallopHeight,
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _ScallopedHillPainter(),
               ),
             ),
           ),
@@ -248,426 +464,104 @@ class LandingScreen extends StatelessWidget {
   }
 }
 
-/// CustomPainter yang menggambar pemandangan lengkap:
-/// 1. Langit cerah kuning-kehijauan dengan awan halus.
-/// 2. Perbukitan hijau bertingkat dengan pepohonan.
-/// 3. Jalan setapak batu (stepping stones path).
-/// 4. Podium/pedestal emas 3D.
-/// 5. Maskot katak/panda hijau chibi yang menggemaskan dengan tunas di kepala & lidah melet.
-/// 6. 6 Lencana gamifikasi melayang (Oranye, Ungu ⏩, Pink ⭐, Kuning Emas ✓, Toska 🛡️, Biru 🔔) + kilauan bintang.
-/// 7. 4 Anak-anak ceria yang mengintip dari balik semak kanan.
-/// 8. Transisi kurva kanopi bergelombang (scalloped green canopy) pemisah pemandangan dengan kartu bawah.
-class _LandingSceneryPainter extends CustomPainter {
+/// Empat lapis hijau tua bergelombang (scallop) membentuk segitiga terbalik:
+/// tepi kiri-kanan tinggi, bagian tengah paling turun.
+/// Lapis terakhir berwarna sama dengan kartu bawah agar menyatu.
+class _ScallopedHillPainter extends CustomPainter {
+  static const _colors = [
+    Color(0xFF2F5E1E),
+    Color(0xFF254D18),
+    Color(0xFF1C3B12),
+    Color(0xFF16300E),
+  ];
+  static const _bases = [0.02, 0.17, 0.32, 0.47]; // posisi y di tepi
+  static const _bumps = [5, 4, 5, 4];
+  static const _dip = 0.40; // seberapa dalam bagian tengah turun
+
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
+    final steps = (w / 2).ceil();
 
-    // 1. Sky Gradient
-    final skyPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Color(0xFFEBF7E2),
-          Color(0xFFE3F4D7),
-          Color(0xFFD6F0C5),
-          Color(0xFFC7EBB2),
-        ],
-        stops: [0.0, 0.35, 0.7, 1.0],
-      ).createShader(Rect.fromLTWH(0, 0, w, h * 0.7));
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), skyPaint);
+    for (int i = 0; i < _colors.length; i++) {
+      final path = Path();
+      for (int s = 0; s <= steps; s++) {
+        final x = w * s / steps;
+        final t = x / w;
 
-    // 2. Soft Fluffy Clouds in Sky
-    final cloudPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.55)
-      ..style = PaintingStyle.fill;
+        // Bentuk segitiga terbalik: 0 di tepi, 1 di tengah
+        final tri = 1 - (2 * t - 1).abs();
 
-    _drawCloud(canvas, cloudPaint, w * 0.15, h * 0.12, 36);
-    _drawCloud(canvas, cloudPaint, w * 0.82, h * 0.08, 42);
-    _drawCloud(canvas, cloudPaint, w * 0.65, h * 0.18, 28);
+        final y = h * (_bases[i] + _dip * tri) -
+            h * 0.05 * math.sin(_bumps[i] * math.pi * t).abs();
 
-    // 3. Distant Rolling Green Hills & Trees
-    final hillBackPaint = Paint()
-      ..color = const Color(0xFF9FD684)
-      ..style = PaintingStyle.fill;
-    final pathHill1 = Path()
-      ..moveTo(0, h * 0.46)
-      ..quadraticBezierTo(w * 0.25, h * 0.38, w * 0.55, h * 0.44)
-      ..quadraticBezierTo(w * 0.8, h * 0.50, w, h * 0.42)
-      ..lineTo(w, h)
-      ..lineTo(0, h)
-      ..close();
-    canvas.drawPath(pathHill1, hillBackPaint);
+        if (s == 0) {
+          path.moveTo(x, y);
+        } else {
+          path.lineTo(x, y);
+        }
+      }
+      path.lineTo(w, h);
+      path.lineTo(0, h);
+      path.close();
 
-    // Background Tree Tufts
-    final treePaint = Paint()
-      ..color = const Color(0xFF7CBF5D)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(w * 0.08, h * 0.40), 22, treePaint);
-    canvas.drawCircle(Offset(w * 0.18, h * 0.38), 28, treePaint);
-    canvas.drawCircle(Offset(w * 0.88, h * 0.38), 26, treePaint);
-    canvas.drawCircle(Offset(w * 0.96, h * 0.39), 20, treePaint);
-
-    // Midground Hill
-    final hillMidPaint = Paint()
-      ..color = const Color(0xFF86CC67)
-      ..style = PaintingStyle.fill;
-    final pathHill2 = Path()
-      ..moveTo(0, h * 0.52)
-      ..quadraticBezierTo(w * 0.4, h * 0.44, w, h * 0.50)
-      ..lineTo(w, h)
-      ..lineTo(0, h)
-      ..close();
-    canvas.drawPath(pathHill2, hillMidPaint);
-
-    // 4. Stepping Stones Path leading to Pedestal
-    final stonePaint = Paint()
-      ..color = const Color(0xFFE8DEB5)
-      ..style = PaintingStyle.fill;
-    final stoneShadow = Paint()
-      ..color = const Color(0xFFB5A97D).withValues(alpha: 0.5)
-      ..style = PaintingStyle.fill;
-
-    final stones = [
-      Offset(w * 0.32, h * 0.57),
-      Offset(w * 0.38, h * 0.54),
-      Offset(w * 0.44, h * 0.52),
-      Offset(w * 0.50, h * 0.51),
-      Offset(w * 0.56, h * 0.52),
-      Offset(w * 0.62, h * 0.54),
-    ];
-    for (var s in stones) {
-      canvas.drawOval(Rect.fromCenter(center: Offset(s.dx, s.dy + 2), width: 22, height: 12), stoneShadow);
-      canvas.drawOval(Rect.fromCenter(center: s, width: 22, height: 11), stonePaint);
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = _colors[i]
+          ..style = PaintingStyle.fill
+          ..isAntiAlias = true,
+      );
     }
-
-    // 5. 3D Golden Pedestal / Podium
-    final pedestalCenter = Offset(w * 0.5, h * 0.435);
-    const pedWidth = 110.0;
-    const pedHeight = 30.0;
-    const pedDepth = 22.0;
-
-    // Pedestal Front Cylinder 3D body
-    final pedBodyPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFFFBBF24), Color(0xFFD97706)],
-      ).createShader(Rect.fromLTWH(pedCenterX(w, pedWidth), pedestalCenter.dy, pedWidth, pedDepth));
-
-    final pedBodyPath = Path()
-      ..moveTo(pedCenterX(w, pedWidth), pedestalCenter.dy)
-      ..lineTo(pedCenterX(w, pedWidth), pedestalCenter.dy + pedDepth)
-      ..quadraticBezierTo(w * 0.5, pedestalCenter.dy + pedDepth + 14, pedCenterRight(w, pedWidth), pedestalCenter.dy + pedDepth)
-      ..lineTo(pedCenterRight(w, pedWidth), pedestalCenter.dy)
-      ..close();
-    canvas.drawPath(pedBodyPath, pedBodyPaint);
-
-    // Pedestal Top Ellipse
-    final pedTopPaint = Paint()
-      ..shader = const RadialGradient(
-        colors: [Color(0xFFFDE68A), Color(0xFFF59E0B)],
-      ).createShader(Rect.fromCenter(center: pedestalCenter, width: pedWidth, height: pedHeight));
-    canvas.drawOval(Rect.fromCenter(center: pedestalCenter, width: pedWidth, height: pedHeight), pedTopPaint);
-
-    // 6. Cute Chibi Green Mascot standing on Pedestal
-    _drawCuteMascot(canvas, Offset(w * 0.5, pedestalCenter.dy - 12));
-
-    // 7. Floating 3D Gamified Badges
-    // 1. Top-Left: Orange Citrus / Spoke
-    _drawBadge(
-      canvas: canvas,
-      center: Offset(w * 0.29, h * 0.22),
-      radius: 20,
-      gradientColors: [const Color(0xFFFDBA74), const Color(0xFFEA580C)],
-      icon: '🍊',
-    );
-
-    // 2. Far-Left: Purple ⏩
-    _drawBadge(
-      canvas: canvas,
-      center: Offset(w * 0.14, h * 0.27),
-      radius: 22,
-      gradientColors: [const Color(0xFFC084FC), const Color(0xFF7E22CE)],
-      icon: '⏩',
-    );
-
-    // 3. Bottom-Left: Hot Pink ⭐
-    _drawBadge(
-      canvas: canvas,
-      center: Offset(w * 0.28, h * 0.33),
-      radius: 19,
-      gradientColors: [const Color(0xFFF472B6), const Color(0xFFDB2777)],
-      icon: '⭐',
-    );
-
-    // 4. Top-Right: Golden Amber ✓
-    _drawBadge(
-      canvas: canvas,
-      center: Offset(w * 0.74, h * 0.23),
-      radius: 20,
-      gradientColors: [const Color(0xFFFCD34D), const Color(0xFFD97706)],
-      icon: '✓',
-      isTextIcon: true,
-    );
-
-    // 5. Far-Right: Teal / Cyan Shield 🛡️
-    _drawBadge(
-      canvas: canvas,
-      center: Offset(w * 0.86, h * 0.29),
-      radius: 22,
-      gradientColors: [const Color(0xFF2DD4BF), const Color(0xFF0F766E)],
-      icon: '🛡️',
-    );
-
-    // 6. Middle-Right: Light Blue Bell 🔔
-    _drawBadge(
-      canvas: canvas,
-      center: Offset(w * 0.72, h * 0.34),
-      radius: 19,
-      gradientColors: [const Color(0xFF60A5FA), const Color(0xFF2563EB)],
-      icon: '🔔',
-    );
-
-    // Sparkles
-    _drawSparkle(canvas, Offset(w * 0.23, h * 0.25), const Color(0xFFA855F7), 6);
-    _drawSparkle(canvas, Offset(w * 0.76, h * 0.27), const Color(0xFFC084FC), 5);
-    _drawSparkle(canvas, Offset(w * 0.36, h * 0.16), const Color(0xFFFBBF24), 5);
-
-    // 8. Peeking Kids on Bottom-Right
-    _drawPeekingKids(canvas, Offset(w * 0.80, h * 0.44));
-
-    // 9. Multi-layered Scalloped Canopy Curves (Connecting into bottom dark forest green)
-    final scallopPaintBack = Paint()
-      ..color = const Color(0xFF1B4D25)
-      ..style = PaintingStyle.fill;
-    final scallopBack = Path()
-      ..moveTo(0, h * 0.58)
-      ..quadraticBezierTo(w * 0.12, h * 0.54, w * 0.25, h * 0.57)
-      ..quadraticBezierTo(w * 0.38, h * 0.53, w * 0.50, h * 0.58)
-      ..quadraticBezierTo(w * 0.65, h * 0.54, w * 0.78, h * 0.57)
-      ..quadraticBezierTo(w * 0.90, h * 0.53, w, h * 0.58)
-      ..lineTo(w, h)
-      ..lineTo(0, h)
-      ..close();
-    canvas.drawPath(scallopBack, scallopPaintBack);
-
-    final scallopPaintFront = Paint()
-      ..color = const Color(0xFF0C2B14)
-      ..style = PaintingStyle.fill;
-    final scallopFront = Path()
-      ..moveTo(0, h * 0.62)
-      ..quadraticBezierTo(w * 0.15, h * 0.57, w * 0.30, h * 0.62)
-      ..quadraticBezierTo(w * 0.45, h * 0.56, w * 0.58, h * 0.61)
-      ..quadraticBezierTo(w * 0.72, h * 0.56, w * 0.85, h * 0.60)
-      ..quadraticBezierTo(w * 0.94, h * 0.57, w, h * 0.62)
-      ..lineTo(w, h)
-      ..lineTo(0, h)
-      ..close();
-    canvas.drawPath(scallopFront, scallopPaintFront);
   }
 
-  double pedCenterX(double w, double pw) => (w - pw) / 2;
-  double pedCenterRight(double w, double pw) => (w + pw) / 2;
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
 
-  void _drawCloud(Canvas canvas, Paint paint, double x, double y, double radius) {
-    canvas.drawCircle(Offset(x, y), radius, paint);
-    canvas.drawCircle(Offset(x + radius * 0.8, y + radius * 0.1), radius * 0.75, paint);
-    canvas.drawCircle(Offset(x - radius * 0.7, y + radius * 0.15), radius * 0.65, paint);
-  }
+/// Bintang berkilau 4 sudut dekoratif
+class _SparkleStar extends StatelessWidget {
+  final double size;
 
-  void _drawCuteMascot(Canvas canvas, Offset bottomCenter) {
-    final cx = bottomCenter.dx;
-    final cy = bottomCenter.dy;
+  const _SparkleStar({required this.size});
 
-    // Body dimensions
-    const headRadius = 40.0;
-    final headCenter = Offset(cx, cy - 58);
-
-    // Mascot Body (Chubby green)
-    final bodyPaint = Paint()
-      ..color = const Color(0xFF3CD052)
-      ..style = PaintingStyle.fill;
-
-    // Feet
-    final footPaint = Paint()..color = const Color(0xFF28B73E);
-    canvas.drawOval(Rect.fromCenter(center: Offset(cx - 18, cy - 2), width: 22, height: 14), footPaint);
-    canvas.drawOval(Rect.fromCenter(center: Offset(cx + 18, cy - 2), width: 22, height: 14), footPaint);
-
-    // Body torso
-    canvas.drawOval(Rect.fromCenter(center: Offset(cx, cy - 22), width: 56, height: 44), bodyPaint);
-
-    // Belly (White patch)
-    final bellyPaint = Paint()..color = Colors.white;
-    canvas.drawOval(Rect.fromCenter(center: Offset(cx, cy - 20), width: 34, height: 28), bellyPaint);
-
-    // Arms
-    canvas.drawOval(Rect.fromCenter(center: Offset(cx - 28, cy - 26), width: 14, height: 26), bodyPaint);
-    canvas.drawOval(Rect.fromCenter(center: Offset(cx + 28, cy - 26), width: 14, height: 26), bodyPaint);
-
-    // Green Ears on Hood
-    final earPaint = Paint()..color = const Color(0xFF28B73E);
-    canvas.drawCircle(Offset(cx - 30, headCenter.dy - 32), 12, earPaint);
-    canvas.drawCircle(Offset(cx + 30, headCenter.dy - 32), 12, earPaint);
-
-    // Head (Green Hoodie)
-    canvas.drawCircle(headCenter, headRadius, bodyPaint);
-
-    // Sprout on top
-    final sproutPaint = Paint()
-      ..color = const Color(0xFF1E822E)
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset(cx, headCenter.dy - headRadius), Offset(cx, headCenter.dy - headRadius - 10), sproutPaint);
-
-    final leafPaint = Paint()..color = const Color(0xFF3CD052);
-    canvas.drawOval(Rect.fromCenter(center: Offset(cx - 6, headCenter.dy - headRadius - 11), width: 12, height: 7), leafPaint);
-    canvas.drawOval(Rect.fromCenter(center: Offset(cx + 6, headCenter.dy - headRadius - 11), width: 12, height: 7), leafPaint);
-
-    // Cream Face inside Hood
-    final facePaint = Paint()..color = const Color(0xFFFFF7ED);
-    canvas.drawOval(Rect.fromCenter(center: Offset(headCenter.dx, headCenter.dy + 4), width: 62, height: 50), facePaint);
-
-    // Rosy Pink Cheeks
-    final cheekPaint = Paint()..color = const Color(0xFFFCA5A5);
-    canvas.drawCircle(Offset(headCenter.dx - 22, headCenter.dy + 12), 7, cheekPaint);
-    canvas.drawCircle(Offset(headCenter.dx + 22, headCenter.dy + 12), 7, cheekPaint);
-
-    // Cute mischievous eyes
-    final eyePaint = Paint()
-      ..color = const Color(0xFF1F2937)
-      ..style = PaintingStyle.fill;
-    // Left eye (slanted mischievous)
-    final eyeStroke = Paint()
-      ..color = const Color(0xFF1F2937)
-      ..strokeWidth = 2.5
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final leftEyebrow = Path()
-      ..moveTo(headCenter.dx - 20, headCenter.dy - 3)
-      ..lineTo(headCenter.dx - 8, headCenter.dy);
-    canvas.drawPath(leftEyebrow, eyeStroke);
-    canvas.drawCircle(Offset(headCenter.dx - 14, headCenter.dy + 4), 3.5, eyePaint);
-
-    // Right eye
-    final rightEyebrow = Path()
-      ..moveTo(headCenter.dx + 8, headCenter.dy)
-      ..lineTo(headCenter.dx + 20, headCenter.dy - 3);
-    canvas.drawPath(rightEyebrow, eyeStroke);
-    canvas.drawCircle(Offset(headCenter.dx + 14, headCenter.dy + 4), 3.5, eyePaint);
-
-    // Little Tongue sticking out! 👅
-    final tonguePaint = Paint()..color = const Color(0xFFF43F5E);
-    final tonguePath = Path()
-      ..moveTo(headCenter.dx - 5, headCenter.dy + 15)
-      ..quadraticBezierTo(headCenter.dx, headCenter.dy + 24, headCenter.dx + 5, headCenter.dy + 15)
-      ..close();
-    canvas.drawPath(tonguePath, tonguePaint);
-  }
-
-  void _drawBadge({
-    required Canvas canvas,
-    required Offset center,
-    required double radius,
-    required List<Color> gradientColors,
-    required String icon,
-    bool isTextIcon = false,
-  }) {
-    // Drop shadow
-    final shadowPaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.15)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-    canvas.drawCircle(Offset(center.dx, center.dy + 4), radius, shadowPaint);
-
-    // Outer Badge Circle
-    final badgePaint = Paint()
-      ..shader = RadialGradient(
-        center: const Alignment(-0.3, -0.4),
-        colors: gradientColors,
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
-    canvas.drawCircle(center, radius, badgePaint);
-
-    // Glossy Highlight on top edge
-    final highlightPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - 2),
-      math.pi * 1.1,
-      math.pi * 0.8,
-      false,
-      highlightPaint,
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _SparkleStarPainter(),
     );
-
-    // Icon in Badge
-    final tp = TextPainter(
-      text: TextSpan(
-        text: icon,
-        style: TextStyle(
-          fontSize: isTextIcon ? radius * 1.1 : radius * 0.95,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    tp.paint(canvas, Offset(center.dx - tp.width / 2, center.dy - tp.height / 2));
   }
+}
 
-  void _drawSparkle(Canvas canvas, Offset c, Color color, double radius) {
+class _SparkleStarPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color
+      ..color = const Color(0xFFFFF176).withValues(alpha: 0.95)
       ..style = PaintingStyle.fill;
-    final path = Path()
-      ..moveTo(c.dx, c.dy - radius)
-      ..quadraticBezierTo(c.dx, c.dy, c.dx + radius, c.dy)
-      ..quadraticBezierTo(c.dx, c.dy, c.dx, c.dy + radius)
-      ..quadraticBezierTo(c.dx, c.dy, c.dx - radius, c.dy)
-      ..quadraticBezierTo(c.dx, c.dy, c.dx, c.dy - radius)
-      ..close();
+
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final rOut = size.width / 2;
+    final rIn = rOut * 0.26;
+
+    final path = Path();
+    for (int i = 0; i < 8; i++) {
+      final angle = (i * 45) * math.pi / 180 - math.pi / 2;
+      final r = (i % 2 == 0) ? rOut : rIn;
+      final x = cx + r * math.cos(angle);
+      final y = cy + r * math.sin(angle);
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    path.close();
+
     canvas.drawPath(path, paint);
-  }
-
-  void _drawPeekingKids(Canvas canvas, Offset base) {
-    // 4 cute kids heads peeking from behind the bushes
-    final skinLight = Paint()..color = const Color(0xFFFDDEC2);
-    final skinWarm = Paint()..color = const Color(0xFFE8B28B);
-    final hairDark = Paint()..color = const Color(0xFF332014);
-    final hairCurly = Paint()..color = const Color(0xFF1E140F);
-    final glassesPaint = Paint()
-      ..color = const Color(0xFF2563EB)
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    // Kid 1: Blue Glasses Boy
-    final k1 = Offset(base.dx - 32, base.dy);
-    canvas.drawCircle(k1, 14, skinLight);
-    canvas.drawArc(Rect.fromCircle(center: k1, radius: 15), math.pi, math.pi, true, hairDark);
-    canvas.drawCircle(Offset(k1.dx - 5, k1.dy + 1), 4, glassesPaint);
-    canvas.drawCircle(Offset(k1.dx + 5, k1.dy + 1), 4, glassesPaint);
-    canvas.drawLine(Offset(k1.dx - 1, k1.dy + 1), Offset(k1.dx + 1, k1.dy + 1), glassesPaint);
-
-    // Kid 2: Girl with Curly Hair in center
-    final k2 = Offset(base.dx + 2, base.dy - 10);
-    canvas.drawCircle(k2, 16, skinLight);
-    canvas.drawCircle(Offset(k2.dx - 14, k2.dy - 4), 8, hairCurly);
-    canvas.drawCircle(Offset(k2.dx + 14, k2.dy - 4), 8, hairCurly);
-    canvas.drawArc(Rect.fromCircle(center: k2, radius: 17), math.pi, math.pi, true, hairCurly);
-
-    // Kid 3: Warm tone smiling boy
-    final k3 = Offset(base.dx + 10, base.dy + 6);
-    canvas.drawCircle(k3, 14, skinWarm);
-    canvas.drawArc(Rect.fromCircle(center: k3, radius: 14), math.pi, math.pi, true, hairDark);
-
-    // Cute eyes & smiles for all peeking kids
-    final eyeP = Paint()..color = const Color(0xFF1E1E1E);
-    canvas.drawCircle(Offset(k2.dx - 5, k2.dy + 1), 2, eyeP);
-    canvas.drawCircle(Offset(k2.dx + 5, k2.dy + 1), 2, eyeP);
-    canvas.drawCircle(Offset(k3.dx - 4, k3.dy + 2), 2, eyeP);
-    canvas.drawCircle(Offset(k3.dx + 4, k3.dy + 2), 2, eyeP);
   }
 
   @override

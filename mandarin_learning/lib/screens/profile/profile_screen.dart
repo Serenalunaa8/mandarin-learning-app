@@ -221,7 +221,7 @@ class ProfileScreen extends StatelessWidget {
                         if (context.mounted) {
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                            MaterialPageRoute(builder: (_) => const LandingScreen()),
                             (route) => false,
                           );
                         }

@@ -5,7 +5,6 @@ import 'providers/auth_provider.dart';
 import 'providers/vocabulary_provider.dart';
 import 'services/supabase_service.dart';
 import 'services/audio_service.dart';
-import 'screens/auth/welcome_screen.dart';
 import 'screens/auth/landing_screen.dart';
 import 'screens/home/main_navigation_screen.dart';
 
