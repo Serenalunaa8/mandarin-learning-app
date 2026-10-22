@@ -17,6 +17,8 @@ int scoreMandarinTranscription(
   // Contoh: target '你好' tapi perangkat mengenali '你好吗' -> 100%
   if (cleanRecognized.contains(cleanTarget)) return 100;
 
+  int bestScore = _calculateLevenshteinScore(cleanTarget, cleanRecognized);
+
   // 3. Jika targetPinyin diberikan, cocokkan dengan pinyin yang dinormalisasi
   if (targetPinyin != null && targetPinyin.isNotEmpty) {
     final normTargetPinyin = normalizePinyin(targetPinyin);
@@ -24,17 +26,18 @@ int scoreMandarinTranscription(
 
     if (normTargetPinyin.isNotEmpty && normRecogPinyin.isNotEmpty) {
       if (normTargetPinyin == normRecogPinyin ||
-          normRecogPinyin.contains(normTargetPinyin)) {
+          normRecogPinyin.contains(normTargetPinyin) ||
+          normTargetPinyin.contains(normRecogPinyin)) {
         return 100;
       }
-      // Hitung kemiripan Levenshtein pada pinyin
       final pinyinScore = _calculateLevenshteinScore(normTargetPinyin, normRecogPinyin);
-      if (pinyinScore >= 80) return pinyinScore;
+      if (pinyinScore > bestScore) {
+        bestScore = pinyinScore;
+      }
     }
   }
 
-  // 4. Hitung kemiripan Levenshtein karakter Hanzi
-  return _calculateLevenshteinScore(cleanTarget, cleanRecognized);
+  return bestScore;
 }
 
 int _calculateLevenshteinScore(String target, String recognized) {

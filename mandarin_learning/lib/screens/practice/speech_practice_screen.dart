@@ -104,11 +104,22 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
     });
     try {
       final available = await _speech.initialize(
-        onError: (error) =>
-            _finishRecognition(error: _friendlySpeechError(error.errorMsg)),
-        onStatus: (status) {
-          if (status == 'notListening' && _isRecording) {
+        onError: (error) {
+          debugPrint('[SpeechPractice] onError: ');
+          if (_recognizedText.trim().isNotEmpty) {
             _finishRecognition();
+          } else {
+            _finishRecognition(error: _friendlySpeechError(error.errorMsg));
+          }
+        },
+        onStatus: (status) {
+          debugPrint('[SpeechPractice] onStatus: ');
+          if (status == 'notListening' && _isRecording) {
+            Future.delayed(const Duration(milliseconds: 350), () {
+              if (mounted && _isRecording) {
+                _finishRecognition();
+              }
+            });
           }
         },
       );
@@ -167,11 +178,16 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
       });
       await _speech.listen(
         onResult: (result) {
-          _recognizedText = result.recognizedWords;
-          _recognitionConfidence = result.hasConfidenceRating
-              ? result.confidence
-              : null;
-          if (result.finalResult) _finishRecognition();
+          if (!mounted) return;
+          setState(() {
+            _recognizedText = result.recognizedWords;
+            _recognitionConfidence = result.hasConfidenceRating
+                ? result.confidence
+                : null;
+          });
+          if (result.finalResult) {
+            _finishRecognition();
+          }
         },
         onSoundLevelChange: (level) {
           if (!mounted) return;
@@ -179,10 +195,10 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
         },
         listenOptions: SpeechListenOptions(
           localeId: localeId,
-          listenFor: const Duration(seconds: 8),
-          pauseFor: const Duration(seconds: 2),
+          listenFor: const Duration(seconds: 15),
+          pauseFor: const Duration(seconds: 4),
           partialResults: true,
-          contextualPhrases: [widget.item.hanzi],
+          cancelOnError: false,
         ),
       );
     } catch (error) {
@@ -199,7 +215,10 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
 
   Future<void> _stopRecording() async {
     try {
-      if (_isRecording) await _speech.stop();
+      if (_isRecording) {
+        await _speech.stop();
+        await Future.delayed(const Duration(milliseconds: 400));
+      }
       await _finishRecognition();
     } catch (error) {
       debugPrint('[SpeechPractice] Recognition stop failed: $error');
@@ -540,6 +559,62 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
     );
   }
 
+  void _showManualPronunciationDialog() {
+    final controller = TextEditingController(text: widget.item.pinyin);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Tes Evaluasi Pelafalan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Masukkan kata Pinyin atau Hanzi yang kamu lafalkan untuk diuji:',
+              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: 'Contoh: ',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              final typed = controller.text.trim();
+              if (typed.isNotEmpty) {
+                final score = scoreMandarinTranscription(
+                  widget.item.hanzi,
+                  typed,
+                  targetPinyin: widget.item.pinyin,
+                );
+                setState(() {
+                  _result = SpeechEvaluation(
+                    recognizedText: typed,
+                    recognitionConfidence: 1.0,
+                    score: score,
+                  );
+                });
+              }
+            },
+            child: const Text('Evaluasi'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAnalysisResultCard(SpeechEvaluation res) {
     final confidence = res.recognitionConfidence;
     final advice = res.recognizedText.isEmpty
@@ -586,6 +661,17 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
             ),
           ],
           const SizedBox(height: 14),
+          if (res.recognizedText == 'tidak terdeteksi' || res.recognizedText.isEmpty) ...[
+            const SizedBox(height: 10),
+            Center(
+              child: OutlinedButton.icon(
+                onPressed: _showManualPronunciationDialog,
+                icon: const Icon(Icons.keyboard_alt_outlined, size: 16),
+                label: const Text('Uji Input Pelafalan Alternatif', style: TextStyle(fontSize: 12)),
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
