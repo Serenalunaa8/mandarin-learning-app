@@ -46,8 +46,8 @@ class _RegisterScreenState extends State<RegisterScreen>
       if (!mounted) return;
       final auth = context.read<AuthProvider>();
       final available = pendingFingerprint
-          ? auth.hasFingerprintSensor
-          : auth.hasFaceSensor;
+          ? (auth.hasFingerprintSensor || auth.isBiometricSupported)
+          : (auth.hasFaceSensor || auth.isBiometricSupported);
       if (available) {
         setState(() {
           if (pendingFingerprint) {
@@ -96,8 +96,8 @@ class _RegisterScreenState extends State<RegisterScreen>
 
     final auth = context.read<AuthProvider>();
     final available = fingerprint
-        ? auth.hasFingerprintSensor
-        : auth.hasFaceSensor;
+        ? (auth.hasFingerprintSensor || auth.isBiometricSupported)
+        : (auth.hasFaceSensor || auth.isBiometricSupported);
     if (available) {
       setState(() {
         if (fingerprint) {
@@ -447,7 +447,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                               : 'Tersedia di aplikasi Android/iOS',
                           style: const TextStyle(fontSize: 11),
                         ),
-                        value: auth.hasFingerprintSensor && _enableFingerprint,
+                        value: (auth.hasFingerprintSensor || auth.isBiometricSupported) && _enableFingerprint,
                         onChanged: (value) => _enableDeviceBiometric(
                           fingerprint: true,
                           enabled: value,
@@ -475,7 +475,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                               : 'Tersedia di aplikasi Android/iOS',
                           style: const TextStyle(fontSize: 11),
                         ),
-                        value: auth.hasFaceSensor && _enableFace,
+                        value: (auth.hasFaceSensor || auth.isBiometricSupported) && _enableFace,
                         onChanged: (value) => _enableDeviceBiometric(
                           fingerprint: false,
                           enabled: value,
