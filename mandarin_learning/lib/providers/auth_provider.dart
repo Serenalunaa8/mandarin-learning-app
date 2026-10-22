@@ -54,6 +54,8 @@ class AuthProvider extends ChangeNotifier {
   /// Memperbarui informasi ketersediaan sensor dan status pendaftaran biometrik
   Future<void> refreshBiometricStatus() async {
     _isBiometricSupported = await BiometricService.instance.canAuthenticate();
+    _hasFingerprintSensor = false;
+    _hasFaceSensor = false;
     if (_isBiometricSupported) {
       _hasFingerprintSensor = await BiometricService.instance.hasFingerprint();
       _hasFaceSensor = await BiometricService.instance.hasFaceRecognition();
@@ -308,6 +310,37 @@ class AuthProvider extends ChangeNotifier {
         };
       }
 
+      final wantsBiometric = enableBiometric || enableFingerprint || enableFace;
+      var allowFingerprint = false;
+      var allowFace = false;
+      if (wantsBiometric) {
+        final deviceHasFingerprint = await BiometricService.instance
+            .hasFingerprint();
+        final deviceHasFace = await BiometricService.instance
+            .hasFaceRecognition();
+        allowFingerprint =
+            deviceHasFingerprint && (enableBiometric || enableFingerprint);
+        allowFace = deviceHasFace && (enableBiometric || enableFace);
+
+        if (!allowFingerprint && !allowFace) {
+          _errorMessage = 'Biometrik yang dipilih belum terdaftar di perangkat. Aktifkan biometrik dari layar pendaftaran perangkat, lalu coba lagi.';
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+
+        final verified = await BiometricService.instance.authenticate(
+          reason:
+              'Verifikasi biometrik untuk mengaktifkan login akun @$cleanUsername',
+        );
+        if (!verified) {
+          _errorMessage = 'Verifikasi biometrik dibatalkan atau gagal. Akun belum dibuat; silakan coba lagi atau nonaktifkan opsi biometrik.';
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+      }
+
       // 2. Simpan ke database lokal SQLite terlebih dahulu
       await LocalDatabaseService.instance.saveOrUpdateUser(userMap);
       debugPrint('[AuthProvider] ✅ Akun tersimpan di SQLite lokal: $cleanUsername');
@@ -344,41 +377,18 @@ class AuthProvider extends ChangeNotifier {
       await prefs.setString('last_registered_username', cleanUsername);
       await prefs.setBool('is_guest_mode', false);
 
-      // Simpan tautan akun di perangkat hanya setelah sensor benar-benar
-      // memverifikasi pengguna. Data biometrik tetap dikelola oleh OS.
-      if (enableBiometric || enableFingerprint || enableFace) {
-        final hasFingerprint = enableBiometric ||
-            (enableFingerprint &&
-                await BiometricService.instance.hasFingerprint());
-        final hasFace = enableBiometric ||
-            (enableFace &&
-                await BiometricService.instance.hasFaceRecognition());
-
-        final deviceHasFingerprint =
-            await BiometricService.instance.hasFingerprint();
-        final deviceHasFace =
-            await BiometricService.instance.hasFaceRecognition();
-        final allowFingerprint = hasFingerprint && deviceHasFingerprint;
-        final allowFace = hasFace && deviceHasFace;
-
-        if (allowFingerprint || allowFace) {
-          final verified = await BiometricService.instance.authenticate(
-            reason: 'Verifikasi sidik jari atau wajah untuk akun @$cleanUsername',
-          );
-          if (verified) {
-            await SessionService.enrollBiometric(
-              userId: userMap['id'].toString(),
-              username: cleanUsername,
-              fullName: cleanFullName,
-              allowFingerprint: allowFingerprint,
-              allowFace: allowFace,
-            );
-            await refreshBiometricStatus();
-            debugPrint(
-              '[AuthProvider] Biometrik berhasil diaktifkan untuk @$cleanUsername',
-            );
-          }
-        }
+      if (wantsBiometric) {
+        await SessionService.enrollBiometric(
+          userId: userMap['id'].toString(),
+          username: cleanUsername,
+          fullName: cleanFullName,
+          allowFingerprint: allowFingerprint,
+          allowFace: allowFace,
+        );
+        await refreshBiometricStatus();
+        debugPrint(
+          '[AuthProvider] Biometrik berhasil diaktifkan untuk @$cleanUsername',
+        );
       }
 
       _isLoading = false;
