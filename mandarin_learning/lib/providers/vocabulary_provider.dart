@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/vocabulary_model.dart';
 import '../models/quiz_attempt_model.dart';
 import '../services/vocabulary_service.dart';
@@ -27,12 +29,18 @@ class VocabularyProvider extends ChangeNotifier {
 
   double get averageQuizScore {
     if (_quizAttempts.isEmpty) return 0.0;
-    final sum = _quizAttempts.fold<int>(0, (prev, element) => prev + element.score);
+    final sum = _quizAttempts.fold<int>(
+      0,
+      (prev, element) => prev + element.score,
+    );
     return sum / _quizAttempts.length;
   }
 
   List<VocabularyItem> get currentLevelVocabulary =>
       VocabularyService.instance.getByLevel(_selectedLevel);
+
+  List<VocabularyItem> get allVocabulary =>
+      VocabularyService.instance.allVocabulary;
 
   Map<int, List<VocabularyItem>> get currentLevelUnits =>
       VocabularyService.instance.getUnitsForLevel(_selectedLevel);
@@ -41,8 +49,7 @@ class VocabularyProvider extends ChangeNotifier {
       VocabularyService.instance.search(_searchQuery);
 
   List<VocabularyItem> get favoriteVocabulary {
-    return VocabularyService.instance
-        .allVocabulary
+    return VocabularyService.instance.allVocabulary
         .where((item) => _favoriteVocabIds.contains(item.id))
         .toList();
   }
@@ -123,7 +130,10 @@ class VocabularyProvider extends ChangeNotifier {
     );
   }
 
-  Future<void> markAsLearned({required int vocabId, required String userId}) async {
+  Future<void> markAsLearned({
+    required int vocabId,
+    required String userId,
+  }) async {
     if (_learnedVocabIds.contains(vocabId)) return;
 
     _learnedVocabIds.add(vocabId);

@@ -6,6 +6,14 @@ import '../../providers/vocabulary_provider.dart';
 import '../../services/audio_service.dart';
 import '../lesson/vocabulary_detail_screen.dart';
 
+List<VocabularyItem> filterVocabularyByHskLevel(
+  List<VocabularyItem> vocabulary,
+  int hskLevel,
+) {
+  if (hskLevel == 0) return vocabulary;
+  return vocabulary.where((item) => item.hskLevel == hskLevel).toList();
+}
+
 class DictionaryScreen extends StatefulWidget {
   final bool initialShowFavorites;
 
@@ -48,17 +56,11 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
           item.artiIndonesia.toLowerCase().contains(q)
         ).toList();
       }
-    } else if (query.isEmpty) {
-      if (_selectedHskFilter == 0) {
-        results = vocab.currentLevelVocabulary;
-      } else {
-        results = vocab.currentLevelVocabulary.where((item) => item.hskLevel == _selectedHskFilter).toList();
-      }
     } else {
-      results = vocab.searchResults;
-      if (_selectedHskFilter > 0) {
-        results = results.where((item) => item.hskLevel == _selectedHskFilter).toList();
-      }
+      final source = query.isEmpty
+          ? vocab.allVocabulary
+          : vocab.searchResults;
+      results = filterVocabularyByHskLevel(source, _selectedHskFilter);
     }
 
     return Scaffold(
@@ -234,77 +236,80 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
           ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        leading: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: AppColors.primaryLight,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: Text(
-              item.hanzi,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryDark),
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight,
+              borderRadius: BorderRadius.circular(12),
             ),
-          ),
-        ),
-        title: Row(
-          children: [
-            Text(
-              item.pinyin,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textDark),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: const Color(0xFFDCFCE7),
-                borderRadius: BorderRadius.circular(6),
-              ),
+            child: Center(
               child: Text(
-                'HSK ${item.hskLevel}',
-                style: const TextStyle(fontSize: 10, color: Color(0xFF15803D), fontWeight: FontWeight.bold),
+                item.hanzi,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryDark),
               ),
             ),
-          ],
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Text(
-            item.artiIndonesia,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Bookmark/Favorite Button (Koleksi Kata)
-            IconButton(
-              icon: Icon(
-                isFav ? Icons.star_rounded : Icons.star_border_rounded,
-                color: isFav ? AppColors.coinGold : AppColors.textLight,
-                size: 22,
+          title: Row(
+            children: [
+              Text(
+                item.pinyin,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textDark),
               ),
-              onPressed: () => vocab.toggleFavorite(item.id),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCFCE7),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'HSK ${item.hskLevel}',
+                  style: const TextStyle(fontSize: 10, color: Color(0xFF15803D), fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              item.artiIndonesia,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
             ),
-            // Audio TTS Button
-            IconButton(
-              icon: const Icon(Icons.volume_up_rounded, color: AppColors.primaryDark, size: 22),
-              onPressed: () => AudioService.instance.speak(item.hanzi),
-            ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textLight),
-          ],
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Bookmark/Favorite Button (Koleksi Kata)
+              IconButton(
+                icon: Icon(
+                  isFav ? Icons.star_rounded : Icons.star_border_rounded,
+                  color: isFav ? AppColors.coinGold : AppColors.textLight,
+                  size: 22,
+                ),
+                onPressed: () => vocab.toggleFavorite(item.id),
+              ),
+              // Audio TTS Button
+              IconButton(
+                icon: const Icon(Icons.volume_up_rounded, color: AppColors.primaryDark, size: 22),
+                onPressed: () => AudioService.instance.speak(item.hanzi),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.textLight),
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => VocabularyDetailScreen(item: item)),
+            );
+          },
         ),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => VocabularyDetailScreen(item: item)),
-          );
-        },
       ),
     );
   }
