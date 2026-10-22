@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -10,6 +10,7 @@ import '../../providers/vocabulary_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/vocabulary_model.dart';
 import '../../models/quiz_attempt_model.dart';
+import '../../services/tilt_direction_service.dart';
 import '../../widgets/mascot_widget.dart';
 
 // FR-09: Tilt to Answer — gyroscope/accelerometer mengontrol pilihan jawaban
@@ -24,8 +25,9 @@ class TiltToAnswerScreen extends StatefulWidget {
 
 class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
   static const int _totalQuestions = 10;
-  static const int _tiltThreshold = 4; // degrees-ish (m/s²)
-  static const Duration _questionTimeout = Duration(seconds: 6);
+  static const double _tiltThreshold = 3.5;
+  static const double _tiltReleaseThreshold = 2.5;
+  static const Duration _questionTimeout = Duration(seconds: 10);
 
   List<VocabularyItem> _pool = [];
   late _QuizQuestion _currentQuestion;
@@ -39,11 +41,12 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
 
   // Sensor
   StreamSubscription<AccelerometerEvent>? _accelSub;
-  double _tiltX = 0; // left(-) right(+)
-  double _tiltY = 0; // up(-) down(+)
+  double _filteredTiltX = 0;
   int _highlightedOption = -1;
+  bool _mustReturnToNeutral = false;
+  Timer? _tiltAnswerTimer;
   Timer? _questionTimer;
-  int _timerRemaining = 6;
+  int _timerRemaining = 10;
 
   @override
   void initState() {
@@ -54,6 +57,7 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
   @override
   void dispose() {
     _accelSub?.cancel();
+    _tiltAnswerTimer?.cancel();
     _questionTimer?.cancel();
     super.dispose();
   }
@@ -62,7 +66,7 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
     final vocab = context.read<VocabularyProvider>();
     _pool = vocab.currentLevelVocabulary;
 
-    if (_pool.isEmpty) {
+    if (_pool.length < 2) {
       setState(() => _isLoading = false);
       return;
     }
@@ -75,48 +79,65 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
           ).listen(
             (event) {
               if (!mounted) return;
-              setState(() {
-                _tiltX = event.x;
-                _tiltY = event.y;
-                _updateHighlight();
-              });
+              final sensorJustBecameAvailable = !_sensorAvailable;
+              _sensorAvailable = true;
+              _filteredTiltX = _filteredTiltX * 0.78 + event.x * 0.22;
+              if (_mustReturnToNeutral) {
+                if (_filteredTiltX.abs() < _tiltReleaseThreshold) {
+                  _mustReturnToNeutral = false;
+                  _highlightedOption = -1;
+                  setState(() {});
+                }
+                return;
+              }
+              final previous = _highlightedOption;
+              _updateHighlight();
+              if (sensorJustBecameAvailable || previous != _highlightedOption) {
+                setState(() {});
+              }
+              if (previous != _highlightedOption) {
+                _scheduleTiltAnswer();
+              }
             },
-            onError: (_) {
+            onError: (Object error) {
+              debugPrint('[TiltToAnswer] Accelerometer error: $error');
+              if (!mounted) return;
               setState(() => _sensorAvailable = false);
             },
           );
-      // Wait briefly to confirm stream fires
       await Future.delayed(const Duration(milliseconds: 400));
-      _sensorAvailable = true;
+      if (!mounted) return;
     } catch (_) {
       _sensorAvailable = false;
     }
 
     _loadQuestion();
+    _scheduleTiltAnswer();
     setState(() => _isLoading = false);
   }
 
   void _updateHighlight() {
     if (_answered) return;
-    // Zones: left(-x) = option 0, right(+x) = option 1, up(-y) = option 2, down(+y) = option 3
-    int h = -1;
-    if (_tiltX < -_tiltThreshold.toDouble()) {
-      h = 0; // left
-    } else if (_tiltX > _tiltThreshold.toDouble()) {
-      h = 1; // right
-    } else if (_tiltY < -_tiltThreshold.toDouble()) {
-      h = 2; // up
-    } else if (_tiltY > _tiltThreshold.toDouble()) {
-      h = 3; // down
-    }
-    if (h != _highlightedOption) {
-      _highlightedOption = h;
-      // Auto-select after holding 1.5s is complex — use tap to confirm instead
+    final option = optionForTiltX(_filteredTiltX, threshold: _tiltThreshold);
+    if (option != null) {
+      _highlightedOption = option;
+    } else if (_filteredTiltX.abs() < _tiltReleaseThreshold) {
+      _highlightedOption = -1;
     }
   }
 
+  void _scheduleTiltAnswer() {
+    _tiltAnswerTimer?.cancel();
+    final option = _highlightedOption;
+    if (!_sensorAvailable || _isLoading || option < 0 || _answered) return;
+    _tiltAnswerTimer = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted || _answered || _highlightedOption != option) return;
+      _onAnswer(option);
+    });
+  }
+
   void _loadQuestion() {
-    if (_questionIndex >= _totalQuestions || _pool.length < 4) {
+    if (_questionIndex >= _totalQuestions || _pool.length < 2) {
       _endGame();
       return;
     }
@@ -124,7 +145,7 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
     final rng = Random();
     final shuffled = List<VocabularyItem>.from(_pool)..shuffle(rng);
     final correct = shuffled[0];
-    final distractors = shuffled.skip(1).take(3).toList();
+    final distractors = shuffled.skip(1).take(1).toList();
 
     final options = [correct, ...distractors]..shuffle(rng);
     final correctIndex = options.indexOf(correct);
@@ -146,6 +167,7 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
 
   void _startTimer() {
     _questionTimer?.cancel();
+    _tiltAnswerTimer?.cancel();
     _questionTimer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) {
         t.cancel();
@@ -164,6 +186,7 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
     _questionTimer?.cancel();
 
     final isCorrect = optionIndex == _currentQuestion.correctIndex;
+    _mustReturnToNeutral = _sensorAvailable && _highlightedOption >= 0;
     setState(() {
       _answered = true;
       _selectedOptionIndex = optionIndex;
@@ -231,7 +254,7 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
               const MascotWidget(pose: MascotPose.holdingSign, size: 100),
               const SizedBox(height: 16),
               const Text(
-                'Butuh minimal 4 kosakata untuk bermain.',
+                'Butuh minimal 2 kosakata untuk bermain.',
                 style: TextStyle(color: AppColors.textMuted),
               ),
               const SizedBox(height: 8),
@@ -377,31 +400,23 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'Apa arti dari...',
+            'Pilih Hanzi yang artinya...',
             style: TextStyle(fontSize: 13, color: AppColors.textMuted),
           ),
           const SizedBox(height: 12),
           Text(
-            _currentQuestion.word.hanzi,
+            _currentQuestion.word.artiIndonesia,
             style: const TextStyle(
-              fontSize: 64,
+              fontSize: 30,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryDark,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _currentQuestion.word.pinyin,
-            style: const TextStyle(
-              fontSize: 18,
-              color: AppColors.primaryGreen,
-              fontWeight: FontWeight.w500,
-            ),
+            textAlign: TextAlign.center,
           ),
           if (_sensorAvailable) ...[
             const SizedBox(height: 12),
             const Text(
-              '📱 Miringkan perangkat ke arah jawaban, lalu ketuk untuk konfirmasi',
+              'Miringkan ke kiri atau kanan dan tahan sebentar untuk memilih',
               style: TextStyle(fontSize: 11, color: AppColors.textMuted),
               textAlign: TextAlign.center,
             ),
@@ -412,20 +427,16 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
   }
 
   Widget _buildOptionsGrid() {
-    // Layout: 2x2 grid (Left, Right, Up, Down)
-    final labels = ['← Kiri', 'Kanan →', '↑ Atas', '↓ Bawah'];
+    const labels = ['← Kiri', 'Kanan →'];
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-      child: GridView.count(
-        shrinkWrap: true,
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 2.2,
-        children: List.generate(
-          min(4, _currentQuestion.options.length),
-          (i) => _buildOptionTile(i, labels[i]),
-        ),
+      child: Row(
+        children: [
+          for (var i = 0; i < 2; i++) ...[
+            if (i > 0) const SizedBox(width: 10),
+            Expanded(child: _buildOptionTile(i, labels[i])),
+          ],
+        ],
       ),
     );
   }
@@ -481,14 +492,19 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
                 ),
               ),
             Text(
-              option.artiIndonesia,
+              option.hanzi,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
                 color: _answered && isCorrect
                     ? AppColors.primaryGreen
                     : AppColors.textDark,
               ),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              '${option.pinyin} · ${option.artiIndonesia}',
+              style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
