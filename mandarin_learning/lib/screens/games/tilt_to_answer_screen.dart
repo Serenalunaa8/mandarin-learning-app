@@ -502,12 +502,17 @@ class _TiltToAnswerScreenState extends State<TiltToAnswerScreen> {
               ),
               textAlign: TextAlign.center,
             ),
+
             Text(
-              '${option.pinyin} · ${option.artiIndonesia}',
-              style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+              option.pinyin,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: _answered && isCorrect
+                    ? AppColors.primaryGreen
+                    : AppColors.textMuted,
+              ),
               textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -649,3 +654,4 @@ class _QuizQuestion {
     required this.correctIndex,
   });
 }
+
