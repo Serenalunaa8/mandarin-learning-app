@@ -220,9 +220,25 @@ class AuthProvider extends ChangeNotifier {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('is_guest_mode', false);
+      await prefs.setString('last_registered_username', username);
       _isGuest = false;
 
       _profile = UserProfile.fromJson(userRecord);
+
+      // Hubungkan akun ke biometrik perangkat jika perangkat mendukung biometrik
+      try {
+        final canBio = await BiometricService.instance.canAuthenticate();
+        if (canBio) {
+          await SessionService.enrollBiometric(
+            userId: userId,
+            username: username,
+            fullName: fullName,
+            allowFingerprint: true,
+            allowFace: true,
+          );
+          await refreshBiometricStatus();
+        }
+      } catch (_) {}
 
       // Ambil riwayat koin
       try {
@@ -310,37 +326,6 @@ class AuthProvider extends ChangeNotifier {
         };
       }
 
-      final wantsBiometric = enableBiometric || enableFingerprint || enableFace;
-      var allowFingerprint = false;
-      var allowFace = false;
-      if (wantsBiometric) {
-        final deviceHasFingerprint = await BiometricService.instance
-            .hasFingerprint();
-        final deviceHasFace = await BiometricService.instance
-            .hasFaceRecognition();
-        allowFingerprint =
-            deviceHasFingerprint && (enableBiometric || enableFingerprint);
-        allowFace = deviceHasFace && (enableBiometric || enableFace);
-
-        if (!allowFingerprint && !allowFace) {
-          _errorMessage = 'Biometrik yang dipilih belum terdaftar di perangkat. Aktifkan biometrik dari layar pendaftaran perangkat, lalu coba lagi.';
-          _isLoading = false;
-          notifyListeners();
-          return false;
-        }
-
-        final verified = await BiometricService.instance.authenticate(
-          reason:
-              'Verifikasi biometrik untuk mengaktifkan login akun @$cleanUsername',
-        );
-        if (!verified) {
-          _errorMessage = 'Verifikasi biometrik dibatalkan atau gagal. Akun belum dibuat; silakan coba lagi atau nonaktifkan opsi biometrik.';
-          _isLoading = false;
-          notifyListeners();
-          return false;
-        }
-      }
-
       // 2. Simpan ke database lokal SQLite terlebih dahulu
       await LocalDatabaseService.instance.saveOrUpdateUser(userMap);
       debugPrint('[AuthProvider] ✅ Akun tersimpan di SQLite lokal: $cleanUsername');
@@ -377,18 +362,24 @@ class AuthProvider extends ChangeNotifier {
       await prefs.setString('last_registered_username', cleanUsername);
       await prefs.setBool('is_guest_mode', false);
 
-      if (wantsBiometric) {
-        await SessionService.enrollBiometric(
-          userId: userMap['id'].toString(),
-          username: cleanUsername,
-          fullName: cleanFullName,
-          allowFingerprint: allowFingerprint,
-          allowFace: allowFace,
-        );
-        await refreshBiometricStatus();
-        debugPrint(
-          '[AuthProvider] Biometrik berhasil diaktifkan untuk @$cleanUsername',
-        );
+      // Siapkan biometrik perangkat untuk akun baru jika perangkat mendukung sensor biometrik
+      try {
+        final canBio = await BiometricService.instance.canAuthenticate();
+        if (canBio) {
+          await SessionService.enrollBiometric(
+            userId: userMap['id'].toString(),
+            username: cleanUsername,
+            fullName: cleanFullName,
+            allowFingerprint: true,
+            allowFace: true,
+          );
+          await refreshBiometricStatus();
+          debugPrint(
+            '[AuthProvider] Biometrik otomatis disiapkan untuk @$cleanUsername',
+          );
+        }
+      } catch (e) {
+        debugPrint('[AuthProvider] Biometric auto-enroll: $e');
       }
 
       _isLoading = false;
@@ -525,12 +516,33 @@ class AuthProvider extends ChangeNotifier {
         return false;
       }
 
-      // LOGIKA KETAT: Cek apakah biometrik sudah didaftarkan terlebih dahulu!
-      final isEnrolled = await SessionService.isBiometricEnrolled();
-      final targetUser = await SessionService.getEnrolledBiometricUsername();
+      // Periksa pendaftaran biometrik
+      var isEnrolled = await SessionService.isBiometricEnrolled();
+      var targetUser = await SessionService.getEnrolledBiometricUsername();
 
       if (!isEnrolled || targetUser == null || targetUser.isEmpty) {
-        _errorMessage = 'Biometrik belum didaftarkan untuk akun manapun di perangkat ini.\n\nSilakan masuk dengan kata sandi terlebih dahulu, lalu daftarkan sidik jari atau pengenalan wajah Anda di menu Pengaturan.';
+        // Cek apakah ada akun terakhir yang terdaftar/login di perangkat ini
+        final prefs = await SharedPreferences.getInstance();
+        final lastUser = prefs.getString('last_registered_username');
+        if (lastUser != null && lastUser.isNotEmpty) {
+          final localAcc = await LocalDatabaseService.instance.getUserByUsername(lastUser);
+          if (localAcc != null) {
+            await SessionService.enrollBiometric(
+              userId: localAcc['id'].toString(),
+              username: lastUser,
+              fullName: localAcc['full_name']?.toString() ?? 'Pelajar Mandarin',
+              allowFingerprint: true,
+              allowFace: true,
+            );
+            await refreshBiometricStatus();
+            isEnrolled = true;
+            targetUser = lastUser;
+          }
+        }
+      }
+
+      if (!isEnrolled || targetUser == null || targetUser.isEmpty) {
+        _errorMessage = 'Biometrik belum terhubung ke akun manapun di perangkat ini.\n\nSilakan masuk dengan kata sandi terlebih dahulu.';
         _isLoading = false;
         notifyListeners();
         return false;

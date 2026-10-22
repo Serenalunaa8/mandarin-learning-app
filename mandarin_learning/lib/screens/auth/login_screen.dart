@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/biometric_service.dart';
 import '../home/main_navigation_screen.dart';
 import 'register_screen.dart';
 
@@ -43,6 +44,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (widget.initialUsername != null && widget.initialUsername!.isNotEmpty) {
       _usernameController.text = widget.initialUsername!;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<AuthProvider>().refreshBiometricStatus();
+    });
   }
 
   @override
@@ -82,38 +86,80 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleBiometricLogin() async {
     final auth = context.read<AuthProvider>();
 
-    // Jika biometrik belum didaftarkan terlebih dahulu:
+    if (!auth.isBiometricSupported) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Perangkat ini belum mendukung atau belum mengaktifkan biometrik.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    // Jika biometrik belum dihubungkan ke akun manapun di perangkat:
     if (!auth.isBiometricEnrolled) {
+      final isFaceOnly = auth.hasFaceSensor && !auth.hasFingerprintSensor;
+      final biometricName = isFaceOnly
+          ? 'pengenalan wajah'
+          : (auth.hasFingerprintSensor && !auth.hasFaceSensor
+              ? 'sidik jari'
+              : 'biometrik');
+      final biometricIcon = isFaceOnly
+          ? Icons.face_retouching_natural_rounded
+          : Icons.fingerprint_rounded;
+
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
+          backgroundColor: _kDarkBg,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: _kFieldBorder, width: 1.5),
+          ),
+          title: Row(
             children: [
-              Icon(Icons.fingerprint_rounded, color: AppColors.primary, size: 28),
-              SizedBox(width: 6),
-              Icon(Icons.face_retouching_natural_rounded, color: AppColors.primary, size: 28),
-              SizedBox(width: 8),
-              Expanded(
+              Icon(biometricIcon, color: _kIcon, size: 28),
+              const SizedBox(width: 10),
+              const Expanded(
                 child: Text(
-                  'Biometrik Belum Didaftarkan',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  'Biometrik Belum Terhubung',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
           ),
-          content: const Text(
-            'Anda belum mendaftarkan sidik jari atau pengenalan wajah untuk akun manapun di perangkat ini.\n\nSilakan masuk menggunakan nama pengguna dan kata sandi terlebih dahulu, lalu buka menu Pengaturan untuk mendaftarkan biometrik Anda.',
-            style: TextStyle(fontSize: 13, height: 1.4),
+          content: Text(
+            'Untuk menggunakan login dengan $biometricName, silakan masuk atau daftar menggunakan nama pengguna dan kata sandi sekali.\n\nPastikan juga $biometricName sudah didaftarkan pada Pengaturan perangkat HP Anda.',
+            style: const TextStyle(fontSize: 13, height: 1.4, color: _kSubtitle),
           ),
           actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                BiometricService.instance.openEnrollmentSettings();
+              },
+              child: const Text(
+                'Pengaturan HP',
+                style: TextStyle(color: _kLink),
+              ),
+            ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                backgroundColor: _kIcon,
+                foregroundColor: _kDarkBg,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Saya Mengerti'),
+              child: const Text(
+                'Saya Mengerti',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
@@ -128,7 +174,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Autentikasi biometrik berhasil! Selamat datang, ${auth.profile?.fullName ?? ""}'),
+          content: Text(
+            'Autentikasi biometrik berhasil! Selamat datang, ${auth.profile?.fullName ?? ""}',
+          ),
           backgroundColor: AppColors.success,
         ),
       );
@@ -140,7 +188,9 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.errorMessage ?? 'Biometrik gagal atau dibatalkan.'),
+          content: Text(
+            auth.errorMessage ?? 'Autentikasi biometrik gagal atau dibatalkan.',
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -192,6 +242,73 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Widget _buildAdaptiveBiometricButton(AuthProvider auth) {
+    final isFaceOnly = auth.hasFaceSensor && !auth.hasFingerprintSensor;
+    final isFingerprintOnly = auth.hasFingerprintSensor && !auth.hasFaceSensor;
+
+    final IconData biometricIcon;
+    final String biometricLabel;
+
+    if (!auth.isBiometricSupported) {
+      biometricIcon = Icons.fingerprint_rounded;
+      biometricLabel = 'Biometrik tidak tersedia di perangkat';
+    } else if (isFaceOnly) {
+      biometricIcon = Icons.face_retouching_natural_rounded;
+      biometricLabel = auth.isBiometricEnrolled
+          ? 'Masuk dengan Wajah (@${auth.enrolledBiometricUsername})'
+          : 'Masuk dengan Pengenalan Wajah';
+    } else if (isFingerprintOnly) {
+      biometricIcon = Icons.fingerprint_rounded;
+      biometricLabel = auth.isBiometricEnrolled
+          ? 'Masuk dengan Sidik Jari (@${auth.enrolledBiometricUsername})'
+          : 'Masuk dengan Sidik Jari';
+    } else {
+      biometricIcon = Icons.fingerprint_rounded;
+      biometricLabel = auth.isBiometricEnrolled
+          ? 'Masuk dengan Biometrik (@${auth.enrolledBiometricUsername})'
+          : 'Masuk dengan Biometrik';
+    }
+
+    return SizedBox(
+      height: 52,
+      child: OutlinedButton(
+        onPressed: auth.isLoading || !auth.isBiometricSupported
+            ? null
+            : _handleBiometricLogin,
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(
+            color: auth.isBiometricEnrolled ? _kIcon : _kFieldBorder,
+            width: 1.5,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          backgroundColor: auth.isBiometricEnrolled
+              ? _kFieldFill
+              : _kFieldFill.withValues(alpha: 0.5),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(biometricIcon, size: 24, color: _kIcon),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                biometricLabel,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: Colors.white,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _bushDecoration(String asset, {required bool left}) {
     return Positioned(
       bottom: 0,
@@ -203,7 +320,7 @@ class _LoginScreenState extends State<LoginScreen> {
           asset,
           fit: BoxFit.contain,
           alignment: left ? Alignment.bottomLeft : Alignment.bottomRight,
-          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
         ),
       ),
     );
@@ -234,7 +351,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 _kHeaderAsset,
                 fit: BoxFit.cover,
                 alignment: Alignment.bottomCenter,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (context, error, stackTrace) => Container(
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -427,52 +544,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 const SizedBox(height: 18),
 
-                                // Tombol Login Biometrik (Sidik Jari & Pengenalan Wajah)
-                                SizedBox(
-                                  height: 52,
-                                  child: OutlinedButton(
-                                    onPressed: auth.isLoading || !auth.isBiometricSupported
-                                        ? null
-                                        : _handleBiometricLogin,
-                                    style: OutlinedButton.styleFrom(
-                                      side: BorderSide(
-                                        color: auth.isBiometricEnrolled ? _kIcon : _kFieldBorder,
-                                        width: 1.5,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30),
-                                      ),
-                                      backgroundColor: auth.isBiometricEnrolled
-                                          ? _kFieldFill
-                                          : _kFieldFill.withValues(alpha: 0.5),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(Icons.fingerprint_rounded, size: 24, color: _kIcon),
-                                        const SizedBox(width: 4),
-                                        const Icon(Icons.face_retouching_natural_rounded,
-                                            size: 24, color: _kIcon),
-                                        const SizedBox(width: 8),
-                                        Flexible(
-                                          child: Text(
-                                            !auth.isBiometricSupported
-                                                ? 'Biometrik tersedia di aplikasi Android/iOS'
-                                                : auth.isBiometricEnrolled
-                                                    ? 'Masuk sebagai @${auth.enrolledBiometricUsername}'
-                                                    : 'Masuk dengan Biometrik (Sidik Jari / Wajah)',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                              color: Colors.white,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                // Tombol Login Biometrik Adaptif Sesuai Sensor Perangkat
+                                _buildAdaptiveBiometricButton(auth),
                                 const SizedBox(height: 10),
 
                                 // Opsi Masuk Sebagai Tamu

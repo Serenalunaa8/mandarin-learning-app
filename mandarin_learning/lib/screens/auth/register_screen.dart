@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/biometric_service.dart';
 import 'login_screen.dart';
 
 const Color _registerPageColor = Color(0xFF16300E);
@@ -26,7 +25,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _nameController = TextEditingController();
@@ -36,20 +35,12 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
-  bool _enableFingerprint = false;
-  bool _enableFace = false;
-  bool? _pendingFingerprintEnrollment;
 
   late final AnimationController _floatController;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<AuthProvider>().refreshBiometricStatus();
-    });
-
     _floatController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2400),
@@ -57,96 +48,14 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) return;
-    final pendingFingerprint = _pendingFingerprintEnrollment;
-    if (pendingFingerprint == null) return;
-    _pendingFingerprintEnrollment = null;
-    context.read<AuthProvider>().refreshBiometricStatus().then((_) {
-      if (!mounted) return;
-      final auth = context.read<AuthProvider>();
-      final available = pendingFingerprint
-          ? auth.hasFingerprintSensor
-          : auth.hasFaceSensor;
-      if (available) {
-        setState(() {
-          if (pendingFingerprint) {
-            _enableFingerprint = true;
-          } else {
-            _enableFace = true;
-          }
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Biometrik belum terdaftar. Selesaikan pendaftarannya di Pengaturan perangkat.',
-            ),
-          ),
-        );
-      }
-    });
-  }
-
-  @override
   void dispose() {
     _floatController.dispose();
-    WidgetsBinding.instance.removeObserver(this);
     _usernameController.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
-  }
-
-  Future<void> _enableDeviceBiometric({
-    required bool fingerprint,
-    required bool enabled,
-  }) async {
-    if (!enabled) {
-      setState(() {
-        if (fingerprint) {
-          _enableFingerprint = false;
-        } else {
-          _enableFace = false;
-        }
-      });
-      return;
-    }
-
-    // Segarkan status sensor terlebih dahulu agar pengecekan memakai data terbaru
-    final auth = context.read<AuthProvider>();
-    await auth.refreshBiometricStatus();
-    if (!mounted) return;
-
-    final available = fingerprint
-        ? auth.hasFingerprintSensor
-        : auth.hasFaceSensor;
-    if (available) {
-      setState(() {
-        if (fingerprint) {
-          _enableFingerprint = true;
-        } else {
-          _enableFace = true;
-        }
-      });
-      return;
-    }
-
-    _pendingFingerprintEnrollment = fingerprint;
-    final opened = await BiometricService.instance.openEnrollmentSettings();
-    if (!mounted) return;
-    if (!opened) {
-      _pendingFingerprintEnrollment = null;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Buka Pengaturan perangkat > Keamanan & privasi untuk mendaftarkan sidik jari atau wajah.',
-          ),
-        ),
-      );
-    }
   }
 
   Future<void> _submitRegister() async {
@@ -157,57 +66,26 @@ class _RegisterScreenState extends State<RegisterScreen>
     final fullName = _nameController.text.trim();
     final email = _emailController.text.trim();
 
-    if (_enableFingerprint || _enableFace) {
-      await auth.refreshBiometricStatus();
-      if (!mounted) return;
-
-      if ((_enableFingerprint && !auth.hasFingerprintSensor) ||
-          (_enableFace && !auth.hasFaceSensor)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Daftarkan jenis biometrik yang dipilih di perangkat terlebih dahulu, lalu coba lagi.',
-            ),
-            backgroundColor: AppColors.error,
-          ),
-        );
-        return;
-      }
-    }
-
     final success = await auth.register(
       username: username,
       password: _passwordController.text,
       fullName: fullName,
       email: email,
-      enableFingerprint: _enableFingerprint,
-      enableFace: _enableFace,
     );
 
     if (!mounted) return;
 
     if (success) {
-      // Segarkan status biometrik agar hasil pendaftaran terbaca akurat
       await auth.refreshBiometricStatus();
       if (!mounted) return;
 
-      final biometricRegistered =
-          auth.isBiometricEnrolled &&
-          auth.enrolledBiometricUsername == username.toLowerCase();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
-            biometricRegistered
-                ? 'Akun tersimpan dan login biometrik berhasil diaktifkan di perangkat ini. Silakan masuk.'
-                : _enableFingerprint || _enableFace
-                ? 'Akun tersimpan, tetapi biometrik belum aktif. Anda dapat mendaftarkannya setelah masuk melalui Pengaturan.'
-                : 'Pendaftaran berhasil! Akun tersimpan. Silakan masuk menggunakan username dan kata sandi Anda.',
+            'Pendaftaran berhasil! Akun tersimpan. Silakan masuk menggunakan nama pengguna dan kata sandi Anda.',
           ),
-          backgroundColor:
-              biometricRegistered || (!_enableFingerprint && !_enableFace)
-              ? AppColors.success
-              : AppColors.error,
-          duration: const Duration(seconds: 4),
+          backgroundColor: AppColors.success,
+          duration: Duration(seconds: 3),
         ),
       );
       // Alur yang benar: Setelah daftar wajib masuk melalui Login, jangan langsung ke dashboard
@@ -540,100 +418,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 18),
-
-                            // Pilih sensor biometrik secara terpisah; autentikasi dikelola OS.
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.16),
-                                ),
-                              ),
-                              child: Column(
-                                children: [
-                                  SwitchListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    secondary: const Icon(
-                                      Icons.fingerprint_rounded,
-                                      color: _registerAccentColor,
-                                    ),
-                                    title: const Text(
-                                      'Sidik Jari',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      auth.hasFingerprintSensor
-                                          ? 'Aktifkan login menggunakan sidik jari'
-                                          : 'Ketuk untuk mendaftarkan sidik jari dari layar sistem',
-                                      style: const TextStyle(
-                                        color: _registerSupportingTextColor,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                    value: _enableFingerprint,
-                                    onChanged: (value) =>
-                                        _enableDeviceBiometric(
-                                          fingerprint: true,
-                                          enabled: value,
-                                        ),
-                                  ),
-                                  const Divider(
-                                    height: 1,
-                                    color: Color(0x5578A978),
-                                  ),
-                                  SwitchListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    secondary: const Icon(
-                                      Icons.face_retouching_natural_rounded,
-                                      color: _registerAccentColor,
-                                    ),
-                                    title: const Text(
-                                      'Pengenalan Wajah',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      auth.hasFaceSensor
-                                          ? 'Aktifkan login menggunakan wajah'
-                                          : 'Ketuk untuk mendaftarkan wajah dari layar sistem',
-                                      style: const TextStyle(
-                                        color: _registerSupportingTextColor,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                    value: _enableFace,
-                                    onChanged: (value) =>
-                                        _enableDeviceBiometric(
-                                          fingerprint: false,
-                                          enabled: value,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    'Biometrik dikelola perangkat dan tidak disimpan ke database aplikasi.',
-                                    style: TextStyle(
-                                      color: _registerSupportingTextColor,
-                                      fontSize: 11,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 24),
 
                             // Tombol: "Daftar ->"
                             Container(
