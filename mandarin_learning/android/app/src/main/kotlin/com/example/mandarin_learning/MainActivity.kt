@@ -1,11 +1,11 @@
 package com.example.mandarin_learning
 
 import android.content.Intent
-import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
-import android.os.CancellationSignal
 import android.provider.Settings
 import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.plugin.common.MethodChannel
@@ -19,18 +19,41 @@ class MainActivity : FlutterFragmentActivity() {
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "canAuthenticate" -> {
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-                        result.success(null)
+                    val bm = BiometricManager.from(this)
+                    val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                            BiometricManager.Authenticators.BIOMETRIC_WEAK
+                    result.success(bm.canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS)
+                }
+                "hasFaceRecognition" -> {
+                    val pm = packageManager
+                    val hasFaceHardware = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        pm.hasSystemFeature(android.content.pm.PackageManager.FEATURE_FACE) ||
+                                pm.hasSystemFeature("android.hardware.biometrics.face") ||
+                                pm.hasSystemFeature("com.samsung.android.bio.face") ||
+                                pm.hasSystemFeature("oppo.hardware.biometrics.face") ||
+                                pm.hasSystemFeature("org.lineageos.biometrics.face")
                     } else {
-                        result.success(
-                            BiometricManager.from(this).canAuthenticate(
-                                BiometricManager.Authenticators.BIOMETRIC_WEAK,
-                            ) == BiometricManager.BIOMETRIC_SUCCESS,
-                        )
+                        pm.hasSystemFeature("android.hardware.biometrics.face") ||
+                                pm.hasSystemFeature("com.samsung.android.bio.face")
                     }
+
+                    val bm = BiometricManager.from(this)
+                    val weakCanAuth = bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS
+                    val strongCanAuth = bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
+
+                    // Di Android, pengenalan wajah kamera 2D masuk kategori BIOMETRIC_WEAK (Class 2).
+                    // Jika WEAK sukses atau perangkat punya fitur hardware face, deteksi aktif.
+                    result.success(hasFaceHardware || (weakCanAuth && !strongCanAuth) || weakCanAuth)
+                }
+                "hasFingerprint" -> {
+                    val pm = packageManager
+                    val hasFingerHardware = pm.hasSystemFeature(android.content.pm.PackageManager.FEATURE_FINGERPRINT)
+                    val bm = BiometricManager.from(this)
+                    val strongCanAuth = bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
+                    result.success(hasFingerHardware || strongCanAuth)
                 }
                 "authenticate" -> authenticateBiometric(
-                    call.argument<String>("reason") ?: "Verifikasi untuk masuk",
+                    call.argument<String>("reason") ?: "Verifikasi biometrik untuk masuk",
                     result,
                 )
                 "openEnrollment" -> {
@@ -38,7 +61,8 @@ class MainActivity : FlutterFragmentActivity() {
                         Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
                             putExtra(
                                 Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                                BiometricManager.Authenticators.BIOMETRIC_WEAK,
+                                BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                                        BiometricManager.Authenticators.BIOMETRIC_WEAK,
                             )
                         }
                     } else {
@@ -69,49 +93,48 @@ class MainActivity : FlutterFragmentActivity() {
         reason: String,
         result: MethodChannel.Result,
     ) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            result.success(null)
-            return
-        }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            result.success(null)
-            return
-        }
-        try {
-            val builder = BiometricPrompt.Builder(this)
-                .setTitle("Masuk dengan biometrik")
-                .setSubtitle(reason)
-                .setNegativeButton("Batal", mainExecutor) { _, _ ->
-                    result.success(false)
-                }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                builder.setAllowedAuthenticators(
-                    BiometricManager.Authenticators.BIOMETRIC_WEAK,
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                builder.setDeviceCredentialAllowed(false)
-            }
-            builder.build().authenticate(
-                CancellationSignal(),
-                mainExecutor,
-                object : BiometricPrompt.AuthenticationCallback() {
-                    override fun onAuthenticationSucceeded(
-                        authenticationResult: BiometricPrompt.AuthenticationResult,
-                    ) {
-                        result.success(true)
-                    }
+        runOnUiThread {
+            try {
+                val executor = ContextCompat.getMainExecutor(this)
+                val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                    .setTitle("Masuk dengan Biometrik")
+                    .setSubtitle(reason)
+                    .setNegativeButtonText("Batal")
+                    .setAllowedAuthenticators(
+                        BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                                BiometricManager.Authenticators.BIOMETRIC_WEAK,
+                    )
+                    .build()
 
-                    override fun onAuthenticationError(
-                        errorCode: Int,
-                        errString: CharSequence,
-                    ) {
-                        result.success(false)
-                    }
-                },
-            )
-        } catch (error: Exception) {
-            result.error("biometric_unavailable", error.message, null)
+                var isCompleted = false
+                val biometricPrompt = BiometricPrompt(
+                    this,
+                    executor,
+                    object : BiometricPrompt.AuthenticationCallback() {
+                        override fun onAuthenticationSucceeded(authResult: BiometricPrompt.AuthenticationResult) {
+                            if (!isCompleted) {
+                                isCompleted = true
+                                result.success(true)
+                            }
+                        }
+
+                        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                            if (!isCompleted) {
+                                isCompleted = true
+                                result.success(false)
+                            }
+                        }
+
+                        override fun onAuthenticationFailed() {
+                            // Upaya gagal, sistem Android tetap menampilkan dialog untuk mencoba lagi
+                        }
+                    },
+                )
+
+                biometricPrompt.authenticate(promptInfo)
+            } catch (error: Exception) {
+                result.error("biometric_unavailable", error.message, null)
+            }
         }
     }
 }

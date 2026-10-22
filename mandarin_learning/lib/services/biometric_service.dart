@@ -44,14 +44,34 @@ class BiometricService {
 
   /// Cek apakah perangkat mendukung pengenalan sidik jari
   Future<bool> hasFingerprint() async {
+    if (kIsWeb) return false;
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        final result = await _settingsChannel.invokeMethod<bool?>('hasFingerprint');
+        if (result != null) return result;
+      } catch (e) {
+        debugPrint('[BiometricService] hasFingerprint channel error: $e');
+      }
+    }
     final types = await getAvailableBiometrics();
-    return types.contains(BiometricType.fingerprint);
+    return types.contains(BiometricType.fingerprint) ||
+           types.contains(BiometricType.strong);
   }
 
   /// Cek apakah perangkat mendukung pengenalan wajah (Face ID / Face Recognition)
   Future<bool> hasFaceRecognition() async {
+    if (kIsWeb) return false;
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        final result = await _settingsChannel.invokeMethod<bool?>('hasFaceRecognition');
+        if (result != null) return result;
+      } catch (e) {
+        debugPrint('[BiometricService] hasFaceRecognition channel error: $e');
+      }
+    }
     final types = await getAvailableBiometrics();
-    return types.contains(BiometricType.face);
+    return types.contains(BiometricType.face) ||
+           types.contains(BiometricType.weak);
   }
 
   /// Cek apakah perangkat mendukung iris
