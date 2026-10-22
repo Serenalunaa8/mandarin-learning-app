@@ -62,9 +62,10 @@ void main() {
         AiProvider.values.map((provider) => provider.id),
         containsAll(['gemini', 'openai', 'anthropic', 'groq']),
       );
-      expect(AiProvider.gemini.model, 'gemini-2.5-flash');
-      expect(AiProvider.openAi.model, 'gpt-6-luna');
-      expect(AiProvider.anthropic.model, 'claude-haiku-5-5');
+      expect(AiProvider.gemini.model, 'gemini-1.5-flash');
+      expect(AiProvider.openAi.model, 'gpt-4o-mini');
+      expect(AiProvider.anthropic.model, 'claude-3-5-haiku-20241022');
+      expect(AiProvider.groq.model, 'llama-3.3-70b-versatile');
     });
   });
 

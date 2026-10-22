@@ -41,6 +41,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             'Ada topik tata bahasa atau kosakata yang ingin kamu tanyakan hari ini?',
         isUser: false,
         timestamp: DateTime.now(),
+        modelBadge: 'Xiao Xiong Assistant',
       ),
     );
   }
@@ -316,6 +317,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           text: response,
           isUser: false,
           timestamp: DateTime.now(),
+          provider: provider,
+          modelBadge: '${provider.label} • ${provider.model}',
           audioText: AudioService.instance.extractMandarinText(response),
         ),
       );
@@ -638,6 +641,38 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       );
     }
 
+    final provider = msg.provider;
+    final Color badgeBg;
+    final Color badgeText;
+    final IconData badgeIcon;
+    switch (provider) {
+      case AiProvider.gemini:
+        badgeBg = const Color(0xFFE0F2FE);
+        badgeText = const Color(0xFF0369A1);
+        badgeIcon = Icons.auto_awesome_rounded;
+        break;
+      case AiProvider.anthropic:
+        badgeBg = const Color(0xFFFEF3C7);
+        badgeText = const Color(0xFFB45309);
+        badgeIcon = Icons.psychology_rounded;
+        break;
+      case AiProvider.openAi:
+        badgeBg = const Color(0xFFDCFCE7);
+        badgeText = const Color(0xFF15803D);
+        badgeIcon = Icons.smart_toy_rounded;
+        break;
+      case AiProvider.groq:
+        badgeBg = const Color(0xFFF3E8FF);
+        badgeText = const Color(0xFF7E22CE);
+        badgeIcon = Icons.bolt_rounded;
+        break;
+      case null:
+        badgeBg = const Color(0xFFECFDF5);
+        badgeText = const Color(0xFF047857);
+        badgeIcon = Icons.support_agent_rounded;
+        break;
+    }
+
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -669,6 +704,37 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (msg.modelBadge != null || provider != null) ...[
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: badgeBg,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: badgeText.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(badgeIcon, size: 12, color: badgeText),
+                            const SizedBox(width: 4),
+                            Text(
+                              msg.modelBadge ?? provider?.label ?? 'Xiao Xiong',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: badgeText,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     Text(
                       msg.text,
                       style: const TextStyle(
