@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -6,9 +7,9 @@ import '../../core/constants/app_colors.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../../models/vocabulary_model.dart';
 import '../../widgets/mascot_widget.dart';
+import '../../services/hanzi_stroke_service.dart';
 
-// FR-08: Hanzi Stroke Challenge — tampilkan panduan urutan stroke + kanvas menulis
-// Validasi terbatas (free-draw canvas), feedback sederhana "Bagus!" / "Coba Lagi"
+// FR-08: Hanzi Stroke Challenge with ordered stroke guidance and shape matching.
 
 class StrokeChallengeScreen extends StatefulWidget {
   const StrokeChallengeScreen({super.key});
@@ -23,32 +24,14 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
   final List<List<Offset>> _strokes = []; // each inner list = one stroke path
   List<Offset> _currentStroke = [];
   bool _isLoading = true;
+  bool _isLoadingStrokeData = false;
+  String? _strokeDataError;
+  HanziStrokeData? _strokeData;
+  int _characterIndex = 0;
+  int _feedbackScore = 0;
+  final GlobalKey _canvasKey = GlobalKey();
   bool _showFeedback = false;
   bool _feedbackPositive = false;
-
-  // Stroke guide data (simplified: stroke count per common character)
-  static const Map<String, int> _strokeCounts = {
-    '我': 7,
-    '你': 7,
-    '他': 5,
-    '们': 5,
-    '是': 9,
-    '的': 8,
-    '了': 2,
-    '在': 6,
-    '有': 6,
-    '大': 3,
-    '小': 3,
-    '中': 4,
-    '人': 2,
-    '日': 4,
-    '月': 4,
-    '水': 4,
-    '火': 4,
-    '木': 4,
-    '金': 8,
-    '土': 3,
-  };
 
   @override
   void initState() {
@@ -63,6 +46,7 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
       _words = words;
       _isLoading = false;
     });
+    _loadStrokeData();
   }
 
   VocabularyItem? get _current =>
@@ -70,9 +54,38 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
       ? _words[_currentIndex]
       : null;
 
-  int get _guideStrokeCount {
-    final hanzi = _current?.hanzi ?? '';
-    return _strokeCounts[hanzi] ?? hanzi.length + 2;
+  String get _currentCharacter {
+    final runes = (_current?.hanzi ?? '').runes.toList();
+    if (runes.isEmpty) return '';
+    return String.fromCharCode(
+      runes[_characterIndex.clamp(0, runes.length - 1)],
+    );
+  }
+
+  int get _guideStrokeCount => _strokeData?.strokes.length ?? 0;
+
+  Future<void> _loadStrokeData() async {
+    final character = _currentCharacter;
+    if (character.isEmpty) return;
+    setState(() {
+      _isLoadingStrokeData = true;
+      _strokeDataError = null;
+      _strokeData = null;
+    });
+    try {
+      final data = await HanziStrokeService.instance.load(character);
+      if (!mounted || character != _currentCharacter) return;
+      setState(() {
+        _strokeData = data;
+        _isLoadingStrokeData = false;
+      });
+    } catch (_) {
+      if (!mounted || character != _currentCharacter) return;
+      setState(() {
+        _isLoadingStrokeData = false;
+        _strokeDataError = 'Panduan stroke tidak dapat dimuat. Periksa internet lalu coba lagi.';
+      });
+    }
   }
 
   void _onPanStart(DragStartDetails d) {
@@ -105,23 +118,42 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
   }
 
   void _checkWriting() {
-    // Validasi terbatas: minimal stroke count ~ expected
-    final expected = _guideStrokeCount;
-    final written = _strokes.length;
-    final positive = written >= (expected - 2) && written <= (expected + 3);
+    final canvasSize =
+        (_canvasKey.currentContext?.findRenderObject() as RenderBox?)?.size;
+    final strokeData = _strokeData;
+    if (canvasSize == null || strokeData == null) return;
+    final score = compareHanziStrokes(
+      drawnStrokes: _strokes,
+      reference: strokeData,
+      canvasSize: canvasSize,
+    );
     setState(() {
       _showFeedback = true;
-      _feedbackPositive = positive;
+      _feedbackScore = score;
+      _feedbackPositive = score >= 75 && _strokes.length == _guideStrokeCount;
     });
   }
 
   void _nextWord() {
+    final runeCount = _current?.hanzi.runes.length ?? 0;
+    if (_characterIndex + 1 < runeCount) {
+      setState(() {
+        _characterIndex++;
+        _strokes.clear();
+        _currentStroke = [];
+        _showFeedback = false;
+      });
+      _loadStrokeData();
+      return;
+    }
     setState(() {
       _currentIndex = (_currentIndex + 1) % _words.length;
+      _characterIndex = 0;
       _strokes.clear();
       _currentStroke = [];
       _showFeedback = false;
     });
+    _loadStrokeData();
   }
 
   @override
@@ -180,6 +212,22 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
               _buildWordInfo(word),
               const SizedBox(height: 20),
               _buildStrokeGuide(word),
+              if (_strokeData != null) ...[
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _strokes.length < _guideStrokeCount
+                        ? 'Langkah ${_strokes.length + 1} dari $_guideStrokeCount · Ikuti garis hijau'
+                        : 'Semua langkah selesai · Periksa urutan dan bentuk tulisan',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryDark,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               _buildCanvas(),
               const SizedBox(height: 16),
@@ -220,7 +268,7 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
             ),
             child: Center(
               child: Text(
-                word.hanzi,
+                _currentCharacter,
                 style: const TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
@@ -261,7 +309,9 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    'Perkiraan $_guideStrokeCount stroke',
+                    _strokeData == null
+                        ? 'Memuat urutan stroke asli...'
+                        : '$_guideStrokeCount stroke • karakter ${_characterIndex + 1}/${word.hanzi.runes.length}',
                     style: const TextStyle(
                       fontSize: 11,
                       color: Color(0xFFB45309),
@@ -296,22 +346,42 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(
-              _guideStrokeCount.clamp(1, 8),
-              (i) => _StrokeGuideBox(
-                number: i + 1,
-                hanzi: word.hanzi,
-                progress: (i + 1) / _guideStrokeCount,
+          if (_isLoadingStrokeData)
+            const Center(child: CircularProgressIndicator())
+          else if (_strokeDataError != null)
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _strokeDataError!,
+                    style: const TextStyle(fontSize: 12, color: Colors.red),
+                  ),
+                ),
+                TextButton(
+                  onPressed: _loadStrokeData,
+                  child: const Text('Coba lagi'),
+                ),
+              ],
+            )
+          else if (_strokeData != null) ...[
+            Wrap(
+              spacing: 4,
+              runSpacing: 8,
+              children: List.generate(
+                _guideStrokeCount,
+                (index) => _StrokeGuideBox(
+                  number: index + 1,
+                  strokes: _strokeData!.strokes,
+                  shownCount: index + 1,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Tulis karakter ini mengikuti urutan stroke di atas.',
-            style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-          ),
+            const SizedBox(height: 8),
+            const Text(
+              'Setiap kotak menampilkan stroke sebenarnya sesuai urutan menulis.',
+              style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+            ),
+          ],
         ],
       ),
     );
@@ -343,19 +413,19 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
               children: [
                 // Grid lines guide
                 CustomPaint(painter: _GridPainter(), size: Size.infinite),
-                // Ghost hanzi guide
-                Center(
-                  child: Text(
-                    _current?.hanzi ?? '',
-                    style: TextStyle(
-                      fontSize: 120,
-                      color: Colors.grey.withValues(alpha: 0.08),
-                      fontWeight: FontWeight.bold,
+                // Show only completed strokes and the next stroke to prevent
+                // tracing the whole character out of order.
+                if (_strokeData != null)
+                  CustomPaint(
+                    painter: _ReferenceStrokePainter(
+                      strokes: _strokeData!.strokes,
+                      completedStrokeCount: _strokes.length,
                     ),
+                    size: Size.infinite,
                   ),
-                ),
                 // Drawing canvas
                 GestureDetector(
+                  key: _canvasKey,
                   onPanStart: _onPanStart,
                   onPanUpdate: _onPanUpdate,
                   onPanEnd: _onPanEnd,
@@ -419,7 +489,12 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
         Expanded(
           flex: 2,
           child: ElevatedButton.icon(
-            onPressed: _strokes.isNotEmpty ? _checkWriting : null,
+            onPressed:
+                _strokes.isNotEmpty &&
+                    _strokeData != null &&
+                    !_isLoadingStrokeData
+                ? _checkWriting
+                : null,
             icon: const Icon(Icons.check_circle_outline_rounded),
             label: const Text('Periksa Tulisan'),
             style: ElevatedButton.styleFrom(
@@ -463,7 +538,7 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _feedbackPositive ? '🎉 Bagus Sekali!' : '💪 Coba Lagi!',
+                  _feedbackPositive ? 'Cukup cocok' : 'Masih kurang tepat',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
@@ -474,9 +549,8 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _feedbackPositive
-                      ? 'Jumlah stroke sudah sesuai. Lanjut ke karakter berikutnya!'
-                      : 'Perkiraan $_guideStrokeCount stroke, kamu menulis ${_strokes.length} stroke. Coba lagi!',
+                  'Kecocokan bentuk: $_feedbackScore%. Urutan yang digambar: ${_strokes.length}/$_guideStrokeCount stroke. '
+                  '${_feedbackPositive ? 'Bentuk dan urutan cukup sesuai.' : 'Periksa arah, bentuk, dan jumlah stroke lalu coba lagi.'}',
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textMuted,
@@ -574,61 +648,132 @@ class _StrokePainter extends CustomPainter {
       old.strokes != strokes || old.currentStroke != currentStroke;
 }
 
-// ── Stroke Guide Box ─────────────────────────────────────────
-
 class _StrokeGuideBox extends StatelessWidget {
   final int number;
-  final String hanzi;
-  final double progress;
+  final List<List<Offset>> strokes;
+  final int shownCount;
 
   const _StrokeGuideBox({
     required this.number,
-    required this.hanzi,
-    required this.progress,
+    required this.strokes,
+    required this.shownCount,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 36,
-      height: 36,
+      width: 40,
+      height: 40,
       decoration: BoxDecoration(
         color: const Color(0xFFEFF6FF),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.primaryDark.withValues(alpha: 0.3)),
       ),
-      child: Stack(
-        children: [
-          Center(
-            child: ClipRect(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                widthFactor: progress,
-                child: Text(
-                  hanzi,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryDark.withValues(alpha: 0.7),
-                  ),
-                ),
-              ),
+      child: CustomPaint(
+        painter: _StrokeStepPainter(
+          strokes: strokes,
+          shownCount: shownCount,
+          highlightedStroke: number - 1,
+        ),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Text(
+            '$number',
+            style: const TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryGreen,
             ),
           ),
-          Positioned(
-            top: 0,
-            left: 2,
-            child: Text(
-              '$number',
-              style: const TextStyle(
-                fontSize: 8,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryGreen,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
+}
+
+class _ReferenceStrokePainter extends CustomPainter {
+  final List<List<Offset>> strokes;
+  final int completedStrokeCount;
+
+  const _ReferenceStrokePainter({
+    required this.strokes,
+    required this.completedStrokeCount,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final side = math.min(size.width, size.height);
+    canvas.save();
+    canvas.translate((size.width - side) / 2, (size.height - side) / 2);
+    canvas.scale(side / 1024);
+    final completedPaint = Paint()
+      ..color = AppColors.primaryDark.withValues(alpha: 0.16)
+      ..strokeWidth = 40
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke;
+    final nextPaint = Paint()
+      ..color = AppColors.primary.withValues(alpha: 0.55)
+      ..strokeWidth = 48
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke;
+    final completed = completedStrokeCount.clamp(0, strokes.length);
+    for (var index = 0; index < completed; index++) {
+      _drawStroke(canvas, strokes[index], completedPaint);
+    }
+    if (completed < strokes.length) {
+      _drawStroke(canvas, strokes[completed], nextPaint);
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _ReferenceStrokePainter oldDelegate) =>
+      !identical(oldDelegate.strokes, strokes) ||
+      oldDelegate.completedStrokeCount != completedStrokeCount;
+}
+
+class _StrokeStepPainter extends CustomPainter {
+  final List<List<Offset>> strokes;
+  final int shownCount;
+  final int highlightedStroke;
+
+  const _StrokeStepPainter({
+    required this.strokes,
+    required this.shownCount,
+    required this.highlightedStroke,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.save();
+    canvas.scale(size.width / 1024, size.height / 1024);
+    for (var index = 0; index < shownCount && index < strokes.length; index++) {
+      final paint = Paint()
+        ..color = index == highlightedStroke
+            ? AppColors.primary
+            : AppColors.primaryDark.withValues(alpha: 0.32)
+        ..strokeWidth = 72
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..style = PaintingStyle.stroke;
+      _drawStroke(canvas, strokes[index], paint);
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _StrokeStepPainter oldDelegate) =>
+      oldDelegate.shownCount != shownCount ||
+      !identical(oldDelegate.strokes, strokes);
+}
+
+void _drawStroke(Canvas canvas, List<Offset> points, Paint paint) {
+  if (points.isEmpty) return;
+  final path = Path()..moveTo(points.first.dx, points.first.dy);
+  for (var index = 1; index < points.length; index++) {
+    path.lineTo(points[index].dx, points[index].dy);
+  }
+  canvas.drawPath(path, paint);
 }

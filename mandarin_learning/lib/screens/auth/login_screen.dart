@@ -64,14 +64,54 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleBiometricLogin() async {
     final auth = context.read<AuthProvider>();
+
+    // Jika biometrik belum didaftarkan terlebih dahulu:
+    if (!auth.isBiometricEnrolled) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: [
+              Icon(Icons.fingerprint_rounded, color: AppColors.primary, size: 28),
+              SizedBox(width: 6),
+              Icon(Icons.face_retouching_natural_rounded, color: AppColors.primary, size: 28),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Biometrik Belum Didaftarkan',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          content: const Text(
+            'Anda belum mendaftarkan sidik jari atau pengenalan wajah untuk akun manapun di perangkat ini.\n\nSilakan masuk menggunakan nama pengguna dan kata sandi terlebih dahulu, lalu buka menu Pengaturan untuk mendaftarkan biometrik Anda.',
+            style: TextStyle(fontSize: 13, height: 1.4),
+          ),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Saya Mengerti'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     final success = await auth.loginWithBiometrics();
 
     if (!mounted) return;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Autentikasi biometrik berhasil! Selamat datang.'),
+        SnackBar(
+          content: Text('Autentikasi biometrik berhasil! Selamat datang, ${auth.profile?.fullName ?? ""}'),
           backgroundColor: AppColors.success,
         ),
       );
@@ -228,18 +268,46 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 14),
 
-                // Tombol Login Biometrik (Sidik Jari / Face ID)
+                // Tombol Login Biometrik (Sidik Jari & Pengenalan Wajah)
                 SizedBox(
-                  height: 50,
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.fingerprint, size: 26, color: AppColors.primaryDark),
-                    label: const Text(
-                      'Masuk dengan Biometrik / Sidik Jari',
-                      style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.primaryDark),
-                    ),
-                    onPressed: auth.isLoading ? null : _handleBiometricLogin,
+                  height: 52,
+                  child: OutlinedButton(
+                    onPressed: auth.isLoading || !auth.isBiometricSupported
+                        ? null
+                        : _handleBiometricLogin,
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.primaryDark, width: 1.5),
+                      side: BorderSide(
+                        color: auth.isBiometricEnrolled ? AppColors.primary : AppColors.border,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      backgroundColor: auth.isBiometricEnrolled
+                          ? AppColors.primaryLight.withValues(alpha: 0.3)
+                          : Colors.white,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.fingerprint_rounded, size: 24, color: AppColors.primaryDark),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.face_retouching_natural_rounded, size: 24, color: AppColors.primaryDark),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            !auth.isBiometricSupported
+                                ? 'Biometrik tersedia di aplikasi Android/iOS'
+                                : auth.isBiometricEnrolled
+                                    ? 'Masuk sebagai @${auth.enrolledBiometricUsername}'
+                                    : 'Masuk dengan Biometrik (Sidik Jari / Wajah)',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: AppColors.primaryDark,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

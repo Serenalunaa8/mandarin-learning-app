@@ -24,7 +24,10 @@ void main() {
 
       expect(SecurityService.verifyPassword(password, hash), isTrue);
       expect(SecurityService.verifyPassword('wrongPassword', hash), isFalse);
-      expect(SecurityService.verifyPassword('MySecretPassword!2026', hash), isFalse);
+      expect(
+        SecurityService.verifyPassword('MySecretPassword!2026', hash),
+        isFalse,
+      );
     });
   });
 
@@ -75,34 +78,86 @@ void main() {
         username: 'aria_mandarin',
         fullName: 'Aria Wang',
       );
-      expect(await SessionService.getLastBiometricUser(), equals('aria_mandarin'));
+      expect(
+        await SessionService.getLastBiometricUser(),
+        equals('aria_mandarin'),
+      );
+    });
+
+    test('Pendaftaran biometrik ganda (Sidik Jari & Pengenalan Wajah) berjalan akurat', () async {
+      // 1. Awalnya belum didaftarkan
+      expect(await SessionService.isBiometricEnrolled(), isFalse);
+      expect(await SessionService.getEnrolledBiometricUsername(), isNull);
+
+      // 2. Daftarkan akun dengan sidik jari dan pengenalan wajah
+      await SessionService.enrollBiometric(
+        userId: 'user_lucy_88',
+        username: 'lucy_naibaho',
+        fullName: 'Lucy Naibaho',
+        allowFingerprint: true,
+        allowFace: true,
+      );
+
+      // 3. Verifikasi status pendaftaran
+      expect(await SessionService.isBiometricEnrolled(), isTrue);
+      expect(
+        await SessionService.getEnrolledBiometricUsername(),
+        equals('lucy_naibaho'),
+      );
+      expect(
+        await SessionService.getEnrolledBiometricFullName(),
+        equals('Lucy Naibaho'),
+      );
+      expect(await SessionService.isFingerprintAllowed(), isTrue);
+      expect(await SessionService.isFaceAllowed(), isTrue);
+
+      // 4. Ubah preferensi sensor (misal hanya izinkan wajah)
+      await SessionService.setFingerprintAllowed(false);
+      expect(await SessionService.isFingerprintAllowed(), isFalse);
+      expect(await SessionService.isFaceAllowed(), isTrue);
+
+      await SessionService.setFaceAllowed(false);
+      expect(await SessionService.isFingerprintAllowed(), isFalse);
+      expect(await SessionService.isFaceAllowed(), isFalse);
+
+      await SessionService.setFingerprintAllowed(true);
+      expect(await SessionService.isFingerprintAllowed(), isTrue);
+      expect(await SessionService.isFaceAllowed(), isFalse);
+
+      // 5. Hapus pendaftaran biometrik
+      await SessionService.unenrollBiometric();
+      expect(await SessionService.isBiometricEnrolled(), isFalse);
+      expect(await SessionService.getEnrolledBiometricUsername(), isNull);
     });
   });
 
   group('Model UserProfile dengan Username dan Penyimpanan Database', () {
-    test('UserProfile mendukung username dan email untuk sinkronisasi database', () {
-      final json = {
-        'id': 'usr_456',
-        'username': 'mandarin_learner',
-        'email': 'learner@study.com',
-        'full_name': 'Serena Halim',
-        'avatar_url': '',
-        'current_hsk_level': 2,
-        'streak': 5,
-        'total_xp': 250,
-        'coins': 90,
-      };
+    test(
+      'UserProfile mendukung username dan email untuk sinkronisasi database',
+      () {
+        final json = {
+          'id': 'usr_456',
+          'username': 'mandarin_learner',
+          'email': 'learner@study.com',
+          'full_name': 'Serena Halim',
+          'avatar_url': '',
+          'current_hsk_level': 2,
+          'streak': 5,
+          'total_xp': 250,
+          'coins': 90,
+        };
 
-      final profile = UserProfile.fromJson(json);
-      expect(profile.username, equals('mandarin_learner'));
-      expect(profile.email, equals('learner@study.com'));
-      expect(profile.fullName, equals('Serena Halim'));
-      expect(profile.currentHskLevel, equals(2));
-      expect(profile.coins, equals(90));
+        final profile = UserProfile.fromJson(json);
+        expect(profile.username, equals('mandarin_learner'));
+        expect(profile.email, equals('learner@study.com'));
+        expect(profile.fullName, equals('Serena Halim'));
+        expect(profile.currentHskLevel, equals(2));
+        expect(profile.coins, equals(90));
 
-      final serialized = profile.toJson();
-      expect(serialized['username'], equals('mandarin_learner'));
-      expect(serialized['email'], equals('learner@study.com'));
-    });
+        final serialized = profile.toJson();
+        expect(serialized['username'], equals('mandarin_learner'));
+        expect(serialized['email'], equals('learner@study.com'));
+      },
+    );
   });
 }

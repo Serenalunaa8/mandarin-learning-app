@@ -26,9 +26,16 @@ class SessionService {
   static const String _keyIsLoggedIn = 'session_is_logged_in';
   static const String _keyLoginTime = 'session_login_time';
 
-  // Biometric session settings
+  // Biometric session settings & enrollment
   static const String _keyBiometricEnabled = 'biometric_enabled';
   static const String _keyLastBiometricUser = 'last_biometric_user';
+  static const String _keyBiometricEnrolled = 'biometric_enrolled';
+  static const String _keyBiometricEnrolledUserId = 'biometric_enrolled_user_id';
+  static const String _keyBiometricEnrolledUsername = 'biometric_enrolled_username';
+  static const String _keyBiometricEnrolledFullName = 'biometric_enrolled_full_name';
+  static const String _keyBiometricAllowFingerprint = 'biometric_allow_fingerprint';
+  static const String _keyBiometricAllowFace = 'biometric_allow_face';
+  static const String _keyBiometricEnrolledAt = 'biometric_enrolled_at';
 
   /// Menyimpan sesi login pengguna
   static Future<void> saveSession({
@@ -102,5 +109,81 @@ class SessionService {
   static Future<String?> getLastBiometricUser() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyLastBiometricUser);
+  }
+
+  /// Cek apakah ada akun yang telah didaftarkan biometriknya di perangkat ini
+  static Future<bool> isBiometricEnrolled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyBiometricEnrolled) ?? false;
+  }
+
+  /// Mendaftarkan biometrik untuk akun tertentu
+  static Future<void> enrollBiometric({
+    required String userId,
+    required String username,
+    required String fullName,
+    bool allowFingerprint = true,
+    bool allowFace = true,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyBiometricEnrolled, true);
+    await prefs.setBool(_keyBiometricEnabled, true);
+    await prefs.setString(_keyBiometricEnrolledUserId, userId);
+    await prefs.setString(_keyBiometricEnrolledUsername, username);
+    await prefs.setString(_keyBiometricEnrolledFullName, fullName);
+    await prefs.setBool(_keyBiometricAllowFingerprint, allowFingerprint);
+    await prefs.setBool(_keyBiometricAllowFace, allowFace);
+    await prefs.setString(_keyBiometricEnrolledAt, DateTime.now().toIso8601String());
+    // Update juga target user
+    await prefs.setString(_keyLastBiometricUser, username);
+  }
+
+  /// Menghapus pendaftaran biometrik
+  static Future<void> unenrollBiometric() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyBiometricEnrolled, false);
+    await prefs.setBool(_keyBiometricEnabled, false);
+    await prefs.remove(_keyBiometricEnrolledUserId);
+    await prefs.remove(_keyBiometricEnrolledUsername);
+    await prefs.remove(_keyBiometricEnrolledFullName);
+    await prefs.remove(_keyBiometricAllowFingerprint);
+    await prefs.remove(_keyBiometricAllowFace);
+    await prefs.remove(_keyBiometricEnrolledAt);
+  }
+
+  /// Mengambil username yang didaftarkan pada biometrik
+  static Future<String?> getEnrolledBiometricUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    final enrolled = prefs.getBool(_keyBiometricEnrolled) ?? false;
+    if (!enrolled) return null;
+    return prefs.getString(_keyBiometricEnrolledUsername) ?? prefs.getString(_keyLastBiometricUser);
+  }
+
+  /// Mengambil nama lengkap pemilik biometrik yang didaftarkan
+  static Future<String?> getEnrolledBiometricFullName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyBiometricEnrolledFullName);
+  }
+
+  /// Apakah sensor sidik jari diaktifkan untuk akun terdaftar
+  static Future<bool> isFingerprintAllowed() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyBiometricAllowFingerprint) ?? true;
+  }
+
+  static Future<void> setFingerprintAllowed(bool allowed) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyBiometricAllowFingerprint, allowed);
+  }
+
+  /// Apakah pengenalan wajah diaktifkan untuk akun terdaftar
+  static Future<bool> isFaceAllowed() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyBiometricAllowFace) ?? true;
+  }
+
+  static Future<void> setFaceAllowed(bool allowed) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyBiometricAllowFace, allowed);
   }
 }

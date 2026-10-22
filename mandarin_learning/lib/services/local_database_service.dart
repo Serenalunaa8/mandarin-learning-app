@@ -12,12 +12,19 @@ class LocalDatabaseService {
   bool _isInitialized = false;
 
   Future<Database?> get database async {
+    if (kIsWeb) return null;
     if (_db != null && _db!.isOpen) return _db;
     await initialize();
     return _db;
   }
 
   Future<void> initialize() async {
+    if (kIsWeb) {
+      debugPrint(
+        '[LocalDatabaseService] Platform Web terdeteksi: SQLite lokal dilewati (menggunakan Supabase & Session).',
+      );
+      return;
+    }
     if (_isInitialized && _db != null && _db!.isOpen) return;
 
     try {
@@ -56,7 +63,7 @@ class LocalDatabaseService {
         '[LocalDatabaseService] SQLite database berhasil diinisialisasi.',
       );
     } catch (e) {
-      debugPrint('[LocalDatabaseService] SQLite init warning: $e');
+      debugPrint('[LocalDatabaseService] SQLite init info: $e');
     }
   }
 

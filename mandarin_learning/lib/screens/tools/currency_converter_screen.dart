@@ -267,21 +267,24 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen> {
                     ),
                   ],
                 ),
-                child: Column(
-                  children: [10, 50, 100, 200, 500].map((cny) {
-                    final idr = cny * _getRate(CurrencyCode.cny, CurrencyCode.idr);
-                    return ListTile(
-                      dense: true,
-                      leading: Text(
-                        '¥ $cny',
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark),
-                      ),
-                      trailing: Text(
-                        'Rp ${_formatNumber(idr, CurrencyCode.idr)}',
-                        style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primaryGreen),
-                      ),
-                    );
-                  }).toList(),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Column(
+                    children: [10, 50, 100, 200, 500].map((cny) {
+                      final idr = cny * _getRate(CurrencyCode.cny, CurrencyCode.idr);
+                      return ListTile(
+                        dense: true,
+                        leading: Text(
+                          '¥ $cny',
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark),
+                        ),
+                        trailing: Text(
+                          'Rp ${_formatNumber(idr, CurrencyCode.idr)}',
+                          style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primaryGreen),
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
@@ -13,6 +14,14 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: AppColors.mintBackground,
       fontFamily: 'Roboto',
+      fontFamilyFallback: const [
+        'PingFang SC',
+        'Microsoft YaHei',
+        'SimHei',
+        'Noto Sans SC',
+        'Noto Sans CJK SC',
+        'sans-serif',
+      ],
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,

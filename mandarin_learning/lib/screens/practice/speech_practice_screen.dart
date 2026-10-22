@@ -1,10 +1,15 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../models/vocabulary_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/audio_service.dart';
+import '../../services/speech_evaluation_service.dart';
+import '../../services/speech_recognition_settings_service.dart';
 import '../../services/tone_analysis_service.dart';
 import '../../widgets/mascot_widget.dart';
 
@@ -17,70 +22,236 @@ class SpeechPracticeScreen extends StatefulWidget {
   State<SpeechPracticeScreen> createState() => _SpeechPracticeScreenState();
 }
 
+class SpeechEvaluation {
+  final String recognizedText;
+  final double? recognitionConfidence;
+  final int score;
+
+  const SpeechEvaluation({
+    required this.recognizedText,
+    required this.recognitionConfidence,
+    required this.score,
+  });
+}
+
 class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
+  final SpeechToText _speech = SpeechToText();
   bool _isRecording = false;
   bool _isAnalyzing = false;
   int _recordSeconds = 0;
   Timer? _timer;
-  ToneContourResult? _result;
+  SpeechEvaluation? _result;
   bool _hasRewarded = false;
+  bool _isFinalizing = false;
+  String _recognizedText = '';
+  double? _recognitionConfidence;
+  String? _recognitionError;
+  bool _needsSpeechSetup = false;
+
+  String _friendlySpeechError(String error) {
+    final normalized = error.toLowerCase();
+    if (normalized.contains('language') ||
+        normalized.contains('locale') ||
+        normalized.contains('bahasa')) {
+      _needsSpeechSetup = true;
+      return 'Layanan suara belum menyediakan bahasa Mandarin. Aktifkan atau unduh bahasa Mandarin pada layanan pengenalan suara perangkat.';
+    }
+    return error;
+  }
+
+  Future<void> _openSpeechSettings() async {
+    final opened = await SpeechRecognitionSettingsService.openSettings();
+    if (!mounted || opened) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Buka Pengaturan perangkat > Bahasa & masukan > Pengenalan suara. Pilih Google Speech Services dan unduh paket bahasa Mandarin.',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _playPronunciation() async {
+    final played = await AudioService.instance.speak(widget.item.hanzi);
+    if (!mounted || played) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Suara Mandarin belum tersedia. Periksa atau pasang suara Mandarin di pengaturan Text-to-speech perangkat.',
+        ),
+      ),
+    );
+  }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _speech.cancel();
     super.dispose();
   }
 
-  void _startRecording() {
-    setState(() {
-      _isRecording = true;
-      _isAnalyzing = false;
-      _recordSeconds = 0;
-      _result = null;
-    });
+  double _soundLevel = 0.0;
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) return;
-      setState(() {
-        _recordSeconds++;
-      });
-      if (_recordSeconds >= 5) {
-        _stopRecording();
-      }
+  Future<void> _startRecording() async {
+    setState(() {
+      _isAnalyzing = true;
+      _result = null;
+      _recognitionError = null;
+      _needsSpeechSetup = false;
+      _recognizedText = '';
+      _recognitionConfidence = null;
+      _soundLevel = 0.0;
     });
+    try {
+      final available = await _speech.initialize(
+        onError: (error) =>
+            _finishRecognition(error: _friendlySpeechError(error.errorMsg)),
+        onStatus: (status) {
+          if (status == 'notListening' && _isRecording) {
+            _finishRecognition();
+          }
+        },
+      );
+      if (!mounted) return;
+      if (!available) {
+        setState(() {
+          _isAnalyzing = false;
+          _needsSpeechSetup = true;
+          _recognitionError = 'Pengenalan suara Mandarin tidak tersedia. Periksa izin mikrofon dan layanan suara perangkat.';
+        });
+        return;
+      }
+
+      final locales = await _speech.locales();
+      final chineseLocales =
+          locales
+              .where(
+                (locale) => locale.localeId
+                    .toLowerCase()
+                    .replaceAll('-', '_')
+                    .startsWith('zh'),
+              )
+              .toList()
+            ..sort((a, b) {
+              int rank(String localeId) {
+                final normalized = localeId.toLowerCase().replaceAll('-', '_');
+                if (normalized == 'zh_cn' || normalized == 'cmn_cn') return 0;
+                if (normalized.startsWith('zh_cn_') ||
+                    normalized.startsWith('cmn_hans_cn')) {
+                  return 1;
+                }
+                if (normalized.startsWith('zh_tw') ||
+                    normalized.startsWith('zh_hk')) {
+                  return 3;
+                }
+                return 2;
+              }
+
+              return rank(a.localeId).compareTo(rank(b.localeId));
+            });
+      final localeId = chineseLocales.isEmpty
+          ? 'zh_CN'
+          : chineseLocales.first.localeId;
+      if (chineseLocales.isEmpty) _needsSpeechSetup = true;
+
+      setState(() {
+        _isRecording = true;
+        _isAnalyzing = false;
+        _recordSeconds = 0;
+        _isFinalizing = false;
+      });
+
+      _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+        if (!mounted) return;
+        setState(() => _recordSeconds++);
+      });
+      await _speech.listen(
+        onResult: (result) {
+          _recognizedText = result.recognizedWords;
+          _recognitionConfidence = result.hasConfidenceRating
+              ? result.confidence
+              : null;
+          if (result.finalResult) _finishRecognition();
+        },
+        onSoundLevelChange: (level) {
+          if (!mounted) return;
+          setState(() => _soundLevel = level);
+        },
+        listenOptions: SpeechListenOptions(
+          localeId: localeId,
+          listenFor: const Duration(seconds: 8),
+          pauseFor: const Duration(seconds: 2),
+          partialResults: true,
+          contextualPhrases: [widget.item.hanzi],
+        ),
+      );
+    } catch (error) {
+      debugPrint('[SpeechPractice] Recognition start failed: $error');
+      if (!mounted) return;
+      _timer?.cancel();
+      setState(() {
+        _isRecording = false;
+        _isAnalyzing = false;
+        _recognitionError = 'Pengenalan suara gagal dimulai. Periksa izin mikrofon dan layanan suara perangkat.';
+      });
+    }
   }
 
-  void _stopRecording() async {
+  Future<void> _stopRecording() async {
+    try {
+      if (_isRecording) await _speech.stop();
+      await _finishRecognition();
+    } catch (error) {
+      debugPrint('[SpeechPractice] Recognition stop failed: $error');
+      await _finishRecognition(
+        error: 'Pengenalan suara gagal dihentikan. Coba mulai ulang latihan.',
+      );
+    }
+  }
+
+  Future<void> _finishRecognition({String? error}) async {
+    if (_isFinalizing || (!_isRecording && !_isAnalyzing)) return;
+    _isFinalizing = true;
     _timer?.cancel();
-    setState(() {
-      _isRecording = false;
-      _isAnalyzing = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isRecording = false;
+        _isAnalyzing = true;
+        _soundLevel = 0.0;
+      });
+    }
 
-    // Simulasi analisis pemrosesan ASR dan Pitch F0
-    await Future.delayed(const Duration(milliseconds: 900));
-
-    if (!mounted) return;
-
-    final result = ToneAnalysisService.instance.analyzePronunciation(
-      pinyin: widget.item.pinyin,
-      recordingDuration: Duration(seconds: _recordSeconds > 0 ? _recordSeconds : 1),
+    final similarity = error == null
+        ? scoreMandarinTranscription(
+            widget.item.hanzi,
+            _recognizedText,
+            targetPinyin: widget.item.pinyin,
+          )
+        : 0;
+    final result = SpeechEvaluation(
+      recognizedText: _recognizedText,
+      recognitionConfidence: _recognitionConfidence,
+      score: similarity,
     );
-
+    if (!mounted) return;
     setState(() {
       _isAnalyzing = false;
-      _result = result;
+      _result = error == null ? result : null;
+      _recognitionError = error;
     });
 
-    // Beri reward koin (FR-17: 5 koin untuk penyelesaian latihan pelafalan, 1 kali)
-    if (!_hasRewarded && result.score > 0) {
+    if (!_hasRewarded &&
+        result.score >= 80 &&
+        (result.recognitionConfidence == null ||
+            result.recognitionConfidence! >= 0.7)) {
       _hasRewarded = true;
       final auth = context.read<AuthProvider>();
       await auth.addCoins(
         5,
         'speech_practice',
         'Latihan pelafalan: ${widget.item.hanzi} (${widget.item.pinyin})',
-        attemptId: 'speech_${widget.item.id}_${DateTime.now().millisecondsSinceEpoch}',
+        attemptId:
+            'speech_${widget.item.id}_${DateTime.now().millisecondsSinceEpoch}',
       );
     }
   }
@@ -88,7 +259,9 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final tone = ToneAnalysisService.instance.detectToneFromPinyin(widget.item.pinyin);
+    final tone = ToneAnalysisService.instance.detectToneFromPinyin(
+      widget.item.pinyin,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.mintBackground,
@@ -115,7 +288,11 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                 const SizedBox(width: 4),
                 Text(
                   '${auth.coins}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textDark),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: AppColors.textDark,
+                  ),
                 ),
               ],
             ),
@@ -156,15 +333,20 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        GestureDetector(
-                          onTap: () => AudioService.instance.speak(widget.item.hanzi),
-                          child: Container(
+                        IconButton(
+                          tooltip: 'Dengarkan pelafalan Mandarin',
+                          onPressed: _playPronunciation,
+                          icon: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: AppColors.primaryLight,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.volume_up_rounded, color: AppColors.primaryDark, size: 26),
+                            child: const Icon(
+                              Icons.volume_up_rounded,
+                              color: AppColors.primaryDark,
+                              size: 26,
+                            ),
                           ),
                         ),
                       ],
@@ -219,7 +401,10 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                           const SizedBox(height: 2),
                           Text(
                             _getToneRule(tone),
-                            style: const TextStyle(fontSize: 12, color: Color(0xFF166534)),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF166534),
+                            ),
                           ),
                         ],
                       ),
@@ -242,8 +427,11 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                       CircularProgressIndicator(color: AppColors.primary),
                       SizedBox(height: 16),
                       Text(
-                        'Menganalisis frekuensi nada & ujaran...',
-                        style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark),
+                        'Mengenali ucapan Mandarin...',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textDark,
+                        ),
                       ),
                     ],
                   ),
@@ -260,6 +448,20 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                   ),
                 ),
               ],
+              if (_recognitionError != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  _recognitionError!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppColors.error, fontSize: 12),
+                ),
+                if (_needsSpeechSetup)
+                  TextButton.icon(
+                    onPressed: _openSpeechSettings,
+                    icon: const Icon(Icons.settings_voice_rounded),
+                    label: const Text('Atur bahasa Mandarin'),
+                  ),
+              ],
 
               const SizedBox(height: 24),
 
@@ -271,20 +473,28 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                       onTap: _isAnalyzing
                           ? null
                           : _isRecording
-                              ? _stopRecording
-                              : _startRecording,
+                          ? _stopRecording
+                          : _startRecording,
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
                         width: _isRecording ? 90 : 80,
                         height: _isRecording ? 90 : 80,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: _isRecording ? AppColors.error : AppColors.primary,
+                          color: _isRecording
+                              ? AppColors.error
+                              : AppColors.primary,
                           boxShadow: [
                             BoxShadow(
-                              color: (_isRecording ? AppColors.error : AppColors.primary).withValues(alpha: 0.35),
+                              color:
+                                  (_isRecording
+                                          ? AppColors.error
+                                          : AppColors.primary)
+                                      .withValues(alpha: 0.35),
                               blurRadius: 16,
-                              spreadRadius: _isRecording ? 4 : 1,
+                              spreadRadius: _isRecording
+                                  ? (4 + (_soundLevel * 1.5).clamp(0.0, 12.0))
+                                  : 1,
                               offset: const Offset(0, 6),
                             ),
                           ],
@@ -299,12 +509,14 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                     const SizedBox(height: 12),
                     Text(
                       _isRecording
-                          ? 'Merekam suara... ($_recordSeconds dtk) • Ketuk untuk selesai'
+                          ? 'Mendengarkan Mandarin... ($_recordSeconds dtk) • Ketuk untuk selesai'
                           : 'Ketuk mikrofon untuk melafalkan',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: _isRecording ? AppColors.error : AppColors.textMuted,
+                        color: _isRecording
+                            ? AppColors.error
+                            : AppColors.textMuted,
                       ),
                     ),
                   ],
@@ -316,7 +528,7 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
               // Catatan Transparansi Kebutuhan PRD 7 & 13
               const Center(
                 child: Text(
-                  'Estimasi pembelajaran kontur nada, bukan sertifikasi ahli.',
+                  'Penilaian mencocokkan transkripsi ASR, bukan mengukur nada atau kualitas aksen.',
                   style: TextStyle(fontSize: 11, color: AppColors.textLight),
                 ),
               ),
@@ -328,7 +540,15 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
     );
   }
 
-  Widget _buildAnalysisResultCard(ToneContourResult res) {
+  Widget _buildAnalysisResultCard(SpeechEvaluation res) {
+    final confidence = res.recognitionConfidence;
+    final advice = res.recognizedText.isEmpty
+        ? 'Ucapan belum berhasil dikenali. Coba ucapkan lebih jelas di tempat yang lebih tenang.'
+        : res.score == 100 && (confidence == null || confidence >= 0.8)
+        ? 'Transkripsi cocok dengan target. Ini bukan penilaian ahli untuk nada atau aksen.'
+        : res.score >= 70
+        ? 'Sebagian ucapan cocok. Periksa karakter yang berbeda dan coba ulangi.'
+        : 'Kurang tepat: hasil pengenalan belum cocok dengan target. Coba ucapkan kembali.';
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -345,76 +565,27 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Evaluasi Kontur Nada',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                  ),
-                  Text(
-                    res.toneName,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: res.score >= 80 ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  '${res.score} / 100',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    color: res.score >= 80 ? const Color(0xFF15803D) : const Color(0xFFB45309),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Visualisasi Grafik Kontur Nada (Pitch Curve)
-          Container(
-            height: 120,
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: CustomPaint(
-              painter: _ToneContourGraphPainter(
-                referenceCurve: res.referenceCurve,
-                userCurve: res.userCurve,
-              ),
+          Text(
+            'Kecocokan transkripsi: ${res.score}%',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: AppColors.textDark,
             ),
           ),
           const SizedBox(height: 10),
-
-          // Legend
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(width: 14, height: 3, color: const Color(0xFF0284C7)),
-              const SizedBox(width: 6),
-              const Text('Referensi Ideal', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
-              const SizedBox(width: 18),
-              Container(width: 14, height: 3, color: AppColors.primary),
-              const SizedBox(width: 6),
-              const Text('Suaramu', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
-            ],
+          Text(
+            'Terdengar: ${res.recognizedText.isEmpty ? 'tidak terdeteksi' : res.recognizedText}',
+            style: const TextStyle(fontSize: 18, color: AppColors.primaryDark),
           ),
+          if (confidence != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Keyakinan pengenalan suara: ${(confidence * 100).round()}% (bukan skor pelafalan)',
+              style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+            ),
+          ],
           const SizedBox(height: 14),
-
-          // Saran / Feedback Text
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -428,8 +599,11 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    res.feedback,
-                    style: const TextStyle(fontSize: 13, color: Color(0xFF14532D)),
+                    advice,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF14532D),
+                    ),
                   ),
                 ),
               ],
@@ -440,8 +614,14 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
             const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('🎉 +5 Koin diperoleh dari latihan pelafalan!',
-                    style: TextStyle(color: AppColors.primaryDark, fontSize: 12, fontWeight: FontWeight.bold)),
+                Text(
+                  '🎉 +5 Koin diperoleh dari latihan pelafalan!',
+                  style: TextStyle(
+                    color: AppColors.primaryDark,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ],
@@ -479,67 +659,4 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
         return 'Ucapkan singkat, rileks, dan ringan.';
     }
   }
-}
-
-class _ToneContourGraphPainter extends CustomPainter {
-  final List<double> referenceCurve;
-  final List<double> userCurve;
-
-  _ToneContourGraphPainter({required this.referenceCurve, required this.userCurve});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final gridPaint = Paint()
-      ..color = const Color(0xFFE2E8F0)
-      ..strokeWidth = 1.0;
-
-    // Gambar grid 5 baris nada (Chao scale 1 s.d. 5)
-    for (int i = 1; i <= 5; i++) {
-      final y = size.height - (i - 1) * (size.height / 4);
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
-    }
-
-    // Reference curve (Biru)
-    final refPaint = Paint()
-      ..color = const Color(0xFF0284C7)
-      ..strokeWidth = 2.5
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final refPath = Path();
-    for (int i = 0; i < referenceCurve.length; i++) {
-      final x = i * (size.width / (referenceCurve.length - 1));
-      final val = referenceCurve[i]; // 1.0 - 5.0
-      final y = size.height - ((val - 1.0) / 4.0) * size.height;
-      if (i == 0) {
-        refPath.moveTo(x, y);
-      } else {
-        refPath.lineTo(x, y);
-      }
-    }
-    canvas.drawPath(refPath, refPaint);
-
-    // User curve (Hijau cerah)
-    final userPaint = Paint()
-      ..color = const Color(0xFF22C55E)
-      ..strokeWidth = 3.5
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final userPath = Path();
-    for (int i = 0; i < userCurve.length; i++) {
-      final x = i * (size.width / (userCurve.length - 1));
-      final val = userCurve[i];
-      final y = size.height - ((val - 1.0) / 4.0) * size.height;
-      if (i == 0) {
-        userPath.moveTo(x, y);
-      } else {
-        userPath.lineTo(x, y);
-      }
-    }
-    canvas.drawPath(userPath, userPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ToneContourGraphPainter oldDelegate) => true;
 }

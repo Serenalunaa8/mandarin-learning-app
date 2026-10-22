@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../services/ai_tutor_service.dart';
 import '../../services/audio_service.dart';
@@ -16,6 +18,9 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<AiChatMessage> _messages = [];
   bool _isGenerating = false;
+  List<AiProvider> _availableProviders = [];
+  String? _providerStatusError;
+  AiProvider _selectedProvider = AiProvider.gemini;
 
   final List<String> _quickSuggestions = [
     'Perbedaan 的, 得, 地',
@@ -28,9 +33,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   @override
   void initState() {
     super.initState();
+    _loadAvailableProviders();
     _messages.add(
       AiChatMessage(
-        text: 'Halo! Aku Xiao Xiong, AI Tutor Mandarin pribadimu 🐼. '
+        text:
+            'Halo! Aku Xiao Xiong, AI Tutor Mandarin pribadimu 🐼. '
             'Ada topik tata bahasa atau kosakata yang ingin kamu tanyakan hari ini?',
         isUser: false,
         timestamp: DateTime.now(),
@@ -45,25 +52,260 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     super.dispose();
   }
 
-  void _sendMessage(String text) async {
+  Future<void> _loadAvailableProviders() async {
+    if (mounted) {
+      setState(() {
+        _providerStatusError = null;
+      });
+    }
+    try {
+      final providers = await AiTutorService.instance.getAvailableProviders();
+      final preferences = await SharedPreferences.getInstance();
+      final selectedId = preferences.getString('ai_tutor_provider');
+      if (!mounted) return;
+      setState(() {
+        _availableProviders = providers;
+        if (providers.isNotEmpty) {
+          _selectedProvider = providers.firstWhere(
+            (provider) => provider.id == selectedId,
+            orElse: () => providers.first,
+          );
+        }
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _availableProviders = AiProvider.values;
+      });
+    }
+  }
+
+  Future<void> _selectProvider(AiProvider provider) async {
+    setState(() => _selectedProvider = provider);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setString('ai_tutor_provider', provider.id);
+  }
+
+  Future<void> _showApiKeySettingsDialog() async {
+    final geminiKey = await AiTutorService.instance.getApiKey(AiProvider.gemini) ?? '';
+    final claudeKey = await AiTutorService.instance.getApiKey(AiProvider.anthropic) ?? '';
+    final openAiKey = await AiTutorService.instance.getApiKey(AiProvider.openAi) ?? '';
+    final groqKey = await AiTutorService.instance.getApiKey(AiProvider.groq) ?? '';
+
+    final geminiController = TextEditingController(text: geminiKey);
+    final claudeController = TextEditingController(text: claudeKey);
+    final openAiController = TextEditingController(text: openAiKey);
+    final groqController = TextEditingController(text: groqKey);
+
+    if (!mounted) return;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.key_rounded, color: AppColors.primaryGreen),
+                        SizedBox(width: 8),
+                        Text(
+                          'Pengaturan API Key LLM',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Masukkan API Key milikmu untuk menghubungkan Claude, Gemini, OpenAI, atau Groq secara langsung tanpa batasan.',
+                  style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                ),
+                const SizedBox(height: 16),
+
+                // Gemini Field
+                _buildApiKeyInput(
+                  label: 'Google Gemini API Key',
+                  controller: geminiController,
+                  hint: 'AIzaSy...',
+                  helper: 'Dapatkan gratis di aistudio.google.com',
+                ),
+                const SizedBox(height: 12),
+
+                // Claude Field
+                _buildApiKeyInput(
+                  label: 'Anthropic Claude API Key',
+                  controller: claudeController,
+                  hint: 'sk-ant-api...',
+                  helper: 'Dapatkan di console.anthropic.com',
+                ),
+                const SizedBox(height: 12),
+
+                // OpenAI Field
+                _buildApiKeyInput(
+                  label: 'OpenAI GPT API Key',
+                  controller: openAiController,
+                  hint: 'sk-proj-...',
+                  helper: 'Dapatkan di platform.openai.com',
+                ),
+                const SizedBox(height: 12),
+
+                // Groq Field
+                _buildApiKeyInput(
+                  label: 'Groq API Key',
+                  controller: groqController,
+                  hint: 'gsk_...',
+                  helper: 'Dapatkan gratis di console.groq.com',
+                ),
+                const SizedBox(height: 20),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryGreen,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed: () async {
+                      await AiTutorService.instance.saveApiKey(
+                        AiProvider.gemini,
+                        geminiController.text,
+                      );
+                      await AiTutorService.instance.saveApiKey(
+                        AiProvider.anthropic,
+                        claudeController.text,
+                      );
+                      await AiTutorService.instance.saveApiKey(
+                        AiProvider.openAi,
+                        openAiController.text,
+                      );
+                      await AiTutorService.instance.saveApiKey(
+                        AiProvider.groq,
+                        groqController.text,
+                      );
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Pengaturan API Key berhasil disimpan!'),
+                            backgroundColor: AppColors.primaryGreen,
+                          ),
+                        );
+                        setState(() {});
+                      }
+                    },
+                    child: const Text(
+                      'Simpan Pengaturan API Key',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildApiKeyInput({
+    required String label,
+    required TextEditingController controller,
+    required String hint,
+    required String helper,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textDark,
+          ),
+        ),
+        const SizedBox(height: 4),
+        TextField(
+          controller: controller,
+          obscureText: true,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(fontSize: 12, color: Colors.black26),
+            helperText: helper,
+            helperStyle: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _sendMessage(String text) async {
     final trimmed = text.trim();
-    if (trimmed.isEmpty) return;
+    if (trimmed.isEmpty || _isGenerating) return;
 
     _textController.clear();
+    final provider = _selectedProvider;
     setState(() {
       _messages.add(
-        AiChatMessage(
-          text: trimmed,
-          isUser: true,
-          timestamp: DateTime.now(),
-        ),
+        AiChatMessage(text: trimmed, isUser: true, timestamp: DateTime.now()),
       );
       _isGenerating = true;
     });
 
     _scrollToBottom();
 
-    final response = await AiTutorService.instance.askAiTutor(trimmed);
+    String response;
+    try {
+      response = await AiTutorService.instance.askAiTutor(
+        trimmed,
+        provider: provider,
+      );
+    } catch (error) {
+      response =
+          'Tidak dapat menghubungi ${provider.label}. Membuka panduan lokal Xiao Xiong:\n\n'
+          'Detail error: $error';
+    }
 
     if (!mounted) return;
 
@@ -74,6 +316,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           text: response,
           isUser: false,
           timestamp: DateTime.now(),
+          audioText: AudioService.instance.extractMandarinText(response),
         ),
       );
     });
@@ -106,6 +349,77 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             Text('AI Tutor Mandarin'),
           ],
         ),
+        actions: [
+          PopupMenuButton<AiProvider>(
+            tooltip: 'Pilih model AI',
+            initialValue: _selectedProvider,
+            onSelected: _isGenerating ? null : _selectProvider,
+            itemBuilder: (context) => [
+              for (final provider in _availableProviders)
+                PopupMenuItem(
+                  value: provider,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            provider == _selectedProvider
+                                ? Icons.check_circle_rounded
+                                : Icons.radio_button_unchecked_rounded,
+                            size: 16,
+                            color: provider == _selectedProvider
+                                ? AppColors.primaryGreen
+                                : Colors.grey,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(provider.label, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 22),
+                        child: Text(
+                          provider.model,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFBBF7D0)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.auto_awesome_rounded, size: 16, color: AppColors.primaryGreen),
+                  const SizedBox(width: 4),
+                  Text(
+                    _selectedProvider.label,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primaryDark),
+                  ),
+                  const Icon(Icons.arrow_drop_down_rounded, size: 18),
+                ],
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Atur API Key LLM',
+            icon: const Icon(Icons.vpn_key_rounded, color: AppColors.primaryDark),
+            onPressed: _showApiKeySettingsDialog,
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -123,21 +437,65 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                   final suggestion = _quickSuggestions[index];
                   return ActionChip(
                     label: Text(suggestion),
-                    labelStyle: const TextStyle(fontSize: 12, color: AppColors.primaryDark, fontWeight: FontWeight.w600),
+                    labelStyle: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primaryDark,
+                      fontWeight: FontWeight.w600,
+                    ),
                     backgroundColor: Colors.white,
                     side: const BorderSide(color: Color(0xFFBBF7D0)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     onPressed: () => _sendMessage(suggestion),
                   );
                 },
               ),
             ),
 
+            if (_providerStatusError != null)
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFBBF7D0)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.primaryGreen),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Kamu dapat menghubungkan API Key LLM sendiri atau menggunakan Xiao Xiong offline.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _showApiKeySettingsDialog,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      child: const Text('Atur Key', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryGreen)),
+                    ),
+                  ],
+                ),
+              ),
+
             // Message list
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final msg = _messages[index];
@@ -155,7 +513,10 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                     const MascotWidget(size: 26, pose: MascotPose.headOnly),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
@@ -166,10 +527,19 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                           SizedBox(
                             width: 14,
                             height: 14,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primary,
+                            ),
                           ),
                           SizedBox(width: 8),
-                          Text('Tutor sedang mengetik...', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                          Text(
+                            'Tutor sedang mengetik...',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -199,10 +569,16 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                       onSubmitted: _sendMessage,
                       decoration: InputDecoration(
                         hintText: 'Tanyakan tata bahasa atau kosakata...',
-                        hintStyle: const TextStyle(fontSize: 13, color: AppColors.textLight),
+                        hintStyle: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textLight,
+                        ),
                         filled: true,
                         fillColor: const Color(0xFFF1F5F9),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide.none,
@@ -217,7 +593,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                      icon: const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                       onPressed: () => _sendMessage(_textController.text),
                     ),
                   ),
@@ -248,7 +628,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           ),
           child: Text(
             msg.text,
-            style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.3),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              height: 1.3,
+            ),
           ),
         ),
       );
@@ -295,32 +679,50 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                     ),
                     const SizedBox(height: 8),
                     // Action toolbar: Audio TTS if text contains Chinese
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            // Ekstrak karakter mandarin atau baca jawaban
-                            AudioService.instance.speak(msg.text);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryLight,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.volume_up_rounded, size: 16, color: AppColors.primaryDark),
-                                SizedBox(width: 4),
-                                Text('Dengar', style: TextStyle(fontSize: 11, color: AppColors.primaryDark, fontWeight: FontWeight.bold)),
-                              ],
+                    if (msg.audioText?.isNotEmpty ?? false)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              // Ekstrak karakter mandarin atau baca jawaban
+                              final mandarinText = msg.audioText ?? '';
+                              if (mandarinText.isNotEmpty) {
+                                AudioService.instance.speak(mandarinText);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryLight,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.volume_up_rounded,
+                                    size: 16,
+                                    color: AppColors.primaryDark,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Dengar',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.primaryDark,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
                   ],
                 ),
               ),

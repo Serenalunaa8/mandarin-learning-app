@@ -324,23 +324,26 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
-        leading: Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF0FDF4),
-            borderRadius: BorderRadius.circular(12),
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+          leading: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0FDF4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: AppColors.primaryDark, size: 22),
           ),
-          child: Icon(icon, color: AppColors.primaryDark, size: 22),
+          title: Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textDark),
+          ),
+          trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textLight),
+          onTap: onTap,
         ),
-        title: Text(
-          title,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textDark),
-        ),
-        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textLight),
-        onTap: onTap,
       ),
     );
   }

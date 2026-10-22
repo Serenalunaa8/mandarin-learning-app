@@ -1,6 +1,8 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../home/main_navigation_screen.dart';
@@ -79,14 +81,19 @@ class _LandingScreenState extends State<LandingScreen>
               width: double.infinity,
               height: 50,
               child: ElevatedButton.icon(
-                icon: const Icon(Icons.person_add_alt_1_rounded, color: Colors.white),
+                icon: const Icon(
+                  Icons.person_add_alt_1_rounded,
+                  color: Colors.white,
+                ),
                 label: const Text(
                   'Daftar Akun Baru',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF22C55E),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
                   elevation: 0,
                 ),
                 onPressed: () {
@@ -105,7 +112,10 @@ class _LandingScreenState extends State<LandingScreen>
               width: double.infinity,
               height: 50,
               child: OutlinedButton.icon(
-                icon: const Icon(Icons.flash_on_rounded, color: Color(0xFF15803D)),
+                icon: const Icon(
+                  Icons.flash_on_rounded,
+                  color: Color(0xFF15803D),
+                ),
                 label: const Text(
                   'Coba Cepat (Mode Tamu)',
                   style: TextStyle(
@@ -116,7 +126,9 @@ class _LandingScreenState extends State<LandingScreen>
                 ),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF86EFAC), width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
                 ),
                 onPressed: () async {
                   Navigator.pop(ctx);
@@ -125,7 +137,9 @@ class _LandingScreenState extends State<LandingScreen>
                   if (context.mounted) {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const MainNavigationScreen(),
+                      ),
                     );
                   }
                 },
@@ -260,7 +274,12 @@ class _LandingScreenState extends State<LandingScreen>
                     final badgeSize = (screenWidth * 0.125).clamp(42.0, 56.0);
 
                     // cx, cy = titik tengah lencana (proporsi lebar / tinggi area atas)
-                    Widget badge(String asset, double cx, double cy, double dy) {
+                    Widget badge(
+                      String asset,
+                      double cx,
+                      double cy,
+                      double dy,
+                    ) {
                       return Positioned(
                         left: screenWidth * cx - badgeSize / 2,
                         top: topHeight * cy - badgeSize / 2 + dy,
@@ -282,28 +301,52 @@ class _LandingScreenState extends State<LandingScreen>
                       clipBehavior: Clip.none,
                       children: [
                         // Ikon 1: Jeruk Oranye (Kiri Atas)
-                        badge('assets/image/landing_page/03_ikon_jeruk.png',
-                            0.29, 0.39, dy1),
+                        badge(
+                          'assets/image/landing_page/03_ikon_jeruk.png',
+                          0.29,
+                          0.39,
+                          dy1,
+                        ),
 
                         // Ikon 2: Panah Ungu Ganda (Kiri Tengah Luar)
-                        badge('assets/image/landing_page/02_ikon_ungu_panah.png',
-                            0.14, 0.48, dy2),
+                        badge(
+                          'assets/image/landing_page/02_ikon_ungu_panah.png',
+                          0.14,
+                          0.48,
+                          dy2,
+                        ),
 
                         // Ikon 3: Bintang Pink (Kiri Bawah)
-                        badge('assets/image/landing_page/05_ikon_pink_bintang.png',
-                            0.29, 0.59, dy3),
+                        badge(
+                          'assets/image/landing_page/05_ikon_pink_bintang.png',
+                          0.29,
+                          0.59,
+                          dy3,
+                        ),
 
                         // Ikon 4: Centang Kuning (Kanan Atas)
-                        badge('assets/image/landing_page/04_ikon_kuning_centang.png',
-                            0.755, 0.40, dy2),
+                        badge(
+                          'assets/image/landing_page/04_ikon_kuning_centang.png',
+                          0.755,
+                          0.40,
+                          dy2,
+                        ),
 
                         // Ikon 5: Perisai Teal (Kanan Tengah Luar)
-                        badge('assets/image/landing_page/06_ikon_teal_perisai_1.png',
-                            0.86, 0.52, dy1),
+                        badge(
+                          'assets/image/landing_page/06_ikon_teal_perisai_1.png',
+                          0.86,
+                          0.52,
+                          dy1,
+                        ),
 
                         // Ikon 6: Lonceng Biru (Kanan Bawah)
-                        badge('assets/image/landing_page/07_ikon_teal_perisai_2.png',
-                            0.72, 0.60, dy3),
+                        badge(
+                          'assets/image/landing_page/07_ikon_teal_perisai_2.png',
+                          0.72,
+                          0.60,
+                          dy3,
+                        ),
 
                         // Sparkle Berkilau Kuning
                         sparkle(0.22, 0.42, dy3, 10),
@@ -333,110 +376,130 @@ class _LandingScreenState extends State<LandingScreen>
                 top: false,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 28),
-                  child: Column(
-                    children: [
-                      // Jarak aman agar teks berada rapi di bawah puncak lengkungan bukit
-                      SizedBox(
-                        height: (72 - 0.13 * scallopHeight + 14).clamp(56.0, 74.0),
-                      ),
-                      const Spacer(flex: 1),
-
-                      // Headline
-                      const Text(
-                        'Learn Languages.\nLevel Up Your World.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          height: 1.25,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-
-                      // Subtitle
-                      const Text(
-                        'Master new languages with fun lessons,\nreal conversations, and daily practice.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFFB4C8AE),
-                          height: 1.5,
-                        ),
-                      ),
-
-                      const Spacer(flex: 2),
-
-                      // CTA Button: "Start Learning" (efek 3D tepi bawah gelap)
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0xFF2D8A1A),
-                              offset: Offset(0, 4),
-                              blurRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: SizedBox(
-                          height: 52,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF47B82A),
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
-                              ),
-                            ),
-                            onPressed: () => _onStartLearning(context),
-                            child: const Text(
-                              'Start Learning',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Footer Link: "Already have an account? Log in"
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final compactLayout = constraints.maxHeight < 300;
+                      return Column(
                         children: [
-                          const Text(
-                            'Already have an account? ',
+                          // Jarak aman agar teks berada rapi di bawah puncak lengkungan bukit
+                          SizedBox(
+                            height: compactLayout
+                                ? 12
+                                : (72 - 0.13 * scallopHeight + 14).clamp(
+                                    56.0,
+                                    74.0,
+                                  ),
+                          ),
+                          if (compactLayout)
+                            const SizedBox(height: 0)
+                          else
+                            const Spacer(flex: 1),
+
+                          // Headline
+                          Text(
+                            'Learn Languages.\nLevel Up Your World.',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 12.5,
-                              color: Color(0xFF9DB596),
+                              fontSize: compactLayout ? 24 : 26,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              height: 1.25,
+                              letterSpacing: -0.2,
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () => _onLogin(context),
-                            child: const Text(
-                              'Log in',
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF58D13A),
+                          SizedBox(height: compactLayout ? 6 : 10),
+
+                          // Subtitle
+                          const Text(
+                            'Master new languages with fun lessons,\nreal conversations, and daily practice.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFFB4C8AE),
+                              height: 1.5,
+                            ),
+                          ),
+
+                          if (compactLayout)
+                            const SizedBox(height: 0)
+                          else
+                            const Spacer(flex: 2),
+
+                          // CTA Button: "Start Learning" (efek 3D tepi bawah gelap)
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(28),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0xFF2D8A1A),
+                                  offset: Offset(0, 4),
+                                  blurRadius: 0,
+                                ),
+                              ],
+                            ),
+                            child: SizedBox(
+                              height: compactLayout ? 48 : 52,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF47B82A),
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(28),
+                                  ),
+                                ),
+                                onPressed: () => _onStartLearning(context),
+                                child: const Text(
+                                  'Start Learning',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                          SizedBox(height: compactLayout ? 8 : 16),
 
-                      // Ruang fleksibel bawah agar tombol dan teks login terangkat naik proporsional
-                      const Spacer(flex: 2),
-                      const SizedBox(height: 12),
-                    ],
+                          // Footer Link: "Already have an account? Log in"
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Already have an account? ',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: Color(0xFF9DB596),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => _onLogin(context),
+                                child: const Text(
+                                  'Log in',
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF58D13A),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // Ruang fleksibel bawah agar tombol dan teks login terangkat naik proporsional
+                          if (compactLayout)
+                            const SizedBox(height: 4)
+                          else ...[
+                            const Spacer(flex: 2),
+                            const SizedBox(height: 12),
+                          ],
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -448,14 +511,15 @@ class _LandingScreenState extends State<LandingScreen>
           //    (segitiga terbalik, menimpa sambungan ilustrasi & kartu bawah)
           // =========================================================
           Positioned(
-            top: topHeight - scallopHeight + 72, // makin besar angka, makin turun
+            top:
+                topHeight -
+                scallopHeight +
+                72, // makin besar angka, makin turun
             left: 0,
             right: 0,
             height: scallopHeight,
             child: IgnorePointer(
-              child: CustomPaint(
-                painter: _ScallopedHillPainter(),
-              ),
+              child: CustomPaint(painter: _ScallopedHillPainter()),
             ),
           ),
         ],
@@ -493,7 +557,8 @@ class _ScallopedHillPainter extends CustomPainter {
         // Bentuk segitiga terbalik: 0 di tepi, 1 di tengah
         final tri = 1 - (2 * t - 1).abs();
 
-        final y = h * (_bases[i] + _dip * tri) -
+        final y =
+            h * (_bases[i] + _dip * tri) -
             h * 0.05 * math.sin(_bumps[i] * math.pi * t).abs();
 
         if (s == 0) {
@@ -528,10 +593,7 @@ class _SparkleStar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(size, size),
-      painter: _SparkleStarPainter(),
-    );
+    return CustomPaint(size: Size(size, size), painter: _SparkleStarPainter());
   }
 }
 

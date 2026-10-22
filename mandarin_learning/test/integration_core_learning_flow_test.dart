@@ -3,6 +3,7 @@ import 'package:mandarin_learning/models/vocabulary_model.dart';
 import 'package:mandarin_learning/models/quiz_attempt_model.dart';
 import 'package:mandarin_learning/models/coin_transaction_model.dart';
 import 'package:mandarin_learning/services/tone_analysis_service.dart';
+import 'package:mandarin_learning/services/speech_evaluation_service.dart';
 
 // PBI-070: Integration Testing Alur Utama (Materi ➔ Kuis ➔ Pelafalan ➔ Reward Koin)
 // Sesuai PRD 8.1 Alur Utama Pembelajaran & DoD Sprint 7
@@ -99,12 +100,11 @@ void main() {
       // 'nǐ' memiliki nada 3 (dipping tone)
       expect(detectedTone, MandarinTone.tone3);
 
-      final toneResult = ToneAnalysisService.instance.analyzePronunciation(
-        pinyin: mockVocab.pinyin,
-        recordingDuration: const Duration(milliseconds: 1200),
+      final transcriptionScore = scoreMandarinTranscription(
+        mockVocab.hanzi,
+        '你好',
       );
-      expect(toneResult.isUnclear, isFalse);
-      expect(toneResult.score, greaterThanOrEqualTo(50));
+      expect(transcriptionScore, 100);
 
       // Berikan reward pelafalan sah (+5 koin)
       const speechReward = 5;

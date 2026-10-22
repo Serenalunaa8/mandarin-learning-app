@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mandarin_learning/services/tone_analysis_service.dart';
 import 'package:mandarin_learning/services/ai_tutor_service.dart';
+import 'package:mandarin_learning/services/speech_evaluation_service.dart';
 
 void main() {
   group('Tahap 4 (Suara & Analisis Nada - FR-04 & FR-05)', () {
@@ -45,59 +46,25 @@ void main() {
       expect(t4.last, 1.0);
     });
 
-    test('Audio terlalu singkat (<350ms) ditandai tidak jelas / tidak dapat dinilai', () {
-      final service = ToneAnalysisService.instance;
-      final result = service.analyzePronunciation(
-        pinyin: 'mā',
-        recordingDuration: const Duration(milliseconds: 200),
-      );
-
-      expect(result.isUnclear, isTrue);
-      expect(result.score, 0);
-      expect(result.feedback, contains('terlalu singkat atau tidak jelas'));
-    });
-
-    test('Evaluasi rekaman normal menghasilkan skor indikatif dan kurva akustik', () {
-      final service = ToneAnalysisService.instance;
-      final result = service.analyzePronunciation(
-        pinyin: 'nǐ',
-        recordingDuration: const Duration(seconds: 2),
-      );
-
-      expect(result.isUnclear, isFalse);
-      expect(result.score, greaterThanOrEqualTo(50));
-      expect(result.userCurve.length, 10);
-      expect(result.referenceCurve.length, 10);
-      expect(result.toneName, contains('Nada 3'));
-    });
+    test(
+      'Ucapan dinilai dari hasil transkripsi, bukan kontur suara simulasi',
+      () {
+        expect(scoreMandarinTranscription('你好', '你好'), 100);
+        expect(scoreMandarinTranscription('你好', '你'), 50);
+        expect(scoreMandarinTranscription('你好', '再见'), 0);
+      },
+    );
   });
 
   group('Tahap 4 (AI Tutor Mandarin - FR-14 & PBI-034/035)', () {
-    test('AI Tutor memberikan penjelasan tata bahasa tiga "de" dengan contoh kalimat', () async {
-      final service = AiTutorService.instance;
-      final answer = await service.askAiTutor('Jelaskan perbedaan partikel de: 的, 得, dan 地');
-
-      expect(answer, contains('Perbedaan Tiga "de"'));
-      expect(answer, contains('的'));
-      expect(answer, contains('得'));
-      expect(answer, contains('地'));
-    });
-
-    test('AI Tutor memberikan panduan membedakan Nada 2 dan Nada 3', () async {
-      final service = AiTutorService.instance;
-      final answer = await service.askAiTutor('Bagaimana cara membedakan nada 2 dan 3?');
-
-      expect(answer, contains('Nada 2'));
-      expect(answer, contains('Nada 3'));
-      expect(answer, contains('Tips'));
-    });
-
-    test('AI Tutor memberikan contoh percakapan restoran yang praktis', () async {
-      final service = AiTutorService.instance;
-      final answer = await service.askAiTutor('Contoh percakapan pesan makanan di restoran');
-
-      expect(answer, contains('菜单'));
-      expect(answer, contains('买单'));
+    test('AI Tutor menyediakan pilihan model provider yang dapat dipilih', () {
+      expect(
+        AiProvider.values.map((provider) => provider.id),
+        containsAll(['gemini', 'openai', 'anthropic', 'groq']),
+      );
+      expect(AiProvider.gemini.model, 'gemini-2.5-flash');
+      expect(AiProvider.openAi.model, 'gpt-6-luna');
+      expect(AiProvider.anthropic.model, 'claude-haiku-5-5');
     });
   });
 
