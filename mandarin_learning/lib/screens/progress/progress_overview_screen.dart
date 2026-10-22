@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
+import '../auth/register_screen.dart';
 import '../practice/quiz_screen.dart';
 import '../practice/dictionary_screen.dart';
 
@@ -16,6 +17,76 @@ class ProgressOverviewScreen extends StatelessWidget {
     final learnedTotal = vocab.learnedVocabIds.length;
     final attempts = vocab.quizAttempts;
     final avgScore = vocab.averageQuizScore;
+
+    // Guest mode: show locked/empty state
+    if (auth.isGuest) {
+      return Scaffold(
+        backgroundColor: AppColors.mintBackground,
+        appBar: AppBar(
+          title: const Text('Progres Belajar'),
+        ),
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.bar_chart_rounded,
+                    size: 72,
+                    color: Color(0xFF94A3B8),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Progres Tidak Tersedia',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Progres belajar tidak tersedia untuk Mode Tamu. Daftar akun untuk melacak kemajuanmu!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textMuted,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                        );
+                      },
+                      child: const Text(
+                        'Daftar Akun',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.mintBackground,

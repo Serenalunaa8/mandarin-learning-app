@@ -274,50 +274,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 height: 1.35,
                               ),
                             ),
-                            const SizedBox(height: 22),
-
-                            // Info Keamanan
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: _registerAccentColor.withValues(
-                                    alpha: 0.45,
-                                  ),
-                                ),
-                              ),
-                              child: const Row(
-                                children: [
-                                  Icon(
-                                    Icons.lock_clock_outlined,
-                                    color: _registerAccentColor,
-                                    size: 22,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      'Password otomatis dienkripsi dengan SHA-256 (Tanpa Firebase).',
-                                      style: TextStyle(
-                                        fontSize: 11.5,
-                                        color: _registerSupportingTextColor,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 24),
 
                             // Username
                             _buildInputField(
                               controller: _usernameController,
-                              hintText: 'Username (contoh: lucy_mandarin)',
+                              hintText: 'Username',
                               prefixIcon: Icons.alternate_email_rounded,
                               validator: (val) {
                                 if (val == null || val.trim().isEmpty) {
@@ -349,12 +311,22 @@ class _RegisterScreenState extends State<RegisterScreen>
                             ),
                             const SizedBox(height: 14),
 
-                            // Email (Opsional)
+                            // Email (Wajib)
                             _buildInputField(
                               controller: _emailController,
-                              hintText: 'Email (Opsional)',
+                              hintText: 'Email',
                               prefixIcon: Icons.email_rounded,
                               keyboardType: TextInputType.emailAddress,
+                              validator: (val) {
+                                if (val == null || val.trim().isEmpty) {
+                                  return 'Email wajib diisi';
+                                }
+                                final email = val.trim();
+                                if (!email.contains('@') || !email.contains('.')) {
+                                  return 'Format email tidak valid';
+                                }
+                                return null;
+                              },
                             ),
                             const SizedBox(height: 14),
 

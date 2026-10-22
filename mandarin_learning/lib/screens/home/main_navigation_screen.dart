@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
+import '../../providers/auth_provider.dart';
 import 'home_dashboard_screen.dart';
 import '../lesson/lesson_path_screen.dart';
 import '../practice/practice_hub_screen.dart';
 import '../progress/progress_overview_screen.dart';
 import '../profile/profile_screen.dart';
+import '../auth/register_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   final int initialIndex;
@@ -25,9 +28,83 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _onTabTapped(int index) {
+    final auth = context.read<AuthProvider>();
+
+    // Tabs 1 (Kursus), 2 (Praktik), 3 (Progres) are restricted for guests.
+    // Tab 0 (Beranda) and Tab 4 (Profil) remain accessible.
+    if (auth.isGuest && (index == 1 || index == 2 || index == 3)) {
+      _showGuestRestrictionSheet(context);
+      return;
+    }
+
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  void _showGuestRestrictionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFCBD5E1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Icon(Icons.lock_rounded, size: 48, color: Color(0xFF94A3B8)),
+              const SizedBox(height: 12),
+              const Text(
+                'Fitur Terkunci',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Fitur ini tidak tersedia untuk Mode Tamu. Daftar akun untuk menikmati semua fitur.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                    );
+                  },
+                  child: const Text(
+                    'Daftar',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override

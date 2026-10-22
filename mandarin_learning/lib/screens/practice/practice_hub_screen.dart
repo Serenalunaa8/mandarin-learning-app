@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
+import '../auth/register_screen.dart';
 import '../coins/coin_ledger_screen.dart';
 import '../games/hanzi_matching_screen.dart';
 import '../games/mandarin_catcher_screen.dart';
@@ -20,10 +22,32 @@ import '../tools/feedback_screen.dart';
 class PracticeHubScreen extends StatelessWidget {
   const PracticeHubScreen({super.key});
 
+  void _showGuestLockedSnackbar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          'Fitur ini hanya tersedia untuk akun terdaftar. Silakan daftar untuk mengakses.',
+        ),
+        action: SnackBarAction(
+          label: 'Daftar',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RegisterScreen()),
+            );
+          },
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
     final vocab = context.watch<VocabularyProvider>();
     final words = vocab.currentLevelVocabulary;
+    final isGuest = auth.isGuest;
 
     return Scaffold(
       backgroundColor: AppColors.mintBackground,
@@ -32,6 +56,52 @@ class PracticeHubScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           children: [
+            // Guest mode info banner
+            if (isGuest) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF7ED),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFFED7AA)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, color: Color(0xFFEA580C), size: 20),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        'Mode Tamu: Hanya Kamus Mandarin yang tersedia',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF9A3412),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                        );
+                      },
+                      child: const Text(
+                        'Daftar',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFEA580C),
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             const Text(
               'Aktivitas Belajar Mandiri (Tahap 4)',
               style: TextStyle(
@@ -42,7 +112,7 @@ class PracticeHubScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 1. Kamus Mandarin
+            // 1. Kamus Mandarin — always accessible
             _buildFeatureCard(
               context,
               title: 'Kamus Mandarin–Indonesia',
@@ -50,6 +120,7 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '📖',
               color: const Color(0xFFEFF6FF),
               tag: 'Kamus HSK',
+              locked: false,
               onTap: () {
                 Navigator.push(
                   context,
@@ -59,7 +130,7 @@ class PracticeHubScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 2. Kuis Utama Tebak Arti & Pinyin (FR-03)
+            // 2. Kuis Utama
             _buildFeatureCard(
               context,
               title: 'Kuis Tebak Arti & Pinyin',
@@ -67,7 +138,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '🎯',
               color: const Color(0xFFFDF2F8),
               tag: 'Kuis Utama',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const QuizScreen()),
@@ -76,7 +152,7 @@ class PracticeHubScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 3. Latihan Pelafalan & Analisis Nada (FR-04 & FR-05)
+            // 3. Latihan Pelafalan
             _buildFeatureCard(
               context,
               title: 'Latihan Pelafalan & Kontur Nada',
@@ -84,7 +160,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '🎙️',
               color: const Color(0xFFF0FDF4),
               tag: 'Suara & Nada',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 final target = words.isNotEmpty ? words.first : null;
                 if (target != null) {
                   Navigator.push(
@@ -98,7 +179,7 @@ class PracticeHubScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 4. AI Tutor Mandarin (FR-14)
+            // 4. AI Tutor
             _buildFeatureCard(
               context,
               title: 'AI Tutor Mandarin (Xiao Xiong)',
@@ -106,7 +187,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '🤖',
               color: const Color(0xFFF5F3FF),
               tag: 'AI Tutor',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const AiTutorScreen()),
@@ -132,7 +218,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '🧩',
               color: const Color(0xFFFFFBEB),
               tag: 'Streak Koin',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -150,7 +241,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '✍️',
               color: const Color(0xFFEFF6FF),
               tag: 'Stroke Goresan',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -168,7 +264,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '📱',
               color: const Color(0xFFF0FDF4),
               tag: 'Sensor Gerak',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const TiltToAnswerScreen()),
@@ -184,7 +285,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '🧺',
               color: const Color(0xFFECFDF5),
               tag: 'Sensor Gerak',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -198,12 +304,16 @@ class PracticeHubScreen extends StatelessWidget {
             _buildFeatureCard(
               context,
               title: 'Saldo & Riwayat Koin',
-              desc:
-                  'Lihat saldo, reward, dan koin yang digunakan untuk bantuan',
+              desc: 'Lihat saldo, reward, dan koin yang digunakan untuk bantuan',
               emoji: '🪙',
               color: const Color(0xFFFFF7ED),
               tag: 'Reward Koin',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const CoinLedgerScreen()),
@@ -222,7 +332,7 @@ class PracticeHubScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 1. Direction Explorer (PB-15, FR-11)
+            // 1. Direction Explorer
             _buildFeatureCard(
               context,
               title: 'Mandarin Direction Explorer',
@@ -230,7 +340,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '🧭',
               color: const Color(0xFFF0FDF4),
               tag: 'LBS & Kompas',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const DirectionExplorerScreen()),
@@ -239,7 +354,7 @@ class PracticeHubScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 2. Konversi Mata Uang (PB-16, FR-12)
+            // 2. Konversi Mata Uang
             _buildFeatureCard(
               context,
               title: 'Konversi Mata Uang (CNY / IDR / USD)',
@@ -247,7 +362,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '💱',
               color: const Color(0xFFFFFBEB),
               tag: 'Kurs Uang',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const CurrencyConverterScreen()),
@@ -256,7 +376,7 @@ class PracticeHubScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 3. Konversi Waktu (PB-17, FR-13)
+            // 3. Konversi Waktu
             _buildFeatureCard(
               context,
               title: 'Konversi Zona Waktu Dunia',
@@ -264,7 +384,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '⏰',
               color: const Color(0xFFEFF6FF),
               tag: 'Zona Waktu',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const TimeConverterScreen()),
@@ -273,7 +398,7 @@ class PracticeHubScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 4. Umpan Balik (PB-18, FR-21)
+            // 4. Umpan Balik
             _buildFeatureCard(
               context,
               title: 'Umpan Balik & Saran',
@@ -281,7 +406,12 @@ class PracticeHubScreen extends StatelessWidget {
               emoji: '💌',
               color: const Color(0xFFFAF5FF),
               tag: 'Feedback',
+              locked: isGuest,
               onTap: () {
+                if (isGuest) {
+                  _showGuestLockedSnackbar(context);
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const FeedbackScreen()),
@@ -303,105 +433,113 @@ class PracticeHubScreen extends StatelessWidget {
     required Color color,
     required String tag,
     required VoidCallback onTap,
+    bool locked = false,
     bool isComingSoon = false,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
+    return Opacity(
+      opacity: locked ? 0.55 : 1.0,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(22),
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(22),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: locked ? const Color(0xFFF1F5F9) : color,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Center(
+                      child: locked
+                          ? const Icon(Icons.lock_rounded, color: Color(0xFF94A3B8), size: 24)
+                          : Text(emoji, style: const TextStyle(fontSize: 24)),
+                    ),
                   ),
-                  child: Center(
-                    child: Text(emoji, style: const TextStyle(fontSize: 24)),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            tag,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryDark,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              tag,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: locked ? const Color(0xFF94A3B8) : AppColors.primaryDark,
+                              ),
                             ),
-                          ),
-                          if (isComingSoon)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFEF3C7),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Text(
-                                'Tahap 5',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFFB45309),
+                            if (isComingSoon)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEF3C7),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Text(
+                                  'Tahap 5',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFFB45309),
+                                  ),
                                 ),
                               ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textDark,
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        desc,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textMuted,
-                          height: 1.3,
+                        const SizedBox(height: 4),
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: locked ? const Color(0xFF94A3B8) : AppColors.textDark,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          locked
+                              ? 'Fitur ini hanya tersedia untuk akun terdaftar.'
+                              : desc,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: AppColors.textLight,
-                ),
-              ],
+                  const SizedBox(width: 6),
+                  Icon(
+                    locked ? Icons.lock_outline_rounded : Icons.chevron_right_rounded,
+                    color: AppColors.textLight,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -109,6 +109,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _handleOverwriteBiometric(AuthProvider auth) async {
+    final targetUser = auth.profile?.username ?? 'akun ini';
+    final previousUser = auth.enrolledBiometricUsername ?? 'akun lain';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Gantikan Pendaftaran Biometrik?'),
+        content: Text(
+          'Sensor biometrik di perangkat ini saat ini terhubung ke @$previousUser.\n\nSesuai standar keamanan 1-ke-1, mengaktifkan biometrik untuk @$targetUser akan menimpa dan menonaktifkan biometrik untuk @$previousUser.\n\nLanjutkan pemindaian biometrik untuk @$targetUser?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Gantikan & Aktifkan'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _handleEnrollBiometric(auth);
+    }
+  }
+
   Future<void> _toggleReminder(bool val) async {
     setState(() => _dailyReminderEnabled = val);
     if (val) {
@@ -241,8 +270,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
               clipBehavior: Clip.antiAlias,
               child: Column(
                 children: [
-                  // Status Pendaftaran Biometrik
-                  if (!auth.isBiometricEnrolled) ...[
+                  // Status Pendaftaran Biometrik (1-ke-1 Single Account Binding & Guest Mode)
+                  if (auth.isGuest) ...[
+                    Container(
+                      margin: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF3C7),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFFF59E0B)),
+                      ),
+                      child: const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.no_accounts_rounded, color: Color(0xFFB45309), size: 24),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Fitur Tidak Tersedia untuk Mode Tamu',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFB45309)),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Pendaftaran biometrik dan penyimpanan preferensi akun hanya tersedia untuk akun terdaftar. Mode Tamu tidak menyimpan progres atau pengaturan apapun.',
+                            style: TextStyle(fontSize: 12, color: Color(0xFF78350F)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else if (!auth.isBiometricEnrolled) ...[
                     Container(
                       margin: const EdgeInsets.all(14),
                       padding: const EdgeInsets.all(16),
@@ -282,10 +343,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            auth.isGuest
-                                ? 'Masuk dengan akun terdaftar untuk mengaktifkan pendaftaran biometrik.'
-                                : auth.isBiometricSupported
-                                ? 'Daftarkan sensor yang sudah aktif di perangkat agar bisa login tanpa mengetik kata sandi.'
+                            auth.isBiometricSupported
+                                ? 'Daftarkan sensor sidik jari atau pengenalan wajah perangkat ini untuk akun @${auth.profile?.username ?? "Anda"}.'
                                 : 'Pendaftaran biometrik membutuhkan aplikasi Android/iOS dan sensor yang sudah aktif; browser web tidak didukung.',
                             style: const TextStyle(
                               fontSize: 12,
@@ -293,42 +352,116 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          if (!auth.isGuest)
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
                                 ),
-                                icon: const Icon(
-                                  Icons.security_rounded,
-                                  size: 20,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                label: const Text(
-                                  'Daftarkan Sidik Jari & Wajah',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                onPressed:
-                                    auth.isLoading || !auth.isBiometricSupported
-                                    ? null
-                                    : () => _handleEnrollBiometric(auth),
                               ),
+                              icon: const Icon(
+                                Icons.security_rounded,
+                                size: 20,
+                              ),
+                              label: Text(
+                                'Daftarkan Biometrik (@${auth.profile?.username ?? "Akun Ini"})',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              onPressed:
+                                  auth.isLoading || !auth.isBiometricSupported
+                                  ? null
+                                  : () => _handleEnrollBiometric(auth),
                             ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else if (!auth.isBiometricEnrolledForCurrentUser) ...[
+                    // Kasus 1-to-1 Binding: Biometrik terikat ke akun lain
+                    Container(
+                      margin: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF7ED),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFFF97316)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.swap_horiz_rounded,
+                                color: Color(0xFFC2410C),
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Biometrik Terikat ke @${auth.enrolledBiometricUsername}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Color(0xFFC2410C),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Sensor biometrik saat ini aktif untuk login akun @${auth.enrolledBiometricUsername}. Satu perangkat hanya dapat menautkan biometrik ke satu akun.\n\nJika diaktifkan untuk @${auth.profile?.username}, biometrik akun @${auth.enrolledBiometricUsername} akan ditimpa dan dinonaktifkan.',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF7C2D12),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFEA580C),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.published_with_changes_rounded,
+                                size: 20,
+                              ),
+                              label: Text(
+                                'Alihkan ke @${auth.profile?.username} (Gantikan)',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              onPressed:
+                                  auth.isLoading || !auth.isBiometricSupported
+                                  ? null
+                                  : () => _handleOverwriteBiometric(auth),
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ] else ...[
-                    // Jika sudah terdaftar: Tampilkan status sukses dan kontrol sensor
+                    // Terdaftar aktif untuk akun saat ini
                     Container(
                       margin: const EdgeInsets.all(14),
                       padding: const EdgeInsets.all(14),
@@ -351,16 +484,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                const Text(
                                   'Biometrik Terdaftar Aktif',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
                                     color: AppColors.primaryDark,
                                   ),
                                 ),
                                 Text(
-                                  'Akun: @${auth.enrolledBiometricUsername ?? auth.profile?.username ?? "-"} • ${auth.biometricSensorLabel}',
+                                  'Akun: @${auth.profile?.username ?? "-"} • ${auth.biometricSensorLabel}',
                                   style: const TextStyle(
                                     fontSize: 11,
                                     color: AppColors.textMuted,
@@ -372,8 +505,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ],
                       ),
                     ),
-
-                    // Toggle Penggunaan Sidik Jari
                     SwitchListTile(
                       secondary: Container(
                         padding: const EdgeInsets.all(8),
@@ -409,8 +540,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           : null,
                     ),
                     const Divider(height: 1),
-
-                    // Toggle Penggunaan Pengenalan Wajah
                     SwitchListTile(
                       secondary: Container(
                         padding: const EdgeInsets.all(8),
@@ -443,8 +572,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           : null,
                     ),
                     const Divider(height: 1),
-
-                    // Tombol Hapus / Daftarkan Ulang
                     ListTile(
                       leading: Container(
                         padding: const EdgeInsets.all(8),
@@ -716,7 +843,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 6),
                   Text(
                     auth.isGuest
-                        ? 'Mode tamu: progres dan koin hanya disimpan di perangkat dan tidak disinkronkan ke akun cloud.'
+                        ? 'Mode Tamu (Akses Terbatas): Progres belajar, XP, koin, dan skor bersifat sementara (in-memory) dan tidak disimpan ke perangkat maupun database.'
                         : 'Username: ${auth.profile?.username.isNotEmpty == true ? auth.profile!.username : (auth.profile?.fullName ?? "-")}\nDatabase lokal: SQLite\nSupabase: ${_isCloudConnected == null
                               ? "sedang diperiksa"
                               : _isCloudConnected!

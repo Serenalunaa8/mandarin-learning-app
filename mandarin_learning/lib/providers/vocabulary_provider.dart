@@ -60,32 +60,34 @@ class VocabularyProvider extends ChangeNotifier {
 
     await VocabularyService.instance.loadVocabulary();
 
+    final isGuestUser = userId == null || userId == 'guest_local_user' || userId == 'guest_temp';
     final prefs = await SharedPreferences.getInstance();
 
     // 1. Muat progres yang sudah dipelajari (PB-05 & FR-15)
     _learnedVocabIds.clear();
-    if (userId != null && userId != 'guest_local_user') {
+    if (!isGuestUser) {
       final ids = await SupabaseService.instance.fetchLearnedVocabIds(userId);
       _learnedVocabIds.addAll(ids);
-    } else {
-      final localList = prefs.getStringList('learned_vocab_ids') ?? [];
-      _learnedVocabIds.addAll(localList.map((e) => int.tryParse(e) ?? 0));
     }
 
     // 2. Muat koleksi kata favorit / kamus tersimpan
     _favoriteVocabIds.clear();
-    final favList = prefs.getStringList('favorite_vocab_ids') ?? [];
-    _favoriteVocabIds.addAll(favList.map((e) => int.tryParse(e) ?? 0));
+    if (!isGuestUser) {
+      final favList = prefs.getStringList('favorite_vocab_ids') ?? [];
+      _favoriteVocabIds.addAll(favList.map((e) => int.tryParse(e) ?? 0));
+    }
 
     // 3. Muat riwayat kuis utama
     _quizAttempts.clear();
-    final localAttempts = prefs.getStringList('local_quiz_attempts') ?? [];
-    for (var str in localAttempts) {
-      try {
-        final map = jsonDecode(str) as Map<String, dynamic>;
-        _quizAttempts.add(QuizAttempt.fromJson(map));
-      } catch (e) {
-        debugPrint('[VocabProvider] Error parsing quiz attempt: $e');
+    if (!isGuestUser) {
+      final localAttempts = prefs.getStringList('local_quiz_attempts') ?? [];
+      for (var str in localAttempts) {
+        try {
+          final map = jsonDecode(str) as Map<String, dynamic>;
+          _quizAttempts.add(QuizAttempt.fromJson(map));
+        } catch (e) {
+          debugPrint('[VocabProvider] Error parsing quiz attempt: $e');
+        }
       }
     }
 
@@ -139,17 +141,11 @@ class VocabularyProvider extends ChangeNotifier {
     _learnedVocabIds.add(vocabId);
     notifyListeners();
 
-    if (userId != 'guest_local_user') {
+    if (userId != 'guest_local_user' && userId != 'guest_temp') {
       await SupabaseService.instance.recordProgress(
         userId: userId,
         vocabId: vocabId,
         hskLevel: _selectedLevel,
-      );
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList(
-        'learned_vocab_ids',
-        _learnedVocabIds.map((e) => e.toString()).toList(),
       );
     }
   }
@@ -158,13 +154,12 @@ class VocabularyProvider extends ChangeNotifier {
     _quizAttempts.insert(0, attempt);
     notifyListeners();
 
-    // Simpan lokal SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    final jsonList = _quizAttempts.map((e) => jsonEncode(e.toJson())).toList();
-    await prefs.setStringList('local_quiz_attempts', jsonList);
+    // Mode Tamu tidak menyimpan riwayat kuis ke disk maupun online
+    if (attempt.userId != 'guest_local_user' && attempt.userId != 'guest_temp') {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonList = _quizAttempts.map((e) => jsonEncode(e.toJson())).toList();
+      await prefs.setStringList('local_quiz_attempts', jsonList);
 
-    // Simpan ke Supabase jika bukan akun tamu
-    if (attempt.userId != 'guest_local_user') {
       await SupabaseService.instance.saveQuizAttempt(
         userId: attempt.userId,
         attemptId: attempt.id,

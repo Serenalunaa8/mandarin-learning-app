@@ -8,6 +8,7 @@ import '../practice/speech_practice_screen.dart';
 import '../practice/ai_tutor_screen.dart';
 import '../practice/dictionary_screen.dart';
 import '../coins/coin_ledger_screen.dart';
+import '../auth/register_screen.dart';
 
 class HomeDashboardScreen extends StatelessWidget {
   final Function(int) onNavigateTab;
@@ -20,7 +21,7 @@ class HomeDashboardScreen extends StatelessWidget {
     final vocab = context.watch<VocabularyProvider>();
     final user = auth.profile;
     final fullName = user?.fullName ?? 'Aria';
-    final firstName = fullName.split(' ').first;
+    final firstName = auth.isGuest ? 'Tamu' : fullName.split(' ').first;
     final level = vocab.selectedLevel;
     final progress = vocab.getLevelProgress(level);
     final displayProgress = progress == 0 ? 0.6 : progress;
@@ -141,6 +142,74 @@ class HomeDashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 18),
 
+              // Guest Mode Banner jika sedang menggunakan akun tamu
+              if (auth.isGuest) ...[
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF3C7),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.6)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.amber.withValues(alpha: 0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFDE68A),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.info_outline_rounded, color: Color(0xFFB45309), size: 22),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Mode Tamu (Akses Terbatas)',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: Color(0xFF92400E),
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Progres belajar & koin tidak disimpan.',
+                              style: TextStyle(fontSize: 11, color: Color(0xFF78350F)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: const Color(0xFFD97706),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                          );
+                        },
+                        child: const Text('Daftar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               // Greeting & Mascot peek
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -184,7 +253,7 @@ class HomeDashboardScreen extends StatelessWidget {
                   Expanded(
                     child: _buildStatCard(
                       icon: '💎',
-                      value: '${auth.totalXp > 0 ? auth.totalXp : 320}',
+                      value: '${auth.isGuest ? auth.totalXp : (auth.totalXp > 0 ? auth.totalXp : 320)}',
                       unit: 'Total XP',
                       title: 'XP',
                     ),

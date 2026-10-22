@@ -46,6 +46,16 @@ class AuthProvider extends ChangeNotifier {
   bool get isFaceAllowed => _isFaceAllowed;
   String get biometricSensorLabel => _biometricSensorLabel;
 
+  /// Memeriksa apakah biometrik di perangkat ini aktif untuk akun yang sedang login saat ini
+  bool get isBiometricEnrolledForCurrentUser {
+    if (!_isBiometricEnrolled || _profile == null) return false;
+    final enrolledUser = _enrolledBiometricUsername?.trim().toLowerCase();
+    final currentUser = _profile?.username.trim().toLowerCase();
+    return enrolledUser != null &&
+        enrolledUser.isNotEmpty &&
+        enrolledUser == currentUser;
+  }
+
   int get coins => _profile?.coins ?? 50;
   int get streak => _profile?.streak ?? 1;
   int get totalXp => _profile?.totalXp ?? 0;
@@ -86,16 +96,19 @@ class AuthProvider extends ChangeNotifier {
 
       if (guestMode) {
         _isGuest = true;
+        // Mode Tamu (Akses Terbatas): tidak menyimpan progres apapun
         _profile = UserProfile(
-          id: 'guest_local_user',
-          fullName: prefs.getString('guest_name') ?? 'Pelajar Mandarin',
+          id: 'guest_temp',
+          username: 'guest',
+          fullName: 'Tamu (Akses Terbatas)',
           avatarUrl: '',
-          currentHskLevel: prefs.getInt('guest_hsk') ?? 1,
-          streak: prefs.getInt('guest_streak') ?? 1,
+          currentHskLevel: 1,
+          streak: 0,
           lastActiveDate: DateTime.now(),
-          totalXp: prefs.getInt('guest_xp') ?? 120,
-          coins: prefs.getInt('guest_coins') ?? 50,
+          totalXp: 0,
+          coins: 0,
         );
+        _coinTransactions.clear();
       } else {
         // Cek sesi aktif dari SessionService
         final session = await SessionService.getSession();
@@ -225,21 +238,6 @@ class AuthProvider extends ChangeNotifier {
 
       _profile = UserProfile.fromJson(userRecord);
 
-      // Hubungkan akun ke biometrik perangkat jika perangkat mendukung biometrik
-      try {
-        final canBio = await BiometricService.instance.canAuthenticate();
-        if (canBio) {
-          await SessionService.enrollBiometric(
-            userId: userId,
-            username: username,
-            fullName: fullName,
-            allowFingerprint: true,
-            allowFace: true,
-          );
-          await refreshBiometricStatus();
-        }
-      } catch (_) {}
-
       // Ambil riwayat koin
       try {
         _coinTransactions
@@ -361,26 +359,6 @@ class AuthProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('last_registered_username', cleanUsername);
       await prefs.setBool('is_guest_mode', false);
-
-      // Siapkan biometrik perangkat untuk akun baru jika perangkat mendukung sensor biometrik
-      try {
-        final canBio = await BiometricService.instance.canAuthenticate();
-        if (canBio) {
-          await SessionService.enrollBiometric(
-            userId: userMap['id'].toString(),
-            username: cleanUsername,
-            fullName: cleanFullName,
-            allowFingerprint: true,
-            allowFace: true,
-          );
-          await refreshBiometricStatus();
-          debugPrint(
-            '[AuthProvider] Biometrik otomatis disiapkan untuk @$cleanUsername',
-          );
-        }
-      } catch (e) {
-        debugPrint('[AuthProvider] Biometric auto-enroll: $e');
-      }
 
       _isLoading = false;
       notifyListeners();
@@ -516,33 +494,27 @@ class AuthProvider extends ChangeNotifier {
         return false;
       }
 
-      // Periksa pendaftaran biometrik
-      var isEnrolled = await SessionService.isBiometricEnrolled();
-      var targetUser = await SessionService.getEnrolledBiometricUsername();
+      // Periksa pendaftaran biometrik: pastikan ada akun yang mengaktifkan fitur ini
+      final isEnrolled = await SessionService.isBiometricEnrolled();
 
-      if (!isEnrolled || targetUser == null || targetUser.isEmpty) {
-        // Cek apakah ada akun terakhir yang terdaftar/login di perangkat ini
-        final prefs = await SharedPreferences.getInstance();
-        final lastUser = prefs.getString('last_registered_username');
-        if (lastUser != null && lastUser.isNotEmpty) {
-          final localAcc = await LocalDatabaseService.instance.getUserByUsername(lastUser);
-          if (localAcc != null) {
-            await SessionService.enrollBiometric(
-              userId: localAcc['id'].toString(),
-              username: lastUser,
-              fullName: localAcc['full_name']?.toString() ?? 'Pelajar Mandarin',
-              allowFingerprint: true,
-              allowFace: true,
-            );
-            await refreshBiometricStatus();
-            isEnrolled = true;
-            targetUser = lastUser;
-          }
-        }
+      if (!isEnrolled) {
+        _errorMessage =
+            'Belum ada akun yang mengaktifkan biometrik di perangkat ini.\n\nSilakan masuk dengan kata sandi terlebih dahulu, lalu aktifkan biometrik di menu Pengaturan.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
       }
 
-      if (!isEnrolled || targetUser == null || targetUser.isEmpty) {
-        _errorMessage = 'Biometrik belum terhubung ke akun manapun di perangkat ini.\n\nSilakan masuk dengan kata sandi terlebih dahulu.';
+      // Gunakan akun terakhir yang masuk (bukan akun yang mendaftar biometrik)
+      String? targetUser = await SessionService.getLastBiometricUser();
+      if (targetUser == null || targetUser.isEmpty) {
+        // Fallback ke akun yang terdaftar biometrik jika tidak ada sesi terakhir
+        targetUser = await SessionService.getEnrolledBiometricUsername();
+      }
+
+      if (targetUser == null || targetUser.isEmpty) {
+        _errorMessage =
+            'Tidak ditemukan akun terakhir yang masuk di perangkat ini.\n\nSilakan masuk dengan kata sandi terlebih dahulu.';
         _isLoading = false;
         notifyListeners();
         return false;
@@ -552,7 +524,7 @@ class AuthProvider extends ChangeNotifier {
       final allowFace = await SessionService.isFaceAllowed();
 
       if (!allowFingerprint && !allowFace) {
-        _errorMessage = 'Akses biometrik (sidik jari & pengenalan wajah) dinonaktifkan di pengaturan akun @$targetUser.';
+        _errorMessage = 'Akses biometrik (sidik jari & pengenalan wajah) dinonaktifkan di pengaturan akun terakhir yang masuk (@$targetUser).';
         _isLoading = false;
         notifyListeners();
         return false;
@@ -594,7 +566,7 @@ class AuthProvider extends ChangeNotifier {
       } catch (_) {}
 
       if (userData == null) {
-        _errorMessage = 'Data akun @$targetUser tidak ditemukan di perangkat. Silakan login manual dengan kata sandi.';
+        _errorMessage = 'Data akun terakhir yang masuk (@$targetUser) tidak ditemukan di perangkat. Silakan login manual dengan kata sandi.';
         _isLoading = false;
         notifyListeners();
         return false;
@@ -642,19 +614,25 @@ class AuthProvider extends ChangeNotifier {
     _isGuest = true;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('is_guest_mode', true);
+    // Hapus sisa cache progres tamu lama agar sesi selalu bersih dan tidak menyimpan progres apapun
+    await prefs.remove('guest_coins');
+    await prefs.remove('guest_xp');
+    await prefs.remove('guest_hsk');
+    await prefs.remove('guest_streak');
 
     _profile = UserProfile(
       id: 'guest_local_user',
       username: 'guest',
       email: '',
-      fullName: 'Pelajar Mandiri',
+      fullName: 'Tamu (Akses Terbatas)',
       avatarUrl: '',
       currentHskLevel: 1,
-      streak: 3,
+      streak: 0,
       lastActiveDate: DateTime.now(),
-      totalXp: 150,
-      coins: 50,
+      totalXp: 0,
+      coins: 0,
     );
+    _coinTransactions.clear();
     notifyListeners();
   }
 
@@ -663,6 +641,10 @@ class AuthProvider extends ChangeNotifier {
     await SessionService.clearSession();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('is_guest_mode');
+    await prefs.remove('guest_coins');
+    await prefs.remove('guest_xp');
+    await prefs.remove('guest_hsk');
+    await prefs.remove('guest_streak');
     _profile = null;
     _coinTransactions.clear();
     _isGuest = false;
@@ -713,11 +695,8 @@ class AuthProvider extends ChangeNotifier {
           attemptId: transactionId,
         );
       } catch (_) {}
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('guest_coins', newCoins);
-      await prefs.setInt('guest_xp', newXp);
     }
+    // Catatan: Mode Tamu TIDAK menyimpan progres apapun ke disk atau database.
 
     _coinTransactions.insert(
       0,
@@ -775,10 +754,8 @@ class AuthProvider extends ChangeNotifier {
           attemptId: transactionId,
         );
       } catch (_) {}
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('guest_coins', newCoins);
     }
+    // Catatan: Mode Tamu TIDAK menyimpan progres apapun ke disk atau database.
 
     _coinTransactions.insert(
       0,
@@ -812,9 +789,7 @@ class AuthProvider extends ChangeNotifier {
           currentHskLevel: level,
         );
       } catch (_) {}
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('guest_hsk', level);
     }
+    // Catatan: Mode Tamu TIDAK menyimpan progres apapun ke disk atau database.
   }
 }

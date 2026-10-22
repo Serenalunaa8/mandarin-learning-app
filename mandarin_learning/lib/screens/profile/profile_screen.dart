@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../../widgets/mascot_widget.dart';
 import '../auth/landing_screen.dart';
+import '../auth/register_screen.dart';
 import '../practice/dictionary_screen.dart';
 import '../tools/feedback_screen.dart';
 import '../settings/settings_screen.dart';
@@ -100,26 +101,70 @@ class ProfileScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
+                            color: auth.isGuest ? const Color(0xFFFEF3C7) : const Color(0xFFF1F5F9),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            border: Border.all(
+                              color: auth.isGuest ? const Color(0xFFF59E0B).withValues(alpha: 0.5) : const Color(0xFFE2E8F0),
+                            ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('🥈', style: TextStyle(fontSize: 14)),
-                              SizedBox(width: 6),
+                              Text(auth.isGuest ? '👤' : '🥈', style: const TextStyle(fontSize: 14)),
+                              const SizedBox(width: 6),
                               Text(
-                                'Silver',
+                                auth.isGuest ? 'Mode Tamu' : 'Silver',
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF475569),
+                                  color: auth.isGuest ? const Color(0xFF92400E) : const Color(0xFF475569),
                                 ),
                               ),
                             ],
                           ),
                         ),
+                        if (auth.isGuest) ...[
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEF3C7),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.6)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.info_outline_rounded, color: Color(0xFFB45309), size: 20),
+                                const SizedBox(width: 8),
+                                const Expanded(
+                                  child: Text(
+                                    'Akses terbatas: progres & koin tidak disimpan.',
+                                    style: TextStyle(fontSize: 11, color: Color(0xFF78350F)),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFD97706),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    elevation: 0,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                                    );
+                                  },
+                                  child: const Text('Daftar', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -141,7 +186,7 @@ class ProfileScreen extends StatelessWidget {
                         child: _buildProfileStatCard(
                           icon: '💎',
                           title: 'XP',
-                          value: '${auth.totalXp > 0 ? auth.totalXp : 320}',
+                          value: '${auth.isGuest ? auth.totalXp : (auth.totalXp > 0 ? auth.totalXp : 320)}',
                           unit: 'Total XP',
                         ),
                       ),
@@ -237,7 +282,7 @@ class ProfileScreen extends StatelessWidget {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                       ),
                       icon: const Icon(Icons.logout_rounded, size: 20),
-                      label: const Text('Keluar dari Akun (Logout)', style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: Text(auth.isGuest ? 'Keluar dari Mode Tamu' : 'Keluar dari Akun (Logout)', style: const TextStyle(fontWeight: FontWeight.bold)),
                       onPressed: () async {
                         await auth.logout();
                         if (context.mounted) {

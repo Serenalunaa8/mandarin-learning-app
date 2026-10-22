@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../../widgets/mascot_widget.dart';
 import 'vocabulary_detail_screen.dart';
+import '../auth/register_screen.dart';
 
 class LessonPathScreen extends StatelessWidget {
   const LessonPathScreen({super.key});
@@ -50,6 +51,84 @@ class LessonPathScreen extends StatelessWidget {
     final vocab = context.watch<VocabularyProvider>();
     final currentLevel = vocab.selectedLevel;
     final units = vocab.currentLevelUnits;
+
+    // Guest mode: show full locked state
+    if (auth.isGuest) {
+      return Scaffold(
+        backgroundColor: AppColors.mintBackground,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            onPressed: () {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+            },
+          ),
+          title: const Text('Jalur Pembelajaran'),
+        ),
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.lock_rounded,
+                    size: 72,
+                    color: Color(0xFF94A3B8),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Kursus Terkunci',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Kursus hanya tersedia untuk akun terdaftar. Daftar sekarang dan mulai perjalanan belajar Mandarin-mu!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textMuted,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                        );
+                      },
+                      child: const Text(
+                        'Daftar Sekarang',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.mintBackground,
