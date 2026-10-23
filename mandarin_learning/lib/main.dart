@@ -66,14 +66,22 @@ class _MandarinLearningAppState extends State<MandarinLearningApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: auth.isLoading
-          ? const Scaffold(
+          ? Scaffold(
+              backgroundColor: const Color(0xFFF1F8F4),
               body: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('🐼', style: TextStyle(fontSize: 60)),
-                    SizedBox(height: 16),
-                    CircularProgressIndicator(),
+                    Image.asset(
+                      'assets/image/beranda/maskot_01_bintang.png',
+                      width: 110,
+                      height: 110,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 20),
+                    const CircularProgressIndicator(
+                      color: Color(0xFF22C55E),
+                    ),
                   ],
                 ),
               ),
