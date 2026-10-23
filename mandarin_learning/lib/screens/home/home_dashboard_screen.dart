@@ -77,11 +77,39 @@ class HomeDashboardScreen extends StatelessWidget {
                           ],
                         ),
                         child: Center(
-                          child: Image.asset(
-                            'assets/image/beranda/wajah_01_senyum.png',
-                            width: 32,
-                            height: 32,
-                            fit: BoxFit.contain,
+                          child: ClipOval(
+                            child: (user?.avatarUrl != null && user!.avatarUrl.isNotEmpty)
+                                ? (user.avatarUrl.startsWith('http')
+                                    ? Image.network(
+                                        user.avatarUrl,
+                                        width: 34,
+                                        height: 34,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => Image.asset(
+                                          'assets/image/beranda/wajah_01_senyum.png',
+                                          width: 32,
+                                          height: 32,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      )
+                                    : Image.asset(
+                                        user.avatarUrl,
+                                        width: 34,
+                                        height: 34,
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (context, error, stackTrace) => Image.asset(
+                                          'assets/image/beranda/wajah_01_senyum.png',
+                                          width: 32,
+                                          height: 32,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ))
+                                : Image.asset(
+                                    'assets/image/beranda/wajah_01_senyum.png',
+                                    width: 32,
+                                    height: 32,
+                                    fit: BoxFit.contain,
+                                  ),
                           ),
                         ),
                       ),

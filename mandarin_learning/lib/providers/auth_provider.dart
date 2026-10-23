@@ -74,6 +74,26 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Memperbarui foto profil atau avatar pengguna
+  Future<void> updateAvatar(String newAvatarUrl) async {
+    if (_profile == null) return;
+    _profile = _profile!.copyWith(avatarUrl: newAvatarUrl);
+    notifyListeners();
+
+    if (!_isGuest) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_avatar_${_profile!.username}', newAvatarUrl);
+      final userMap = _profile!.toJson();
+      userMap['id'] = _profile!.id;
+      userMap['username'] = _profile!.username;
+      userMap.remove('avatar_url');
+      await LocalDatabaseService.instance.saveOrUpdateUser(userMap);
+      try {
+        await SupabaseService.instance.updateProfile(_profile!.id, {'avatar_url': newAvatarUrl});
+      } catch (_) {}
+    }
+  }
+
   /// Memperbarui informasi ketersediaan sensor dan status pendaftaran biometrik
   Future<void> refreshBiometricStatus() async {
     _isBiometricSupported = await BiometricService.instance.canAuthenticate();
@@ -257,6 +277,10 @@ class AuthProvider extends ChangeNotifier {
       _dailyGoalMinutes = await SessionService.getDailyGoalMinutes();
 
       _profile = UserProfile.fromJson(userRecord);
+      final savedAvatar = prefs.getString('user_avatar_$username');
+      if (savedAvatar != null && savedAvatar.isNotEmpty) {
+        _profile = _profile!.copyWith(avatarUrl: savedAvatar);
+      }
 
       // Ambil riwayat koin
       try {
