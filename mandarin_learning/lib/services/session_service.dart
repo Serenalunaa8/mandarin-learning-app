@@ -186,4 +186,18 @@ class SessionService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyBiometricAllowFace, allowed);
   }
+
+  static const String _keyDailyGoalMinutes = 'daily_goal_target_minutes';
+
+  /// Mengambil target waktu belajar harian dalam menit (default: 20 menit)
+  static Future<int> getDailyGoalMinutes() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_keyDailyGoalMinutes) ?? 20;
+  }
+
+  /// Menyimpan target waktu belajar harian dalam menit
+  static Future<void> setDailyGoalMinutes(int minutes) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyDailyGoalMinutes, minutes);
+  }
 }

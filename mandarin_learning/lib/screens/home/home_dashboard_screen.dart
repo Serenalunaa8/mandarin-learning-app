@@ -5,6 +5,8 @@ import '../../providers/vocabulary_provider.dart';
 import '../practice/speech_practice_screen.dart';
 import '../coins/coin_ledger_screen.dart';
 import '../auth/register_screen.dart';
+import '../lesson/lesson_path_screen.dart';
+import '../../widgets/daily_goal_modal.dart';
 
 class HomeDashboardScreen extends StatelessWidget {
   final Function(int) onNavigateTab;
@@ -28,7 +30,10 @@ class HomeDashboardScreen extends StatelessWidget {
     final cardProgressValue = auth.isGuest ? 0.0 : (displayProgress == 0 ? 0.6 : displayProgress);
     final cardProgressText = auth.isGuest ? '0%' : '${((displayProgress == 0 ? 0.6 : displayProgress) * 100).toInt()}%';
     final cardButtonText = auth.isGuest ? 'Mulai  →' : 'Lanjut  →';
-    final dailyGoalProgressText = auth.isGuest ? '0 / 20 menit' : '12 / 20 menit';
+    final targetMin = auth.dailyGoalMinutes;
+    final learnedMin = auth.isGuest ? 0 : (12 > targetMin ? targetMin : 12);
+    final dailyGoalProgressText = '$learnedMin / $targetMin menit';
+    final dailyGoalRatio = auth.isGuest ? 0.0 : (12 / targetMin).clamp(0.0, 1.0);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F8F4),
@@ -586,7 +591,12 @@ class HomeDashboardScreen extends StatelessWidget {
                                       minimumSize: Size.zero,
                                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                     ),
-                                    onPressed: () => onNavigateTab(1), // Tab Kursus
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => const LessonPathScreen()),
+                                      );
+                                    },
                                     child: Text(
                                       cardButtonText,
                                       style: const TextStyle(
@@ -646,15 +656,11 @@ class HomeDashboardScreen extends StatelessWidget {
                                   ),
                                 ),
                                 GestureDetector(
-                                  onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Target harian dapat diatur di Pengaturan.')),
-                                    );
-                                  },
+                                  onTap: () => showDailyGoalBottomSheet(context, auth),
                                   child: const Text(
                                     'Edit',
                                     style: TextStyle(
-                                      color: Color(0xFF225232),
+                                      color: Color(0xFF16A34A),
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -663,9 +669,9 @@ class HomeDashboardScreen extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 4),
-                            const Text(
-                              'Belajar selama 20 menit',
-                              style: TextStyle(
+                            Text(
+                              'Belajar selama $targetMin menit',
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                                 color: Color(0xFF1F2937),
@@ -677,6 +683,18 @@ class HomeDashboardScreen extends StatelessWidget {
                               style: const TextStyle(
                                 color: Color(0xFF94A3B8),
                                 fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: dailyGoalRatio,
+                                backgroundColor: const Color(0xFFE2E8F0),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF16A34A),
+                                ),
+                                minHeight: 6,
                               ),
                             ),
                           ],

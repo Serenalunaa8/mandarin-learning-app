@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import 'home_dashboard_screen.dart';
-import '../lesson/lesson_path_screen.dart';
+import '../practice/dictionary_screen.dart';
 import '../practice/practice_hub_screen.dart';
 import '../progress/progress_overview_screen.dart';
 import '../profile/profile_screen.dart';
@@ -41,7 +41,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final auth = context.read<AuthProvider>();
 
     // Guests can access session progress, while lessons and practice stay restricted.
-    if (auth.isGuest && (index == 1 || index == 2)) {
+    if (auth.isGuest && (index == 2 || index == 3)) {
       _showGuestRestrictionSheet(context);
       return;
     }
@@ -60,7 +60,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void _onPageChanged(int index) {
     final auth = context.read<AuthProvider>();
 
-    if (auth.isGuest && (index == 1 || index == 2)) {
+    if (auth.isGuest && (index == 2 || index == 3)) {
       _pageController.jumpToPage(_currentIndex);
       _showGuestRestrictionSheet(context);
       return;
@@ -147,7 +147,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
     final List<Widget> screens = [
       HomeDashboardScreen(onNavigateTab: _onTabTapped),
-      const LessonPathScreen(),
+      const DictionaryScreen(),
       const PracticeHubScreen(),
       const ProgressOverviewScreen(),
       const ProfileScreen(),

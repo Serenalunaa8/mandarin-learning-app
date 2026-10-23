@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
+import '../../widgets/daily_goal_modal.dart';
 import '../../services/notification_service.dart';
 import '../../services/supabase_service.dart';
 
@@ -247,6 +248,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => _showLevelPicker(context, vocab, auth),
+                  ),
+                  const Divider(height: 1, indent: 64),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDCFCE7),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.timer_outlined,
+                        color: Color(0xFF16A34A),
+                      ),
+                    ),
+                    title: const Text(
+                      'Target Waktu Belajar',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${auth.dailyGoalMinutes} menit per hari',
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => showDailyGoalBottomSheet(context, auth),
                   ),
                 ],
               ),

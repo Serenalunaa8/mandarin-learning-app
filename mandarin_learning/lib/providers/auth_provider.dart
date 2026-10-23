@@ -16,6 +16,7 @@ class AuthProvider extends ChangeNotifier {
   String? _errorMessage;
   bool _isGuest = false;
   bool _isBiometricSupported = false;
+  int _dailyGoalMinutes = 20;
 
   // Status Pendaftaran Biometrik (Sidik Jari & Pengenalan Wajah)
   bool _isBiometricEnrolled = false;
@@ -63,6 +64,15 @@ class AuthProvider extends ChangeNotifier {
   int get streak => _profile?.streak ?? 1;
   int get totalXp => _profile?.totalXp ?? 0;
   int get currentHskLevel => _profile?.currentHskLevel ?? 1;
+  int get dailyGoalMinutes => _dailyGoalMinutes;
+
+  Future<void> updateDailyGoalMinutes(int minutes) async {
+    _dailyGoalMinutes = minutes;
+    notifyListeners();
+    if (!_isGuest) {
+      await SessionService.setDailyGoalMinutes(minutes);
+    }
+  }
 
   /// Memperbarui informasi ketersediaan sensor dan status pendaftaran biometrik
   Future<void> refreshBiometricStatus() async {
@@ -103,6 +113,7 @@ class AuthProvider extends ChangeNotifier {
 
       if (guestMode) {
         _isGuest = true;
+        _dailyGoalMinutes = 20;
         // Mode Tamu (Akses Terbatas): tidak menyimpan progres apapun
         _profile = UserProfile(
           id: 'guest_temp',
@@ -117,6 +128,7 @@ class AuthProvider extends ChangeNotifier {
         );
         _coinTransactions.clear();
       } else {
+        _dailyGoalMinutes = await SessionService.getDailyGoalMinutes();
         // Cek sesi aktif dari SessionService
         final session = await SessionService.getSession();
         if (session != null) {
@@ -242,6 +254,7 @@ class AuthProvider extends ChangeNotifier {
       await prefs.setBool('is_guest_mode', false);
       await prefs.setString('last_registered_username', username);
       _isGuest = false;
+      _dailyGoalMinutes = await SessionService.getDailyGoalMinutes();
 
       _profile = UserProfile.fromJson(userRecord);
 
@@ -571,6 +584,7 @@ class AuthProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('is_guest_mode', false);
       _isGuest = false;
+      _dailyGoalMinutes = await SessionService.getDailyGoalMinutes();
 
       _profile = UserProfile.fromJson(userData);
 
@@ -595,6 +609,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> loginAsGuest() async {
     _isGuest = true;
+    _dailyGoalMinutes = 20;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('is_guest_mode', true);
     // Hapus sisa cache progres tamu lama agar sesi selalu bersih dan tidak menyimpan progres apapun
