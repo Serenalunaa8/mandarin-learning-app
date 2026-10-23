@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
-import '../../services/audio_service.dart';
 
 // FR-12: Konversi Mata Uang (IDR, CNY, USD) dengan timestamp update & offline fallback
 // PB-16: Kurs acuan PRD: 1 CNY ≈ 2.220 IDR, 1 USD ≈ 15.600 IDR, 1 USD ≈ 7.02 CNY
@@ -212,36 +211,6 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen> {
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              // Mandarin Vocabulary Context Card
-              const Text(
-                'Kosakata Mata Uang Mandarin',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              _buildVocabCard(
-                hanzi: '人民币',
-                pinyin: 'Rénmínbì',
-                arti: 'Mata uang Tiongkok (RMB / Yuan)',
-              ),
-              const SizedBox(height: 8),
-              _buildVocabCard(
-                hanzi: '汇率',
-                pinyin: 'Huìlǜ',
-                arti: 'Nilai tukar / Kurs mata uang',
-              ),
-              const SizedBox(height: 8),
-              _buildVocabCard(
-                hanzi: '多少钱？',
-                pinyin: 'Duōshao qián?',
-                arti: 'Berapa harganya?',
               ),
               const SizedBox(height: 20),
 
@@ -457,64 +426,5 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen> {
     );
   }
 
-  Widget _buildVocabCard({
-    required String hanzi,
-    required String pinyin,
-    required String arti,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      hanzi,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      pinyin,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryGreen,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  arti,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.volume_up_rounded, color: AppColors.primaryDark),
-            onPressed: () => AudioService.instance.speak(hanzi),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
