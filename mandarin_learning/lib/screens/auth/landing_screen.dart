@@ -1,13 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../core/constants/app_colors.dart';
-import '../../providers/auth_provider.dart';
-import '../home/main_navigation_screen.dart';
 import 'login_screen.dart';
-import 'register_screen.dart';
 
 /// Landing Page Onboarding Screen
 /// Tampilan visual mengikuti referensi mockup:
@@ -44,110 +39,9 @@ class _LandingScreenState extends State<LandingScreen>
   }
 
   void _onStartLearning(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 44,
-              height: 5,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE2E8F0),
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Mulai Petualangan Belajar 🐼',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const SizedBox(height: 20),
-
-            // Opsi 1: Daftar Akun Baru (Disimpan ke Cloud)
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton.icon(
-                icon: const Icon(
-                  Icons.person_add_alt_1_rounded,
-                  color: Colors.white,
-                ),
-                label: const Text(
-                  'Daftar Akun Baru',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF22C55E),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  elevation: 0,
-                ),
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Opsi 2: Coba Mode Tamu (Tanpa Akun)
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: OutlinedButton.icon(
-                icon: const Icon(
-                  Icons.flash_on_rounded,
-                  color: Color(0xFF15803D),
-                ),
-                label: const Text(
-                  'Coba Cepat (Mode Tamu)',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF15803D),
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF86EFAC), width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  final auth = context.read<AuthProvider>();
-                  await auth.loginAsGuest();
-                  if (context.mounted) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const MainNavigationScreen(),
-                      ),
-                    );
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
     );
   }
 

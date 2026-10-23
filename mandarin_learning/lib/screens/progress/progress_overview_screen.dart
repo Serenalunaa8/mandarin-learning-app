@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
-import '../auth/register_screen.dart';
 import '../practice/quiz_screen.dart';
 import '../practice/dictionary_screen.dart';
 
@@ -18,81 +17,9 @@ class ProgressOverviewScreen extends StatelessWidget {
     final attempts = vocab.quizAttempts;
     final avgScore = vocab.averageQuizScore;
 
-    // Guest mode: show locked/empty state
-    if (auth.isGuest) {
-      return Scaffold(
-        backgroundColor: AppColors.mintBackground,
-        appBar: AppBar(
-          title: const Text('Progres Belajar'),
-        ),
-        body: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.bar_chart_rounded,
-                    size: 72,
-                    color: Color(0xFF94A3B8),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Progres Tidak Tersedia',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Progres belajar tidak tersedia untuk Mode Tamu. Daftar akun untuk melacak kemajuanmu!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textMuted,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(26),
-                        ),
-                        elevation: 0,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                        );
-                      },
-                      child: const Text(
-                        'Daftar Akun',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       backgroundColor: AppColors.mintBackground,
-      appBar: AppBar(
-        title: const Text('Progres Belajar'),
-      ),
+      appBar: AppBar(title: const Text('Progres Belajar')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -116,7 +43,13 @@ class ProgressOverviewScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    const Text('Total Kosakata Dikuasai', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                    const Text(
+                      'Total Kosakata Dikuasai',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 13,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     Text(
                       '$learnedTotal / 5.000',
@@ -130,10 +63,12 @@ class ProgressOverviewScreen extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: LinearProgressIndicator(
-                        value: (learnedTotal / 5000).clamp(0.01, 1.0),
+                        value: (learnedTotal / 5000).clamp(0.0, 1.0),
                         minHeight: 10,
                         backgroundColor: const Color(0xFFDCFCE7),
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -142,7 +77,10 @@ class ProgressOverviewScreen extends StatelessWidget {
                       children: [
                         _buildStatCol('🔥 ${auth.streak}', 'Hari Streak'),
                         _buildStatCol('💎 ${auth.coins}', 'Permata/Koin'),
-                        _buildStatCol('⭐ ${auth.totalXp > 0 ? auth.totalXp : 320}', 'Poin XP'),
+                        _buildStatCol(
+                          '⭐ ${auth.isGuest ? auth.totalXp : (auth.totalXp > 0 ? auth.totalXp : 320)}',
+                          'Poin XP',
+                        ),
                       ],
                     ),
                   ],
@@ -164,8 +102,18 @@ class ProgressOverviewScreen extends StatelessWidget {
                   ),
                   TextButton.icon(
                     style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                    icon: const Icon(Icons.play_circle_outline_rounded, size: 18, color: AppColors.primaryDark),
-                    label: const Text('Mulai Kuis', style: TextStyle(color: AppColors.primaryDark, fontWeight: FontWeight.bold)),
+                    icon: const Icon(
+                      Icons.play_circle_outline_rounded,
+                      size: 18,
+                      color: AppColors.primaryDark,
+                    ),
+                    label: const Text(
+                      'Mulai Kuis',
+                      style: TextStyle(
+                        color: AppColors.primaryDark,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -211,7 +159,9 @@ class ProgressOverviewScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const DictionaryScreen(initialShowFavorites: true),
+                            builder: (_) => const DictionaryScreen(
+                              initialShowFavorites: true,
+                            ),
                           ),
                         );
                       },
@@ -241,7 +191,11 @@ class ProgressOverviewScreen extends StatelessWidget {
                     children: [
                       const Text(
                         'Riwayat Kuis Terakhir',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: AppColors.textDark,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       ...attempts.take(3).map((att) {
@@ -264,24 +218,37 @@ class ProgressOverviewScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 10),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Kuis HSK ${att.hskLevel}',
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textDark),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: AppColors.textDark,
+                                        ),
                                       ),
                                       Text(
                                         '${att.correctAnswers}/${att.totalQuestions} Benar • +${att.coinsEarned} 🪙',
-                                        style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textMuted,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: isGreat ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7),
+                                  color: isGreat
+                                      ? const Color(0xFFDCFCE7)
+                                      : const Color(0xFFFEF3C7),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -289,7 +256,9 @@ class ProgressOverviewScreen extends StatelessWidget {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
-                                    color: isGreat ? const Color(0xFF15803D) : const Color(0xFFB45309),
+                                    color: isGreat
+                                        ? const Color(0xFF15803D)
+                                        : const Color(0xFFB45309),
                                   ),
                                 ),
                               ),
@@ -316,7 +285,13 @@ class ProgressOverviewScreen extends StatelessWidget {
               ...List.generate(6, (index) {
                 final lvl = index + 1;
                 final progress = vocab.getLevelProgress(lvl);
-                final totalWords = lvl == 1 ? 150 : (lvl == 2 ? 150 : (lvl == 3 ? 300 : (lvl == 4 ? 600 : (lvl == 5 ? 1300 : 2500))));
+                final totalWords = lvl == 1
+                    ? 150
+                    : (lvl == 2
+                          ? 150
+                          : (lvl == 3
+                                ? 300
+                                : (lvl == 4 ? 600 : (lvl == 5 ? 1300 : 2500))));
                 final learnedInLevel = (progress * totalWords).round();
 
                 return Container(
@@ -341,7 +316,11 @@ class ProgressOverviewScreen extends StatelessWidget {
                         children: [
                           Text(
                             'HSK Level $lvl',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textDark),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: AppColors.textDark,
+                            ),
                           ),
                           Text(
                             '$learnedInLevel / $totalWords kata (${(progress * 100).toInt()}%)',
@@ -361,7 +340,9 @@ class ProgressOverviewScreen extends StatelessWidget {
                           minHeight: 8,
                           backgroundColor: const Color(0xFFF1F5F9),
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            progress >= 1.0 ? const Color(0xFF16A34A) : AppColors.primary,
+                            progress >= 1.0
+                                ? const Color(0xFF16A34A)
+                                : AppColors.primary,
                           ),
                         ),
                       ),
@@ -380,9 +361,15 @@ class ProgressOverviewScreen extends StatelessWidget {
   Widget _buildStatCol(String title, String subtitle) {
     return Column(
       children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         const SizedBox(height: 2),
-        Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+        Text(
+          subtitle,
+          style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+        ),
       ],
     );
   }
@@ -424,7 +411,11 @@ class ProgressOverviewScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
             ),
             Text(
               title,

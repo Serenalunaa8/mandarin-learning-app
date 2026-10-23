@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/biometric_service.dart';
 import '../home/main_navigation_screen.dart';
 import 'register_screen.dart';
 
@@ -105,84 +104,6 @@ class _LoginScreenState extends State<LoginScreen>
       return;
     }
 
-    // Jika biometrik belum dihubungkan ke akun manapun di perangkat:
-    if (!auth.isBiometricEnrolled) {
-      final isFaceOnly = auth.hasFaceSensor && !auth.hasFingerprintSensor;
-      final biometricName = isFaceOnly
-          ? 'pengenalan wajah'
-          : (auth.hasFingerprintSensor && !auth.hasFaceSensor
-              ? 'sidik jari'
-              : 'biometrik');
-      final biometricIcon = isFaceOnly
-          ? Icons.face_retouching_natural_rounded
-          : Icons.fingerprint_rounded;
-
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: _loginPageColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: _loginAccentColor, width: 1.2),
-          ),
-          title: Row(
-            children: [
-              Icon(biometricIcon, color: _loginAccentColor, size: 28),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Text(
-                  'Biometrik Belum Terhubung',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          content: Text(
-            'Untuk menggunakan login dengan $biometricName, silakan masuk atau daftar menggunakan nama pengguna dan kata sandi sekali.\n\nPastikan juga $biometricName sudah didaftarkan pada Pengaturan perangkat HP Anda.',
-            style: const TextStyle(
-              fontSize: 13,
-              height: 1.4,
-              color: _loginSupportingTextColor,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                BiometricService.instance.openEnrollmentSettings();
-              },
-              child: const Text(
-                'Pengaturan HP',
-                style: TextStyle(
-                  color: _loginAccentColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _loginAccentColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text(
-                'Saya Mengerti',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
     final success = await auth.loginWithBiometrics();
 
     if (!mounted) return;
@@ -225,26 +146,24 @@ class _LoginScreenState extends State<LoginScreen>
       biometricLabel = 'Biometrik tidak tersedia di perangkat';
     } else if (isFaceOnly) {
       biometricIcon = Icons.face_retouching_natural_rounded;
-      biometricLabel = auth.isBiometricEnrolled
-          ? 'Masuk dengan Wajah (@${auth.enrolledBiometricUsername})'
+      biometricLabel = auth.biometricLoginUsername != null
+          ? 'Masuk dengan Wajah (@${auth.biometricLoginUsername})'
           : 'Masuk dengan Pengenalan Wajah';
     } else if (isFingerprintOnly) {
       biometricIcon = Icons.fingerprint_rounded;
-      biometricLabel = auth.isBiometricEnrolled
-          ? 'Masuk dengan Sidik Jari (@${auth.enrolledBiometricUsername})'
+      biometricLabel = auth.biometricLoginUsername != null
+          ? 'Masuk dengan Sidik Jari (@${auth.biometricLoginUsername})'
           : 'Masuk dengan Sidik Jari';
     } else {
       biometricIcon = Icons.fingerprint_rounded;
-      biometricLabel = auth.isBiometricEnrolled
-          ? 'Masuk dengan Biometrik (@${auth.enrolledBiometricUsername})'
+      biometricLabel = auth.biometricLoginUsername != null
+          ? 'Masuk dengan Biometrik (@${auth.biometricLoginUsername})'
           : 'Masuk dengan Biometrik';
     }
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
       child: SizedBox(
         height: 52,
         child: OutlinedButton(
@@ -253,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen>
               : _handleBiometricLogin,
           style: OutlinedButton.styleFrom(
             side: BorderSide(
-              color: auth.isBiometricEnrolled
+              color: auth.biometricLoginUsername != null
                   ? _loginAccentColor
                   : _loginFieldBorderColor.withValues(alpha: 0.6),
               width: 1.4,
@@ -261,18 +180,14 @@ class _LoginScreenState extends State<LoginScreen>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            backgroundColor: auth.isBiometricEnrolled
+            backgroundColor: auth.biometricLoginUsername != null
                 ? _loginAccentColor.withValues(alpha: 0.14)
                 : Colors.white.withValues(alpha: 0.05),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                biometricIcon,
-                size: 23,
-                color: _loginAccentColor,
-              ),
+              Icon(biometricIcon, size: 23, color: _loginAccentColor),
               const SizedBox(width: 9),
               Flexible(
                 child: Text(
@@ -565,14 +480,16 @@ class _LoginScreenState extends State<LoginScreen>
                                     backgroundColor: _loginAccentColor,
                                     foregroundColor: Colors.white,
                                     elevation: 2,
-                                    shadowColor: _loginAccentColor
-                                        .withValues(alpha: 0.22),
+                                    shadowColor: _loginAccentColor.withValues(
+                                      alpha: 0.22,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                   ),
-                                  onPressed:
-                                      auth.isLoading ? null : _submitLogin,
+                                  onPressed: auth.isLoading
+                                      ? null
+                                      : _submitLogin,
                                   child: auth.isLoading
                                       ? const SizedBox(
                                           width: 24,
@@ -655,8 +572,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) =>
-                                            const RegisterScreen(),
+                                        builder: (_) => const RegisterScreen(),
                                       ),
                                     );
                                   },

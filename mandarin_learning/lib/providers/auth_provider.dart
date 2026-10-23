@@ -21,6 +21,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isBiometricEnrolled = false;
   String? _enrolledBiometricUsername;
   String? _enrolledBiometricFullName;
+  String? _lastBiometricUsername;
   bool _hasFingerprintSensor = false;
   bool _hasFaceSensor = false;
   bool _isFingerprintAllowed = true;
@@ -39,6 +40,8 @@ class AuthProvider extends ChangeNotifier {
   // Getters Biometrik
   bool get isBiometricEnrolled => _isBiometricEnrolled;
   String? get enrolledBiometricUsername => _enrolledBiometricUsername;
+  String? get biometricLoginUsername =>
+      _lastBiometricUsername ?? _enrolledBiometricUsername;
   String? get enrolledBiometricFullName => _enrolledBiometricFullName;
   bool get hasFingerprintSensor => _hasFingerprintSensor;
   bool get hasFaceSensor => _hasFaceSensor;
@@ -69,11 +72,15 @@ class AuthProvider extends ChangeNotifier {
     if (_isBiometricSupported) {
       _hasFingerprintSensor = await BiometricService.instance.hasFingerprint();
       _hasFaceSensor = await BiometricService.instance.hasFaceRecognition();
-      _biometricSensorLabel = await BiometricService.instance.getSensorSummary();
+      _biometricSensorLabel = await BiometricService.instance
+          .getSensorSummary();
     }
     _isBiometricEnrolled = await SessionService.isBiometricEnrolled();
-    _enrolledBiometricUsername = await SessionService.getEnrolledBiometricUsername();
-    _enrolledBiometricFullName = await SessionService.getEnrolledBiometricFullName();
+    _enrolledBiometricUsername =
+        await SessionService.getEnrolledBiometricUsername();
+    _lastBiometricUsername = await SessionService.getLastBiometricUser();
+    _enrolledBiometricFullName =
+        await SessionService.getEnrolledBiometricFullName();
     _isFingerprintAllowed = await SessionService.isFingerprintAllowed();
     _isFaceAllowed = await SessionService.isFaceAllowed();
     notifyListeners();
@@ -299,8 +306,7 @@ class AuthProvider extends ChangeNotifier {
       if (existingLocal != null) {
         final storedHash = existingLocal['password_hash'] as String? ?? '';
         if (!SecurityService.verifyPassword(password, storedHash)) {
-          _errorMessage =
-              'Username ini sudah tersimpan di perangkat. Masukkan kata sandi akun tersebut untuk menyinkronkan.';
+          _errorMessage = 'Username ini sudah tersimpan di perangkat. Masukkan kata sandi akun tersebut untuk menyinkronkan.';
           _isLoading = false;
           notifyListeners();
           return false;
@@ -326,7 +332,9 @@ class AuthProvider extends ChangeNotifier {
 
       // 2. Simpan ke database lokal SQLite terlebih dahulu
       await LocalDatabaseService.instance.saveOrUpdateUser(userMap);
-      debugPrint('[AuthProvider] ✅ Akun tersimpan di SQLite lokal: $cleanUsername');
+      debugPrint(
+        '[AuthProvider] ✅ Akun tersimpan di SQLite lokal: $cleanUsername',
+      );
 
       // 3. Simpan ke database online Supabase
       try {
@@ -336,16 +344,19 @@ class AuthProvider extends ChangeNotifier {
           passwordHash: userMap['password_hash'].toString(),
           fullName: userMap['full_name']?.toString() ?? cleanFullName,
           email: userMap['email']?.toString() ?? cleanEmail,
-          currentHskLevel:
-              (userMap['current_hsk_level'] as num?)?.toInt() ?? 1,
+          currentHskLevel: (userMap['current_hsk_level'] as num?)?.toInt() ?? 1,
           streak: (userMap['streak'] as num?)?.toInt() ?? 1,
           totalXp: (userMap['total_xp'] as num?)?.toInt() ?? 0,
           coins: (userMap['coins'] as num?)?.toInt() ?? 50,
           createdAt: userMap['created_at']?.toString(),
         );
-        debugPrint('[AuthProvider] ✅ Akun berhasil disimpan ke Supabase online.');
+        debugPrint(
+          '[AuthProvider] ✅ Akun berhasil disimpan ke Supabase online.',
+        );
       } catch (e) {
-        debugPrint('[AuthProvider] ⚠️ Gagal simpan ke Supabase (offline/network): $e');
+        debugPrint(
+          '[AuthProvider] ⚠️ Gagal simpan ke Supabase (offline/network): $e',
+        );
       }
 
       // Pastikan sesi dan profil TIDAK diset saat daftar,
@@ -385,8 +396,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final hasFingerprint =
-          await BiometricService.instance.hasFingerprint();
+      final hasFingerprint = await BiometricService.instance.hasFingerprint();
       final hasFace = await BiometricService.instance.hasFaceRecognition();
       if (!hasFingerprint && !hasFace) {
         _errorMessage = 'Perangkat ini tidak memiliki atau belum mengaktifkan sensor biometrik.';
@@ -397,10 +407,12 @@ class AuthProvider extends ChangeNotifier {
 
       final uId = targetUserId ?? _profile?.id;
       final uName = targetUsername ?? _profile?.username;
-      final fName = targetFullName ?? (_profile?.fullName ?? 'Pelajar Mandarin');
+      final fName =
+          targetFullName ?? (_profile?.fullName ?? 'Pelajar Mandarin');
 
       if (uId == null || uName == null || uName.isEmpty) {
-        _errorMessage = 'Tidak ada akun yang aktif untuk didaftarkan biometrik.';
+        _errorMessage =
+            'Tidak ada akun yang aktif untuk didaftarkan biometrik.';
         _isLoading = false;
         notifyListeners();
         return false;
@@ -462,7 +474,10 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Mengatur preferensi sensor yang diizinkan (Sidik Jari / Wajah)
-  Future<void> setBiometricSensorPreference({bool? fingerprint, bool? face}) async {
+  Future<void> setBiometricSensorPreference({
+    bool? fingerprint,
+    bool? face,
+  }) async {
     if (fingerprint != null) {
       await SessionService.setFingerprintAllowed(fingerprint);
       _isFingerprintAllowed = fingerprint;
@@ -494,54 +509,21 @@ class AuthProvider extends ChangeNotifier {
         return false;
       }
 
-      // Periksa pendaftaran biometrik: pastikan ada akun yang mengaktifkan fitur ini
-      final isEnrolled = await SessionService.isBiometricEnrolled();
-
-      if (!isEnrolled) {
-        _errorMessage =
-            'Belum ada akun yang mengaktifkan biometrik di perangkat ini.\n\nSilakan masuk dengan kata sandi terlebih dahulu, lalu aktifkan biometrik di menu Pengaturan.';
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      // Gunakan akun terakhir yang masuk (bukan akun yang mendaftar biometrik)
-      String? targetUser = await SessionService.getLastBiometricUser();
-      if (targetUser == null || targetUser.isEmpty) {
-        // Fallback ke akun yang terdaftar biometrik jika tidak ada sesi terakhir
-        targetUser = await SessionService.getEnrolledBiometricUsername();
-      }
+      // The device verifies the biometric; the app uses the last account that
+      // successfully signed in to determine which profile to restore.
+      final targetUser =
+          await SessionService.getLastBiometricUser() ??
+          await SessionService.getEnrolledBiometricUsername();
 
       if (targetUser == null || targetUser.isEmpty) {
-        _errorMessage =
-            'Tidak ditemukan akun terakhir yang masuk di perangkat ini.\n\nSilakan masuk dengan kata sandi terlebih dahulu.';
+        _errorMessage = 'Tidak ditemukan akun terakhir yang masuk di perangkat ini.\n\nSilakan masuk dengan kata sandi terlebih dahulu.';
         _isLoading = false;
         notifyListeners();
         return false;
-      }
-
-      final allowFingerprint = await SessionService.isFingerprintAllowed();
-      final allowFace = await SessionService.isFaceAllowed();
-
-      if (!allowFingerprint && !allowFace) {
-        _errorMessage = 'Akses biometrik (sidik jari & pengenalan wajah) dinonaktifkan di pengaturan akun terakhir yang masuk (@$targetUser).';
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      // Tentukan teks prompt sesuai sensor yang didukung dan diizinkan
-      String promptReason;
-      if (allowFingerprint && allowFace) {
-        promptReason = 'Pindai sidik jari atau hadapkan wajah untuk masuk sebagai @$targetUser';
-      } else if (allowFace) {
-        promptReason = 'Hadapkan wajah Anda (Face Recognition) untuk masuk sebagai @$targetUser';
-      } else {
-        promptReason = 'Pindai sidik jari Anda (Fingerprint) untuk masuk sebagai @$targetUser';
       }
 
       final authenticated = await BiometricService.instance.authenticate(
-        reason: promptReason,
+        reason: 'Verifikasi biometrik untuk masuk sebagai @$targetUser',
       );
 
       if (!authenticated) {
@@ -566,7 +548,8 @@ class AuthProvider extends ChangeNotifier {
       } catch (_) {}
 
       if (userData == null) {
-        _errorMessage = 'Data akun terakhir yang masuk (@$targetUser) tidak ditemukan di perangkat. Silakan login manual dengan kata sandi.';
+        _errorMessage =
+            'Data akun terakhir yang masuk (@$targetUser) tidak ditemukan di perangkat. Silakan login manual dengan kata sandi.';
         _isLoading = false;
         notifyListeners();
         return false;
