@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
-import '../../services/audio_service.dart';
 
 // FR-13: Konversi Waktu (WIB, WITA, WIT, London dengan DST, CST / Beijing Time)
 // PB-17: Mendukung komparasi 5 zona waktu & aturan British Summer Time (BST)
@@ -18,6 +17,20 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
   Timer? _timer;
   bool _isLiveTime = true;
   double _customHourOffset = 0; // offset in hours from current time if user slides
+  String _sourceZoneId = 'WIB';
+  String _targetZoneId = 'China';
+
+  List<_TimeZoneOption> get _zones => [
+    _TimeZoneOption(id: 'WIB', name: 'WIB · Jakarta', offsetAt: (_) => 7),
+    _TimeZoneOption(id: 'WITA', name: 'WITA · Bali', offsetAt: (_) => 8),
+    _TimeZoneOption(id: 'WIT', name: 'WIT · Papua', offsetAt: (_) => 9),
+    _TimeZoneOption(id: 'China', name: 'China · Beijing', offsetAt: (_) => 8),
+    _TimeZoneOption(
+      id: 'London',
+      name: 'London · Inggris',
+      offsetAt: (utc) => _isLondonDst(utc) ? 1 : 0,
+    ),
+  ];
 
   @override
   void initState() {
@@ -42,15 +55,43 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
   // Dimulai Minggu terakhir Maret (01:00 UTC) s.d. Minggu terakhir Oktober (01:00 UTC)
   bool _isLondonDst(DateTime utcDate) {
     final year = utcDate.year;
-    // Minggu terakhir Maret
-    final lastSundayMarch = DateTime.utc(year, 3, 31);
-    final marchDstStart = lastSundayMarch.subtract(Duration(days: lastSundayMarch.weekday % 7));
+    final marchSunday = DateTime.utc(year, 3, 31);
+    final octoberSunday = DateTime.utc(year, 10, 31);
+    final bstStarts = DateTime.utc(
+      year,
+      3,
+      31 - (marchSunday.weekday % 7),
+      1,
+    );
+    final bstEnds = DateTime.utc(
+      year,
+      10,
+      31 - (octoberSunday.weekday % 7),
+      1,
+    );
+    return !utcDate.isBefore(bstStarts) && utcDate.isBefore(bstEnds);
+  }
 
-    // Minggu terakhir Oktober
-    final lastSundayOct = DateTime.utc(year, 10, 31);
-    final octDstEnd = lastSundayOct.subtract(Duration(days: lastSundayOct.weekday % 7));
+  _TimeZoneOption _zone(String id) => _zones.firstWhere(
+    (zone) => zone.id == id,
+    orElse: () => _zones.first,
+  );
 
-    return utcDate.isAfter(marchDstStart) && utcDate.isBefore(octDstEnd);
+  DateTime _timeInZone(DateTime utc, _TimeZoneOption zone) =>
+      utc.add(Duration(hours: zone.offsetAt(utc)));
+
+  String _utcLabel(DateTime utc, _TimeZoneOption zone) {
+    final offset = zone.offsetAt(utc);
+    final sign = offset >= 0 ? '+' : '-';
+    return 'UTC$sign${offset.abs().toString().padLeft(2, '0')}:00';
+  }
+
+  void _swapZones() {
+    setState(() {
+      final previousSource = _sourceZoneId;
+      _sourceZoneId = _targetZoneId;
+      _targetZoneId = previousSource;
+    });
   }
 
   DateTime _getTargetTime(int utcOffsetHours) {
@@ -93,6 +134,13 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
     final witTime = _getTargetTime(9);
     final cstTime = _getTargetTime(8); // Beijing UTC+8
     final londonTime = _getTargetTime(londonOffset);
+    final conversionUtc = _currentTime.add(
+      Duration(minutes: (_customHourOffset * 60).round()),
+    );
+    final sourceZone = _zone(_sourceZoneId);
+    final targetZone = _zone(_targetZoneId);
+    final sourceTime = _timeInZone(conversionUtc, sourceZone);
+    final convertedTime = _timeInZone(conversionUtc, targetZone);
 
     return Scaffold(
       backgroundColor: AppColors.mintBackground,
@@ -244,6 +292,122 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
               ),
               const SizedBox(height: 20),
 
+              // Pemilih asal dan tujuan membuat konversi bisa dibalik dan
+              // mendukung seluruh zona yang ditampilkan di halaman ini.
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Konversi waktu antarnegara',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildZoneDropdown(
+                            label: 'Dari',
+                            value: _sourceZoneId,
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => _sourceZoneId = value);
+                              }
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: 'Tukar zona waktu',
+                          onPressed: _swapZones,
+                          icon: const Icon(Icons.swap_horiz_rounded),
+                          color: AppColors.primaryGreen,
+                        ),
+                        Expanded(
+                          child: _buildZoneDropdown(
+                            label: 'Ke',
+                            value: _targetZoneId,
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => _targetZoneId = value);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0FDF4),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${sourceZone.name}  ${_utcLabel(conversionUtc, sourceZone)}',
+                            style: const TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            '${_formatTime(sourceTime)}  ·  ${_formatDate(sourceTime)}',
+                            style: const TextStyle(
+                              color: AppColors.textDark,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Icon(
+                              Icons.arrow_downward_rounded,
+                              color: AppColors.primaryGreen,
+                            ),
+                          ),
+                          Text(
+                            '${targetZone.name}  ${_utcLabel(conversionUtc, targetZone)}',
+                            style: const TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            '${_formatTime(convertedTime)}  ·  ${_formatDate(convertedTime)}',
+                            style: const TextStyle(
+                              color: AppColors.primaryGreen,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
               // 4 Zona Lainnya
               const Text(
                 'Perbandingan Zona Waktu Terkait',
@@ -300,27 +464,49 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Mandarin Time Terms
-              const Text(
-                'Kosakata Waktu Bahasa Mandarin',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              _buildVocabTile(hanzi: '现在几点？', pinyin: 'Xiànzài jǐ diǎn?', arti: 'Sekarang jam berapa?'),
-              const SizedBox(height: 8),
-              _buildVocabTile(hanzi: '时区', pinyin: 'Shíqū', arti: 'Zona waktu'),
-              const SizedBox(height: 8),
-              _buildVocabTile(hanzi: '北京时间', pinyin: 'Běijīng shíjiān', arti: 'Waktu Beijing (CST)'),
-              const SizedBox(height: 24),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildZoneDropdown({
+    required String label,
+    required String value,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.textMuted,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          underline: const SizedBox.shrink(),
+          style: const TextStyle(
+            color: AppColors.textDark,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+          items: _zones
+              .map(
+                (zone) => DropdownMenuItem<String>(
+                  value: zone.id,
+                  child: Text(zone.name, overflow: TextOverflow.ellipsis),
+                ),
+              )
+              .toList(),
+          onChanged: onChanged,
+        ),
+      ],
     );
   }
 
@@ -425,60 +611,16 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
     );
   }
 
-  Widget _buildVocabTile({
-    required String hanzi,
-    required String pinyin,
-    required String arti,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      hanzi,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      pinyin,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryGreen,
-                      ),
-                    ),
-                  ],
-                ),
-                Text(arti, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.volume_up_rounded, color: AppColors.primaryDark),
-            onPressed: () => AudioService.instance.speak(hanzi),
-          ),
-        ],
-      ),
-    );
-  }
+}
+
+class _TimeZoneOption {
+  final String id;
+  final String name;
+  final int Function(DateTime utc) offsetAt;
+
+  const _TimeZoneOption({
+    required this.id,
+    required this.name,
+    required this.offsetAt,
+  });
 }
