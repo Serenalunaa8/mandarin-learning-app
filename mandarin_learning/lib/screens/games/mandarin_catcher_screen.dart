@@ -29,7 +29,10 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
   static const double _catcherHeight = 72.0;
   static const double _objectWidth = 64.0;
   static const double _objectHeight = 84.0;
+  static const double _minimumEggGap = 88.0;
+  static const int _maxFallingObjects = 2;
   static const int _gameDurationSecs = 30;
+  static const int _wrongCatchLimit = 5;
   static const double _fallSpeed = 2.8;
 
   // Game state
@@ -38,7 +41,7 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
   int _score = 0;
   int _combo = 0;
   int _maxCombo = 0;
-  int _lives = 3;
+  int _wrongCaught = 0;
   int _missedTargets = 0;
   bool _isPlaying = false;
   bool _gameOver = false;
@@ -128,7 +131,7 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
       _score = 0;
       _combo = 0;
       _maxCombo = 0;
-      _lives = 3;
+      _wrongCaught = 0;
       _missedTargets = 0;
       _caughtWords.clear();
       _timeRemaining = _gameDurationSecs;
@@ -141,7 +144,7 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     _tickController.repeat();
 
     // Spawn falling objects secara teratur
-    _spawnTimer = Timer.periodic(const Duration(milliseconds: 900), (t) {
+    _spawnTimer = Timer.periodic(const Duration(milliseconds: 2600), (t) {
       if (!mounted || _gameOver) {
         t.cancel();
         return;
@@ -175,12 +178,29 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
         ? _targetWord!
         : distractors[_rng.nextInt(distractors.length)];
 
-    final maxX = _screenWidth - _objectWidth - 20;
-    final x = (20 + _rng.nextDouble() * max(0.0, maxX)).clamp(10.0, maxX);
+    if (_fallingObjects.length >= _maxFallingObjects) return;
+
+    final maxX = max(10.0, _screenWidth - _objectWidth - 10);
+    double? spacedX;
+    for (var attempt = 0; attempt < 40; attempt++) {
+      final candidate = 10 + _rng.nextDouble() * (maxX - 10);
+      final isSeparated = _fallingObjects.every(
+        (existing) =>
+            (existing.x - candidate).abs() >=
+            _objectWidth + _minimumEggGap,
+      );
+      if (isSeparated) {
+        spacedX = candidate;
+        break;
+      }
+    }
+    // Leave a little breathing room when the screen has no free lane instead
+    // of stacking another egg on top of an existing one.
+    if (spacedX == null) return;
 
     final obj = _FallingObject(
       id: DateTime.now().microsecondsSinceEpoch,
-      x: x,
+      x: spacedX,
       y: -_objectHeight,
       word: word,
       isTarget: isTarget,
@@ -229,8 +249,8 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
         } else {
           // ❌ Menangkap kata distractor! Kurangi nyawa
           _combo = 0;
-          _lives--;
-          if (_lives <= 0) {
+          _wrongCaught++;
+          if (_wrongCaught >= _wrongCatchLimit) {
             _endGame();
             return;
           }
@@ -251,6 +271,7 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
   }
 
   void _endGame() {
+    if (_gameOver) return;
     _tickController.stop();
     _spawnTimer?.cancel();
     _gameTimer?.cancel();
@@ -261,6 +282,13 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     });
 
     _saveGameResult();
+  }
+
+  void _exitActiveGame() {
+    _tickController.stop();
+    _spawnTimer?.cancel();
+    _gameTimer?.cancel();
+    Navigator.of(context).maybePop();
   }
 
   Future<void> _saveGameResult() async {
@@ -577,39 +605,55 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 9,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF4FFF5)
-                              .withValues(alpha: 0.92),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF145C50)
-                                  .withValues(alpha: 0.2),
-                              blurRadius: 16,
-                              offset: const Offset(0, 5),
+                      Row(
+                        children: [
+                          Material(
+                            color: const Color(0xFFF4FFF5).withValues(alpha: 0.92),
+                            shape: const CircleBorder(),
+                            child: IconButton(
+                              tooltip: 'Kembali',
+                              onPressed: _exitActiveGame,
+                              icon: const Icon(Icons.arrow_back_rounded),
+                              color: const Color(0xFF174A3F),
                             ),
-                          ],
-                        ),
-                        child: const Text(
-                          'TANGKAP KATA YANG BENAR!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Color(0xFF174A3F),
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16,
-                            letterSpacing: 0.6,
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF4FFF5)
+                                    .withValues(alpha: 0.92),
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF145C50)
+                                        .withValues(alpha: 0.2),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: const Text(
+                                'TANGKAP KATA YANG BENAR!',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Color(0xFF174A3F),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 15,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -618,21 +662,21 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                           _buildGameBadge(
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
-                              children: List.generate(
-                                3,
-                                (i) => Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 1,
-                                  ),
-                                  child: Icon(
-                                    Icons.favorite_rounded,
-                                    size: 17,
-                                    color: i < _lives
-                                        ? const Color(0xFFEF5C62)
-                                        : const Color(0xFFAA9B92),
+                              children: [
+                                const Icon(
+                                  Icons.close_rounded,
+                                  size: 17,
+                                  color: Color(0xFFEF5C62),
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '$_wrongCaught/$_wrongCatchLimit',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF24594F),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                           _buildGameBadge(
