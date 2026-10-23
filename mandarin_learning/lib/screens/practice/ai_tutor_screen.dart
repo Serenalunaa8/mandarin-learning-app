@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../core/constants/app_colors.dart';
 import '../../services/ai_tutor_service.dart';
 import '../../services/audio_service.dart';
@@ -18,9 +16,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<AiChatMessage> _messages = [];
   bool _isGenerating = false;
-  List<AiProvider> _availableProviders = [];
-  String? _providerStatusError;
-  AiProvider _selectedProvider = AiProvider.gemini;
+  String? _providerConfigHint;
+  final AiProvider _selectedProvider = AiProvider.gemini;
 
   final List<String> _quickSuggestions = [
     'Perbedaan 的, 得, 地',
@@ -56,47 +53,24 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   Future<void> _loadAvailableProviders() async {
     if (mounted) {
       setState(() {
-        _providerStatusError = null;
-      });
-    }
-    try {
-      final providers = await AiTutorService.instance.getAvailableProviders();
-      final preferences = await SharedPreferences.getInstance();
-      final selectedId = preferences.getString('ai_tutor_provider');
-      if (!mounted) return;
-      setState(() {
-        _availableProviders = providers;
-        if (providers.isNotEmpty) {
-          _selectedProvider = providers.firstWhere(
-            (provider) => provider.id == selectedId,
-            orElse: () => providers.first,
-          );
-        }
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _availableProviders = AiProvider.values;
+        _providerConfigHint = null;
       });
     }
   }
 
-  Future<void> _selectProvider(AiProvider provider) async {
-    setState(() => _selectedProvider = provider);
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.setString('ai_tutor_provider', provider.id);
+  String _friendlyApiError(Object error) {
+    final details = error.toString().toLowerCase();
+    if (details.contains('404') || details.contains('not_found')) {
+      return 'Layanan AI belum aktif: Edge Function "ai-tutor" belum ditemukan di proyek Supabase. Deploy fungsi dari folder mandarin_learning/supabase/functions/ai-tutor, lalu atur API Key provider di Supabase. Untuk memakai API Key pribadi, isi melalui ikon kunci.';
+    }
+    return 'Pastikan Gemini API Key sudah dikonfigurasi di Supabase atau dimasukkan melalui ikon kunci. Detail: $error';
   }
 
   Future<void> _showApiKeySettingsDialog() async {
-    final geminiKey = await AiTutorService.instance.getApiKey(AiProvider.gemini) ?? '';
-    final claudeKey = await AiTutorService.instance.getApiKey(AiProvider.anthropic) ?? '';
-    final openAiKey = await AiTutorService.instance.getApiKey(AiProvider.openAi) ?? '';
-    final groqKey = await AiTutorService.instance.getApiKey(AiProvider.groq) ?? '';
+    final geminiKey =
+        await AiTutorService.instance.getApiKey(AiProvider.gemini) ?? '';
 
     final geminiController = TextEditingController(text: geminiKey);
-    final claudeController = TextEditingController(text: claudeKey);
-    final openAiController = TextEditingController(text: openAiKey);
-    final groqController = TextEditingController(text: groqKey);
 
     if (!mounted) return;
 
@@ -128,7 +102,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                         Icon(Icons.key_rounded, color: AppColors.primaryGreen),
                         SizedBox(width: 8),
                         Text(
-                          'Pengaturan API Key LLM',
+                          'Pengaturan API Key Gemini',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -145,7 +119,9 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Masukkan API Key milikmu untuk menghubungkan Claude, Gemini, OpenAI, atau Groq secara langsung tanpa batasan.',
+                  'Gunakan API Key di Supabase atau masukkan key milikmu sendiri. '
+                  'Key pribadi Gemini disimpan di perangkat dan dikirim ke Google. '
+                  'Untuk aplikasi publik, simpan key di Supabase.',
                   style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                 ),
                 const SizedBox(height: 16),
@@ -156,33 +132,6 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                   controller: geminiController,
                   hint: 'AIzaSy...',
                   helper: 'Dapatkan gratis di aistudio.google.com',
-                ),
-                const SizedBox(height: 12),
-
-                // Claude Field
-                _buildApiKeyInput(
-                  label: 'Anthropic Claude API Key',
-                  controller: claudeController,
-                  hint: 'sk-ant-api...',
-                  helper: 'Dapatkan di console.anthropic.com',
-                ),
-                const SizedBox(height: 12),
-
-                // OpenAI Field
-                _buildApiKeyInput(
-                  label: 'OpenAI GPT API Key',
-                  controller: openAiController,
-                  hint: 'sk-proj-...',
-                  helper: 'Dapatkan di platform.openai.com',
-                ),
-                const SizedBox(height: 12),
-
-                // Groq Field
-                _buildApiKeyInput(
-                  label: 'Groq API Key',
-                  controller: groqController,
-                  hint: 'gsk_...',
-                  helper: 'Dapatkan gratis di console.groq.com',
                 ),
                 const SizedBox(height: 20),
 
@@ -202,32 +151,25 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                         AiProvider.gemini,
                         geminiController.text,
                       );
-                      await AiTutorService.instance.saveApiKey(
-                        AiProvider.anthropic,
-                        claudeController.text,
-                      );
-                      await AiTutorService.instance.saveApiKey(
-                        AiProvider.openAi,
-                        openAiController.text,
-                      );
-                      await AiTutorService.instance.saveApiKey(
-                        AiProvider.groq,
-                        groqController.text,
-                      );
                       if (context.mounted) {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Pengaturan API Key berhasil disimpan!'),
+                            content: Text(
+                              'API Key berhasil disimpan di perangkat.',
+                            ),
                             backgroundColor: AppColors.primaryGreen,
                           ),
                         );
-                        setState(() {});
+                        await _loadAvailableProviders();
                       }
                     },
                     child: const Text(
-                      'Simpan Pengaturan API Key',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      'Simpan API Key Gemini',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ),
@@ -264,16 +206,25 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             hintText: hint,
             hintStyle: const TextStyle(fontSize: 12, color: Colors.black26),
             helperText: helper,
-            helperStyle: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+            helperStyle: const TextStyle(
+              fontSize: 10,
+              color: AppColors.textMuted,
+            ),
             isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 10,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
+              borderSide: const BorderSide(
+                color: AppColors.primaryGreen,
+                width: 2,
+              ),
             ),
           ),
         ),
@@ -304,8 +255,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       );
     } catch (error) {
       response =
-          'Tidak dapat menghubungi ${provider.label}. Membuka panduan lokal Xiao Xiong:\n\n'
-          'Detail error: $error';
+          'Gagal menerima jawaban dari ${provider.label}. ${_friendlyApiError(error)}';
     }
 
     if (!mounted) return;
@@ -353,48 +303,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           ],
         ),
         actions: [
-          PopupMenuButton<AiProvider>(
-            tooltip: 'Pilih model AI',
-            initialValue: _selectedProvider,
-            onSelected: _isGenerating ? null : _selectProvider,
-            itemBuilder: (context) => [
-              for (final provider in _availableProviders)
-                PopupMenuItem(
-                  value: provider,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            provider == _selectedProvider
-                                ? Icons.check_circle_rounded
-                                : Icons.radio_button_unchecked_rounded,
-                            size: 16,
-                            color: provider == _selectedProvider
-                                ? AppColors.primaryGreen
-                                : Colors.grey,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(provider.label, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 22),
-                        child: Text(
-                          provider.model,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-            child: Container(
+          Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               margin: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
@@ -405,23 +314,24 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.auto_awesome_rounded, size: 16, color: AppColors.primaryGreen),
-                  const SizedBox(width: 4),
-                  Text(
-                    _selectedProvider.label,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primaryDark),
+                  const Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 16,
+                    color: AppColors.primaryGreen,
                   ),
-                  const Icon(Icons.arrow_drop_down_rounded, size: 18),
+                  const SizedBox(width: 4),
+                  const Text(
+                    'Google Gemini',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryDark,
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-          IconButton(
-            tooltip: 'Atur API Key LLM',
-            icon: const Icon(Icons.vpn_key_rounded, color: AppColors.primaryDark),
-            onPressed: _showApiKeySettingsDialog,
-          ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 12),
         ],
       ),
       body: SafeArea(
@@ -455,41 +365,6 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 },
               ),
             ),
-
-            if (_providerStatusError != null)
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0FDF4),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFBBF7D0)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.primaryGreen),
-                    const SizedBox(width: 8),
-                    const Expanded(
-                      child: Text(
-                        'Kamu dapat menghubungkan API Key LLM sendiri atau menggunakan Xiao Xiong offline.',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textDark,
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: _showApiKeySettingsDialog,
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      child: const Text('Atur Key', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryGreen)),
-                    ),
-                  ],
-                ),
-              ),
 
             // Message list
             Expanded(

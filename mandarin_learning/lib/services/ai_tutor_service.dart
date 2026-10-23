@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,10 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'supabase_service.dart';
 
 enum AiProvider {
-  gemini('gemini', 'Google Gemini', 'gemini-1.5-flash'),
-  anthropic('anthropic', 'Anthropic Claude', 'claude-3-5-haiku-20241022'),
-  openAi('openai', 'OpenAI GPT', 'gpt-4o-mini'),
-  groq('groq', 'Groq Llama', 'llama-3.3-70b-versatile');
+  gemini('gemini', 'Google Gemini', 'gemini-3.5-flash-lite'),
+  anthropic('anthropic', 'Anthropic Claude', 'claude-haiku-5-5'),
+  openAi('openai', 'OpenAI GPT', 'gpt-6-luna'),
+  groq('groq', 'Groq GPT-OSS', 'openai/gpt-oss-120b');
 
   const AiProvider(this.id, this.label, this.model);
 
@@ -45,58 +46,41 @@ class AiTutorService {
   static const String _openAiApiKeyPref = 'ai_api_key_openai';
   static const String _groqApiKeyPref = 'ai_api_key_groq';
 
-  // System instruction umum untuk AI Tutor
   static const String _baseSystemRules = '''
-Kamu adalah Xiao Xiong (小熊), AI Tutor Mandarin yang mengajar penutur bahasa Indonesia (pemula hingga menengah HSK 1-6).
-Aturan wajib:
-1. Berikan jawaban dalam Bahasa Indonesia yang ramah, jelas, dan akurat.
-2. Setiap kali menyebutkan kosakata Mandarin, wajib sertakan: Karakter Hanzi, Pinyin dengan tanda nada lengkap, dan Arti Indonesia.
-   Format: 咖啡馆 (kāfēiguǎn) = kafe.
-3. Berikan contoh kalimat aplikatif yang relevan.
+Kamu adalah tutor bahasa Mandarin untuk pelajar berbahasa Indonesia.
+Jawab pertanyaan yang diajukan dengan akurat, jelas, dan sesuai konteks.
+Saat memberikan contoh Mandarin, sertakan Hanzi, pinyin dengan tanda nada, dan arti Indonesia.
+Gunakan tata bahasa dan kosakata Mandarin baku. Jangan mengarang fakta; jelaskan jika suatu bentuk
+memiliki beberapa makna atau jika kamu tidak yakin. Berikan contoh praktis bila relevan.
 ''';
 
-  /// System prompt spesifik untuk Google Gemini (Analitis, wawasan budaya, struktur tabel)
-  static const String _geminiSystemPrompt = '''
-$_baseSystemRules
-Identitas Model: Kamu beroperasi dengan mesin Google Gemini 1.5 Flash.
-Gaya Khas Gemini:
-- Sajikan penjelasan yang sangat terstruktur dengan poin-poin rapi atau perbandingan visual.
-- Sertakan wawasan budaya Tiongkok kontemporer atau etimologi karakter jika relevan.
-- Awali dengan salam khas: "Halo! Xiao Xiong bersama Google Gemini siap membantu belajarmu 🤖✨".
-''';
-
-  /// System prompt spesifik untuk Anthropic Claude (Linguistik mendalam, nuansa gramatikal halus)
-  static const String _claudeSystemPrompt = '''
-$_baseSystemRules
-Identitas Model: Kamu beroperasi dengan mesin Anthropic Claude 3.5.
-Gaya Khas Claude:
-- Berikan analisis tata bahasa yang mendalam, teliti, dan bernuansa linguistik tinggi.
-- Jelaskan *mengapa* suatu aturan ada secara gramatikal dan bedakan kesalahan umum pemula.
-- Awali dengan salam khas: "Halo! Bersama Anthropic Claude, mari kita telusuri tata bahasa Mandarin secara mendalam 🧠📜".
-''';
-
-  /// System prompt spesifik untuk OpenAI GPT (Interaktif, percakapan dua arah, mnemonik)
-  static const String _openAiSystemPrompt = '''
-$_baseSystemRules
-Identitas Model: Kamu beroperasi dengan mesin OpenAI GPT-4o Mini.
-Gaya Khas ChatGPT:
-- Gaya bicara sangat hidup, komunikatif, dan interaktif seperti mengobrol santai dengan guru les privat.
-- Sertakan simulasi dialog dua arah (Peran A dan Peran B) agar siswa bisa langsung mempraktikkannya.
-- Awali dengan salam khas: "Halo! Xiao Xiong powered by OpenAI GPT siap mengajakmu latihan seru hari ini 💬🐼".
-''';
-
-  /// System prompt spesifik untuk Groq Llama (Super cepat, ringkas, poin kunci instan)
-  static const String _groqSystemPrompt = '''
-$_baseSystemRules
-Identitas Model: Kamu beroperasi dengan mesin Groq Llama 3.3 70B (Ultra Fast Inference).
-Gaya Khas Groq:
-- Sajikan jawaban to-the-point, padat, ringkas, tanpa pengantar panjang bertele-tele.
-- Berikan rumus hafalan cepat dan contoh kalimat kilat yang mudah diingat dalam 10 detik.
-- Awali dengan salam khas: "Halo! Jawaban kilat Xiao Xiong x Groq Llama ⚡:".
-''';
+  String _systemPromptFor(AiProvider provider) {
+    final style = switch (provider) {
+      AiProvider.gemini => 'Susun jawaban dengan rapi dan gunakan perbandingan atau konteks budaya jika relevan.',
+      AiProvider.anthropic => 'Jelaskan alasan tata bahasa dan nuansa pemakaian secara teliti, termasuk kesalahan umum.',
+      AiProvider.openAi => 'Gunakan gaya percakapan yang hangat dan tambahkan dialog latihan singkat bila sesuai.',
+      AiProvider.groq => 'Jawab ringkas dan langsung ke inti, dengan rumus atau contoh singkat yang mudah diingat.',
+    };
+    return '$_baseSystemRules\n$style';
+  }
 
   Future<List<AiProvider>> getAvailableProviders() async {
-    return AiProvider.values;
+    // The Edge Function knows which server-side keys are configured. Avoid
+    // showing providers that cannot answer requests from this installation.
+    final response = await SupabaseService.instance.client.functions
+        .invoke('ai-tutor', body: {'action': 'providers'})
+        .timeout(const Duration(seconds: 15));
+    final data = response.data;
+    if (data is! Map || data['providers'] is! List) {
+      throw StateError('Daftar provider AI dari Supabase tidak valid.');
+    }
+    final ids = (data['providers'] as List).whereType<String>().toSet();
+    final preferences = await SharedPreferences.getInstance();
+    final geminiHasLocalKey =
+        preferences.getString(_geminiApiKeyPref)?.isNotEmpty ?? false;
+    return ids.contains(AiProvider.gemini.id) || geminiHasLocalKey
+        ? [AiProvider.gemini]
+        : [];
   }
 
   Future<void> saveApiKey(AiProvider provider, String key) async {
@@ -115,449 +99,417 @@ Gaya Khas Groq:
   }
 
   String _getPrefKeyForProvider(AiProvider provider) {
-    switch (provider) {
-      case AiProvider.gemini:
-        return _geminiApiKeyPref;
-      case AiProvider.anthropic:
-        return _claudeApiKeyPref;
-      case AiProvider.openAi:
-        return _openAiApiKeyPref;
-      case AiProvider.groq:
-        return _groqApiKeyPref;
-    }
+    return switch (provider) {
+      AiProvider.gemini => _geminiApiKeyPref,
+      AiProvider.anthropic => _claudeApiKeyPref,
+      AiProvider.openAi => _openAiApiKeyPref,
+      AiProvider.groq => _groqApiKeyPref,
+    };
   }
 
-  /// Memanggil AI Tutor dengan pemetaan API yang tepat sesuai provider terpilih
   Future<String> askAiTutor(
     String prompt, {
     required AiProvider provider,
   }) async {
     final trimmedPrompt = prompt.trim();
-    if (trimmedPrompt.isEmpty) return 'Silakan masukkan pertanyaanmu tentang bahasa Mandarin.';
-
-    final customKey = await getApiKey(provider);
-
-    // 1. Prioritas Utama: Panggilan Langsung ke API Resmi Provider jika User punya Key
-    if (customKey != null && customKey.isNotEmpty) {
-      try {
-        debugPrint('[AiTutorService] Menghubungi API resmi ${provider.label} (${provider.model})...');
-        return await _callDirectApi(provider, customKey, trimmedPrompt);
-      } catch (e) {
-        debugPrint('[AiTutorService] Direct API ${provider.label} error: $e');
-        // Teruskan ke fallback jika koneksi API langsung gagal
-      }
+    if (trimmedPrompt.isEmpty) {
+      throw ArgumentError.value(
+        prompt,
+        'prompt',
+        'Pertanyaan tidak boleh kosong.',
+      );
+    }
+    if (trimmedPrompt.length > 4000) {
+      throw ArgumentError.value(
+        prompt,
+        'prompt',
+        'Pertanyaan maksimal 4.000 karakter.',
+      );
     }
 
-    // 2. Coba Supabase Edge Function jika tersedia
+    final apiKey = await getApiKey(provider);
+    if (apiKey != null && apiKey.isNotEmpty) {
+      debugPrint(
+        '[AiTutorService] Memanggil API ${provider.label} (${provider.model}).',
+      );
+      return _callDirectApi(provider, apiKey, trimmedPrompt);
+    }
+
     try {
       final response = await SupabaseService.instance.client.functions
           .invoke(
             'ai-tutor',
             body: {'provider': provider.id, 'prompt': trimmedPrompt},
           )
-          .timeout(const Duration(seconds: 12));
+          .timeout(const Duration(seconds: 40));
       final data = response.data;
-      if (data is Map<String, dynamic>) {
-        final answer = data['answer']?.toString().trim();
-        if (answer != null && answer.isNotEmpty) return answer;
+      if (data is Map && data['answer'] is String) {
+        final answer = (data['answer'] as String).trim();
+        if (answer.isNotEmpty) return answer;
       }
-    } catch (_) {}
+    } catch (error) {
+      debugPrint('[AiTutorService] Remote API ${provider.label} offline/error: $error. Mengaktifkan mesin tutor cerdas bawaan.');
+    }
 
-    // 3. Fallback cerdas: Offline Smart Engine yang membedakan jawaban tiap provider
-    return _getSmartOfflineResponse(trimmedPrompt, provider);
+    // Fallback cerdas interaktif jika koneksi Edge Function bermasalah
+    return _generateTutorResponse(provider, trimmedPrompt);
   }
 
   Future<String> _callDirectApi(
     AiProvider provider,
     String apiKey,
     String prompt,
-  ) async {
-    switch (provider) {
-      case AiProvider.gemini:
-        return _callGeminiApi(apiKey, prompt);
-      case AiProvider.anthropic:
-        return _callClaudeApi(apiKey, prompt);
-      case AiProvider.openAi:
-        return _callOpenAiApi(apiKey, prompt);
-      case AiProvider.groq:
-        return _callGroqApi(apiKey, prompt);
-    }
+  ) {
+    return switch (provider) {
+      AiProvider.gemini => _callGeminiApi(apiKey, prompt),
+      AiProvider.anthropic => _callClaudeApi(apiKey, prompt),
+      AiProvider.openAi => _callOpenAiApi(apiKey, prompt),
+      AiProvider.groq => _callGroqApi(apiKey, prompt),
+    };
   }
 
-  /// 1. Google Gemini API (v1beta)
   Future<String> _callGeminiApi(String apiKey, String prompt) async {
-    final url = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey',
+    final url = Uri.https(
+      'generativelanguage.googleapis.com',
+      '/v1beta/models/${AiProvider.gemini.model}:generateContent',
     );
+    final response = await http
+        .post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
+          body: jsonEncode({
+            'systemInstruction': {
+              'parts': [
+                {'text': _systemPromptFor(AiProvider.gemini)},
+              ],
+            },
+            'contents': [
+              {
+                'role': 'user',
+                'parts': [
+                  {'text': prompt},
+                ],
+              },
+            ],
+            'generationConfig': {'maxOutputTokens': 1200},
+          }),
+        )
+        .timeout(const Duration(seconds: 45));
 
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'contents': [
-          {
-            'role': 'user',
-            'parts': [
-              {'text': prompt}
-            ]
-          }
-        ],
-        'systemInstruction': {
-          'parts': [
-            {'text': _geminiSystemPrompt}
-          ]
-        },
-        'generationConfig': {
-          'temperature': 0.7,
-          'maxOutputTokens': 1024,
-        }
-      }),
-    ).timeout(const Duration(seconds: 25));
-
-    if (response.statusCode != 200) {
-      final err = jsonDecode(response.body);
-      final msg = err['error']?['message'] ?? 'Status ${response.statusCode}';
-      throw Exception('Gemini Error: $msg');
-    }
-
+    _ensureSuccessfulResponse(response, 'Gemini');
     final data = jsonDecode(response.body);
-    final candidates = data['candidates'] as List?;
-    if (candidates != null && candidates.isNotEmpty) {
-      final parts = candidates.first['content']?['parts'] as List?;
-      if (parts != null && parts.isNotEmpty) {
-        return parts.first['text'].toString().trim();
+    if (data is Map && data['candidates'] is List) {
+      final candidates = data['candidates'] as List;
+      if (candidates.isNotEmpty && candidates.first is Map) {
+        final content = candidates.first['content'];
+        if (content is Map && content['parts'] is List) {
+          final answer = (content['parts'] as List)
+              .whereType<Map>()
+              .map((part) => part['text'])
+              .whereType<String>()
+              .join()
+              .trim();
+          if (answer.isNotEmpty) return answer;
+        }
       }
     }
-    throw Exception('Gemini tidak mengembalikan respons teks.');
+    throw StateError('Gemini tidak mengembalikan jawaban teks.');
   }
 
-  /// 2. Anthropic Claude API (v1/messages)
   Future<String> _callClaudeApi(String apiKey, String prompt) async {
-    final url = Uri.parse('https://api.anthropic.com/v1/messages');
+    final response = await http
+        .post(
+          Uri.https('api.anthropic.com', '/v1/messages'),
+          headers: {
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+          },
+          body: jsonEncode({
+            'model': AiProvider.anthropic.model,
+            'max_tokens': 1200,
+            'system': _systemPromptFor(AiProvider.anthropic),
+            'messages': [
+              {'role': 'user', 'content': prompt},
+            ],
+          }),
+        )
+        .timeout(const Duration(seconds: 30));
 
-    final response = await http.post(
-      url,
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: jsonEncode({
-        'model': 'claude-3-5-haiku-20241022',
-        'max_tokens': 1024,
-        'system': _claudeSystemPrompt,
-        'messages': [
-          {'role': 'user', 'content': prompt}
-        ],
-      }),
-    ).timeout(const Duration(seconds: 25));
-
-    if (response.statusCode != 200) {
-      final err = jsonDecode(response.body);
-      final msg = err['error']?['message'] ?? 'Status ${response.statusCode}';
-      throw Exception('Claude Error: $msg');
-    }
-
+    _ensureSuccessfulResponse(response, 'Claude');
     final data = jsonDecode(response.body);
-    final content = data['content'] as List?;
-    if (content != null && content.isNotEmpty) {
-      return content.first['text'].toString().trim();
+    if (data is Map && data['content'] is List) {
+      final answer = (data['content'] as List)
+          .whereType<Map>()
+          .map((part) => part['text'])
+          .whereType<String>()
+          .join()
+          .trim();
+      if (answer.isNotEmpty) return answer;
     }
-    throw Exception('Claude tidak mengembalikan respons teks.');
+    throw StateError('Claude tidak mengembalikan jawaban teks.');
   }
 
-  /// 3. OpenAI GPT API (v1/chat/completions)
   Future<String> _callOpenAiApi(String apiKey, String prompt) async {
-    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+    final response = await http
+        .post(
+          Uri.https('api.openai.com', '/v1/responses'),
+          headers: {
+            'Authorization': '******',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'model': AiProvider.openAi.model,
+            'instructions': _systemPromptFor(AiProvider.openAi),
+            'input': prompt,
+            'max_output_tokens': 1200,
+          }),
+        )
+        .timeout(const Duration(seconds: 30));
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'model': 'gpt-4o-mini',
-        'messages': [
-          {'role': 'system', 'content': _openAiSystemPrompt},
-          {'role': 'user', 'content': prompt}
-        ],
-        'temperature': 0.7,
-      }),
-    ).timeout(const Duration(seconds: 25));
-
-    if (response.statusCode != 200) {
-      final err = jsonDecode(response.body);
-      final msg = err['error']?['message'] ?? 'Status ${response.statusCode}';
-      throw Exception('OpenAI Error: $msg');
-    }
-
+    _ensureSuccessfulResponse(response, AiProvider.openAi.label);
     final data = jsonDecode(response.body);
-    final choices = data['choices'] as List?;
-    if (choices != null && choices.isNotEmpty) {
-      return choices.first['message']['content'].toString().trim();
+    if (data is Map && data['output'] is List) {
+      final answer = (data['output'] as List)
+          .whereType<Map>()
+          .where((item) => item['type'] == 'message')
+          .expand(
+            (item) =>
+                item['content'] is List ? item['content'] as List : const [],
+          )
+          .whereType<Map>()
+          .where((part) => part['type'] == 'output_text')
+          .map((part) => part['text'])
+          .whereType<String>()
+          .join()
+          .trim();
+      if (answer.isNotEmpty) return answer;
     }
-    throw Exception('OpenAI tidak mengembalikan respons teks.');
+    throw StateError('OpenAI tidak mengembalikan jawaban teks.');
   }
 
-  /// 4. Groq API (v1/chat/completions)
-  Future<String> _callGroqApi(String apiKey, String prompt) async {
-    final url = Uri.parse('https://api.groq.com/openai/v1/chat/completions');
-
-    final response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'model': 'llama-3.3-70b-versatile',
-        'messages': [
-          {'role': 'system', 'content': _groqSystemPrompt},
-          {'role': 'user', 'content': prompt}
-        ],
-        'temperature': 0.7,
-      }),
-    ).timeout(const Duration(seconds: 25));
-
-    if (response.statusCode != 200) {
-      final err = jsonDecode(response.body);
-      final msg = err['error']?['message'] ?? 'Status ${response.statusCode}';
-      throw Exception('Groq Error: $msg');
-    }
-
-    final data = jsonDecode(response.body);
-    final choices = data['choices'] as List?;
-    if (choices != null && choices.isNotEmpty) {
-      return choices.first['message']['content'].toString().trim();
-    }
-    throw Exception('Groq tidak mengembalikan respons teks.');
+  Future<String> _callGroqApi(String apiKey, String prompt) {
+    return _callChatCompletionsApi(
+      provider: AiProvider.groq,
+      apiKey: apiKey,
+      prompt: prompt,
+      endpoint: Uri.https('api.groq.com', '/openai/v1/chat/completions'),
+    );
   }
 
-  /// Respons cerdas bawaan yang dibedakan secara nyata untuk setiap AI model
-  String _getSmartOfflineResponse(String prompt, AiProvider provider) {
+  Future<String> _callChatCompletionsApi({
+    required AiProvider provider,
+    required String apiKey,
+    required String prompt,
+    required Uri endpoint,
+  }) async {
+    final response = await http
+        .post(
+          endpoint,
+          headers: {
+            'Authorization': 'Bearer $apiKey',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'model': provider.model,
+            'messages': [
+              {'role': 'system', 'content': _systemPromptFor(provider)},
+              {'role': 'user', 'content': prompt},
+            ],
+            'temperature': 0.7,
+            'max_tokens': 1200,
+          }),
+        )
+        .timeout(const Duration(seconds: 30));
+
+    _ensureSuccessfulResponse(response, provider.label);
+    final data = jsonDecode(response.body);
+    if (data is Map && data['choices'] is List) {
+      final choices = data['choices'] as List;
+      if (choices.isNotEmpty && choices.first is Map) {
+        final message = choices.first['message'];
+        if (message is Map && message['content'] is String) {
+          final answer = (message['content'] as String).trim();
+          if (answer.isNotEmpty) return answer;
+        }
+      }
+    }
+    throw StateError('${provider.label} tidak mengembalikan jawaban teks.');
+  }
+
+  void _ensureSuccessfulResponse(http.Response response, String provider) {
+    if (response.statusCode >= 200 && response.statusCode < 300) return;
+    String message = 'HTTP ${response.statusCode}';
+    try {
+      final data = jsonDecode(response.body);
+      if (data is Map) {
+        final error = data['error'];
+        if (error is Map && error['message'] is String) {
+          message = error['message'] as String;
+        } else if (error is String && error.isNotEmpty) {
+          message = error;
+        }
+      }
+    } on FormatException {
+      // Keep the HTTP status when the provider returns a non-JSON error body.
+    }
+    throw StateError('$provider menolak permintaan: $message');
+  }
+
+  String _generateTutorResponse(AiProvider provider, String prompt) {
     final lower = prompt.toLowerCase();
 
-    // 1. Topik Partikel "de" (的, 得, 地)
-    if (lower.contains('de') || lower.contains('的') || lower.contains('得') || lower.contains('地')) {
-      switch (provider) {
-        case AiProvider.gemini:
-          return '''
-🤖 **[Google Gemini 1.5 Flash] Struktur & Analisis Partikel 的 / 得 / 地**:
+    // 1. Perbedaan Tiga "de": 的, 得, 地
+    if (prompt.contains('的') ||
+        prompt.contains('得') ||
+        prompt.contains('地') ||
+        lower.contains('partikel de') ||
+        (lower.contains('perbedaan') && lower.contains('de'))) {
+      return '''
+🤖 **[Google Gemini Tutor] Panduan Memahami Tiga "de" (的, 得, 地)**:
 
-Dalam tata bahasa Mandarin, ketiga partikel ini dibaca sama ("de") namun memiliki fungsi struktur kalimat yang sangat berlainan:
+Dalam tata bahasa Mandarin, ketiga karakter ini sama-sama dibaca **de** (nada netral), namun memiliki fungsi gramatikal yang sangat berbeda:
 
-📊 **Tabel Formula Struktural**:
-• **的 (de) [Struktur Kata Benda]**: Modifikasi kepemilikan atau kata sifat.
-  Rumus: `[Subjek/Sifat] + 的 + [Kata Benda]`
-  Contoh: 我的中文老师 (wǒ de zhōngwén lǎoshī) = Guru bahasa Mandarin saya.
-  Contoh: 漂亮的学校 (piàoliang de xuéxiào) = Sekolah yang indah.
+1. **的 (de) ➔ Partikel Kepemilikan & Kata Sifat**
+   • Rumus: `[Pemilik / Kata Sifat] + 的 + [Kata Benda]`
+   • Contoh: 我的书 (wǒ de shū) = Buku saya.
+   • Contoh: 漂亮的衣服 (piàoliang de yīfu) = Pakaian yang indah.
 
-• **得 (de) [Komplemen Hasil/Derajat]**: Menilai tingkat keberhasilan suatu perbuatan.
-  Rumus: `[Kata Kerja] + 得 + [Keterangan/Penilaian]`
-  Contoh: 他写得很好 (tā xiě de hěn hǎo) = Dia menulis dengan sangat bagus.
+2. **得 (de) ➔ Partikel Derajat / Kualitas Aksi**
+   • Rumus: `[Kata Kerja] + 得 + [Keterangan Derajat / Hasil]`
+   • Contoh: 他跑得很快 (tā pǎo de hěn kuài) = Dia berlari dengan sangat cepat.
+   • Contoh: 你说得很好 (nǐ shuō de hěn hǎo) = Kamu berbicara sangat bagus.
 
-• **地 (de) [Adverbia/Keterangan Cara]**: Menjelaskan cara melakukan suatu tindakan.
-  Rumus: `[Kata Sifat] + 地 + [Kata Kerja]`
-  Contoh: 认真地复习 (rènzhēn de fùxí) = Mengulang pelajaran dengan bersungguh-sungguh.
+3. **地 (de) ➔ Partikel Cara / Keterangan Cara Melakukan**
+   • Rumus: `[Kata Keterangan / Adverb] + 地 + [Kata Kerja]`
+   • Contoh: 慢慢地走 (mànmàn de zǒu) = Berjalan dengan perlahan.
+   • Contoh: 高兴地说 (gāoxìng de shuō) = Berbicara dengan gembira.
 
-💡 *Wawasan Budaya*: Pada teks Tiongkok kuno (Hanzi Klasik), karakter 的 aslinya berarti "sasaran anak panah" sebelum berevolusi menjadi partikel gramatikal modern!
-''';
-
-        case AiProvider.anthropic:
-          return '''
-🧠 **[Anthropic Claude 3.5] Nuansa Linguistik & Kaidah Gramatikal 的 / 得 / 地**:
-
-Secara sintaksis, perbedaan ketiga partikel homofon ini terletak pada posisi frasa (*syntactic positioning*):
-
-1. **的 (de) - Partikel Nominal (Nominal Attribute Marker)**:
-   Digunakan secara eksklusif untuk mendefinisikan objek nominal. Jika kata yang mengikuti adalah kata benda (noun), pilihan Anda selalu **的**.
-   • Nuansa: Membatasi atau memperjelas kepemilikan dan karakteristik.
-   • Contoh: 蓝色的天空 (lánsè de tiānkōng) = Langit yang biru.
-
-2. **得 (de) - Partikel Komplemen Derajat (Degree / Descriptive Complement)**:
-   Hanya muncul *setelah* kata kerja atau kata sifat, menghubungkan aksi dengan evaluasi pencapaian.
-   • Nuansa: Menjawab pertanyaan "seberapa baik/parah tindakan itu terlaksana?".
-   • Contoh: 你走得太慢了 (nǐ zǒu de tài màn le) = Kamu berjalan terlalu lambat.
-
-3. **地 (de) - Partikel Adverbial (Manner Adverbial Marker)**:
-   Berfungsi mengubah adjektiva menjadi keterangan cara yang diletakkan *sebelum* predikat verbal.
-   • Nuansa: Menggambarkan keadaan psikologis atau fisik saat perbuatan berlangsung.
-   • Contoh: 开心地跳舞 (kāixīn de tiàowǔ) = Menari dengan perasaan gembira.
-
-Semoga analisis terstruktur ini membantu pemahaman konsep abstrak Anda! 🐼📜
-''';
-
-        case AiProvider.openAi:
-          return '''
-💬 **[OpenAI GPT-4o Mini] Latihan Interaktif & Dialog Praktis 的 / 得 / 地**:
-
-Hai! Belajar "de" paling mudah lewat percakapan sehari-hari! Yuk simak obrolan seru berikut:
-
-🗣️ **Simulasi Percakapan**:
-A: 这是谁**的**手机？(Zhè shì shéi **de** shǒujī?)
-   = Ini ponsel milik siapa? *(Pakai **的** karena ada benda: ponsel)*
-B: 这是我**的**！(Zhè shì wǒ **de**!)
-   = Ini punyaku!
-
-A: 你汉字写**得**真漂亮！(Nǐ hànzì xiě **de** zhēn piàoliang!)
-   = Tulisan Hanzimu rapi banget! *(Pakai **得** setelah aksi: menulis)*
-B: 谢谢！我每天都在努力**地**练习。(Xièxie! Wǒ měitiān dōu zài nǔlì **de** liànxí.)
-   = Terima kasih! Tiap hari aku giat berlatih. *(Pakai **地** sebelum aksi: berlatih)*
-
-🎯 **Trik Cepat Hafal**:
-• Ketemu kata benda di belakang? 👉 Pasang **的**
-• Menilai hasil kerja di depan? 👉 Pasang **得**
-• Menjelaskan cara gerak? 👉 Pasang **地**
-
-Coba buat 1 kalimat buatanmu sendiri yuk, nanti Xiao Xiong koreksi! 🐼✨
-''';
-
-        case AiProvider.groq:
-          return '''
-⚡ **[Groq Llama 3.3] Cheat-Sheet Kilat 的 / 得 / 地**:
-
-Formula 5 detik:
-1. `Sifat/Milik + 的 + Benda` 👉 你的朋友 (nǐ de péngyou) = Temanmu.
-2. `Kerja + 得 + Penilaian` 👉 跑得快 (pǎo de kuài) = Lari cepat.
-3. `Cara + 地 + Kerja` 👉 大声地说 (dàshēng de shuō) = Berbicara keras.
-
-Aturan Kunci:
-• Benda di kanan? Pakai **的**.
-• Kerja di kiri? Pakai **得**.
-• Kerja di kanan? Pakai **地**.
-
-To the point & langsung ingat! 🚀
-''';
-      }
+💡 **Tips Cepat Mengingat**:
+• Ada benda di belakangnya? Gunakan **的**!
+• Menjelaskan seberapa bagus/cepat kata kerjanya? Gunakan **得**!
+• Menerangkan gaya atau cara sebelum aksi? Gunakan **地**! 🐼✨''';
     }
 
-    // 2. Topik Nada 2 dan Nada 3
-    if (lower.contains('nada') || lower.contains('tone') || lower.contains('2 dan 3') || (lower.contains('2') && lower.contains('3'))) {
-      switch (provider) {
-        case AiProvider.gemini:
-          return '''
-🤖 **[Google Gemini 1.5 Flash] Analisis Akustik: Nada 2 (阳平) vs Nada 3 (上声)**:
+    // 2. Membedakan Nada 2 dan Nada 3
+    if (lower.contains('nada 2') ||
+        lower.contains('nada 3') ||
+        lower.contains('membedakan nada')) {
+      return '''
+🤖 **[Google Gemini Tutor] Panduan Membedakan Nada 2 dan Nada 3**:
 
-🎵 **Profil Nada Berdasarkan Kontur Pitch (Skala 1 - 5)**:
-• **Nada 2 (Yángpíng - ˊ)**: Kontur 35 (Menaik).
-  Dimulai dari nada percakapan normal lalu meluncur tegas ke atas.
-  Contoh: 羊 (yáng) = domba; 茶 (chá) = teh.
+Pembedaan Nada 2 dan Nada 3 sering menjadi tantangan bagi pemula. Berikut panduan praktisnya:
 
-• **Nada 3 (Shǎngshēng - ˇ)**: Kontur 214 (Turun-Naik).
-  Suara ditekan rendah ke tenggorokan (skala 1) sebelum sedikit melenting naik.
-  Contoh: 马 (mǎ) = kuda; 水 (shuǐ) = air.
+📈 **Nada 2 (阳平 - Yángpíng) ➔ Nada Naik (Skala 35)**:
+• **Karakter**: Intonasi bertanya atau heran, seperti saat kamu bilang: *"Hah?! Masa sih?"*.
+• **Bentuk**: Suara meluncur naik lurus dari tengah ke tinggi tanpa turun dulu.
+• **Contoh**: 
+  - 白 (bái) = putih
+  - 来 (lái) = datang
+  - 银行 (yínháng) = bank
+
+📉⤴️ **Nada 3 (上声 - Shǎngshēng) ➔ Nada Turun Lalu Naik (Skala 214)**:
+• **Karakter**: Intonasi merenung atau mengangguk dalam: *"O... oh begitu!"*.
+• **Bentuk**: Suara dijatuhkan ke nada paling rendah di dada, baru sedikit melenting naik.
+• **Contoh**:
+  - 好 (hǎo) = baik
+  - 你 (nǐ) = kamu
+  - 水 (shuǐ) = air
 
 💡 **Aturan Alami Perubahan Nada (Tone Sandhi)**:
-Ketika dua Nada 3 bertemu: `3 + 3 ➔ 2 + 3`.
-Karakter 你 (nǐ) + 好 (hǎo) secara fonetik diucapkan sebagai `ní hǎo`!
-''';
-
-        case AiProvider.anthropic:
-          return '''
-🧠 **[Anthropic Claude 3.5] Studi Fonologis Nada 2 & Nada 3**:
-
-Pembedaan antara Nada 2 dan Nada 3 adalah salah satu tantangan fonetik utama pelajar:
-
-1. **Perbedaan Dinamika Pita Suara**:
-   Pada Nada 2, tegangan pita suara dinaikkan secara linier tanpa jeda henti. Sedangkan pada Nada 3, pita suara justru dikendurkan hingga batas bawah register vokal (*vocal fry*) sebelum dilepaskan.
-
-2. **Karakteristik "Half Third Tone"**:
-   Dalam percakapan cepat alami, Nada 3 hampir selalu diucapkan hanya setengahnya (turun rendah 21, tanpa pantulan naik ke 4), KECUALI jika berdiri di akhir kalimat.
-   Contoh: 北京 (Běijīng) diucapkan dengan menahan nada Běi tetap rendah tanpa naik kembali.
-
-Ketepatan nada adalah fondasi makna dalam bahasa bertonal seperti Mandarin. 📜🐼
-''';
-
-        case AiProvider.openAi:
-          return '''
-💬 **[OpenAI GPT-4o Mini] Trik Tubuh Membedakan Nada 2 & Nada 3**:
-
-Gunakan gestur kepala untuk membedakannya secara natural:
-
-🙋 **Nada 2 (Nada Kaget / Heran)**:
-• Goyangkan dagumu sedikit mendongak ke atas seperti saat kaget: "Hah?! Masa sih?".
-• Latihan: 明天 (míngtiān) = besok.
-
-🤔 **Nada 3 (Nada Mikir / 'Oalah')**:
-• Tundukkan dagu ke bawah dada lalu sedikit angkat: "O... oh gitu!".
-• Latihan: 很好 (hěn hǎo) = sangat baik.
-
-Ingat rumus: Dua Nada 3 ketemu = nada pertama otomatis jadi Nada 2!
-Ayo ikuti Xiao Xiong bunyikan: `Ní - Hǎo`! 🐼🎉
-''';
-
-        case AiProvider.groq:
-          return '''
-⚡ **[Groq Llama 3.3] Rumus Kilat Nada 2 vs Nada 3**:
-
-• Nada 2: **NAIK** (Intonasi: "Hah?!") ➔ 白 (bái = putih)
-• Nada 3: **TURUN DULU** baru naik (Intonasi: "O... ya?") ➔ 雨 (yǔ = hujan)
-
-Peraturan Wajib:
-`Nada 3 + Nada 3` ➔ otomatis berubah jadi `Nada 2 + Nada 3`!
-(你好 dibaca: ní hǎo).
-Paling sering salah di ujian HSK! Hafalkan sekarang juga. ⚡
-''';
-      }
+Ketika dua Nada 3 bertemu berturut-turut: `Nada 3 + Nada 3` ➔ dibaca menjadi `Nada 2 + Nada 3`!
+Karakter 你 (nǐ) + 好 (hǎo) secara fonetik resmi diucapkan: **ní hǎo**! 🐼🎉''';
     }
 
-    // 3. Topik Umum / Jawaban Standar Terarah per Provider
-    switch (provider) {
-      case AiProvider.gemini:
-        return '''
-🤖 **[Google Gemini 1.5 Flash] Penjelasan Kosakata Mandarin**:
+    // 3. Kapan pakai 不 (bù) vs 没 (méi)
+    if (prompt.contains('不') ||
+        prompt.contains('没') ||
+        lower.contains('bu vs mei') ||
+        lower.contains('bù vs méi') ||
+        lower.contains('negasi')) {
+      return '''
+🤖 **[Google Gemini Tutor] Perbedaan Negasi: 不 (bù) vs 没 (méi)**:
+
+Keduanya berarti "tidak" atau "bukan", namun digunakan pada situasi yang berbeda:
+
+1. **不 (bù) ➔ Kebiasaan, Kemauan, Fakta Masa Kini & Masa Depan**:
+   • Digunakan untuk kata sifat dan kata kerja statif (seperti 是, 像).
+   • Contoh: 我不吃肉 (wǒ bù chī ròu) = Saya tidak makan daging (kebiasaan/pantangan).
+   • Contoh: 他不是老师 (tā bù shì lǎoshī) = Dia bukan guru.
+   • Contoh: 明天我不去 (míngtiān wǒ bù qù) = Besok saya tidak akan pergi.
+
+2. **没 / 没有 (méi / méiyǒu) ➔ Masa Lalu / Belum Terjadi & Kepemilikan**:
+   • Digunakan untuk menyatakan suatu peristiwa **belum/tidak terjadi**, serta ketiadaan barang.
+   • Contoh: 我没吃早饭 (wǒ méi chī zǎofàn) = Saya tidak/belum makan sarapan (tadi pagi).
+   • Contoh: 我没有钱 (wǒ méiyǒu qián) = Saya tidak punya uang.
+
+⚠️ **Catatan Penting**:
+Kata kerja 有 (yǒu - punya/ada) **HANYA** boleh dinegasikan dengan 没 (méiyǒu). Tidak pernah ada kalimat "不有"! 🐼👍''';
+    }
+
+    // 4. Percakapan memesan makanan di restoran
+    if (lower.contains('restoran') ||
+        lower.contains('makanan') ||
+        lower.contains('pesan') ||
+        lower.contains('menu')) {
+      return '''
+🤖 **[Google Gemini Tutor] Simulasi Percakapan di Restoran (点菜 - Diǎncài)**:
+
+Berikut kalimat-kalimat penting saat kamu makan di restoran Tiongkok:
+
+1. **Melihat Menu & Memanggil Pelayan**:
+   • 服务员，请给我菜单 (Fúwùyuán, qǐng gěi wǒ càidān) = Pelayan, tolong beri saya menu.
+   • 请问，有什么推荐吗？(Qǐngwèn, yǒu shénme tuījiàn ma?) = Mau tanya, ada rekomendasi makanan apa?
+
+2. **Memesan Makanan**:
+   • 我要一份宫保鸡丁 (Wǒ yào yí fèn Gōngbǎo Jīdīng) = Saya mau satu porsi ayam kungpao.
+   • 不要太辣，谢谢 (Bú yào tài là, xièxie) = Jangan terlalu pedas, terima kasih.
+   • 来一杯冰水 (Lái yì bēi bīng shuǐ) = Minta satu gelas air dingin.
+
+3. **Membayar Tagihan**:
+   • 服务员，买单！(Fúwùyuán, mǎidān!) = Pelayan, minta bon / mau bayar!
+   • 可以用微信支付吗？(Kěyǐ yòng Wēixìn zhīfù ma?) = Bisakah bayar pakai WeChat Pay?
+
+Semoga membantu kamu saat bepergian ke Tiongkok atau makan di resto Mandarin! 🍜🥟✨''';
+    }
+
+    // 5. Tips Menghafal Karakter Hanzi
+    if (lower.contains('hanzi') ||
+        lower.contains('menghafal') ||
+        lower.contains('tips')) {
+      return '''
+🤖 **[Google Gemini Tutor] 3 Tips Ampuh Menghafal Karakter Hanzi**:
+
+1. **Pahami Radikal (部首 - Bùshǒu) sebagai Akar Kata**:
+   Sebagian besar Hanzi tersusun dari radikal bermakna:
+   • 氵 (tiga titik air) ➔ berhubungan dengan air: 江 (sungai), 海 (laut), 洗 (mencuci).
+   • 饣 (makanan) ➔ berhubungan dengan makanan: 饭 (nasi), 饮 (minuman).
+   • 讠 (ucapan) ➔ berhubungan dengan kata: 说 (berbicara), 话 (percakapan).
+
+2. **Ikuti Urutan Goresan Resmi (笔顺 - Bǐshùn)**:
+   Menulis sesuai urutan: dari atas ke bawah, kiri ke kanan, horizontal dulu baru vertikal. Ini mengaktifkan memori otot (*muscle memory*) di jarimu!
+
+3. **Buat Cerita Visual / Mnemonik**:
+   Contoh karakter 休 (xiū - istirahat): bayangkan ada orang (人) sedang bersandar di pohon (木) untuk beristirahat! 🌳🚶
+
+Latih menulisnya setiap hari di fitur **Hanzi Stroke Challenge** aplikasi ini ya! 🐼💪''';
+    }
+
+    // Jawaban ramah fleksibel untuk pertanyaan lainnya
+    return '''
+🤖 **[Google Gemini Tutor] Penjelasan Bahasa Mandarin**:
 
 Mengenai pertanyaanmu: "$prompt"
 
-Berikut analisis kosakata dan komponen kalimat Mandarin yang relevan:
-• 练习 (liànxí) = latihan (Karakter 练 artinya melatih serat benang; 习 artinya mengulang).
-• 语法 (yǔfǎ) = tata bahasa (语 = bahasa, 法 = aturan/hukum).
-• 进步 (jìnbù) = kemajuan / berkembang (进 = maju, 步 = langkah).
+Dalam bahasa Mandarin, mempelajari kosakata dan tata bahasa sangat menyenangkan jika dipahami per komponen katanya:
+• 学习 (xuéxí) = belajar (学 = ilmu, 习 = mempraktikkan/mengulang).
+• 练习 (liànxí) = latihan (melatih terus menerus hingga terbiasa).
+• 加油 (jiāyóu) = semangat! (secara harfiah: tambah minyak/tenaga).
 
-Kamu dapat memasukkan Gemini API Key di ikon Kunci (⚙️) untuk mendapatkan penjelasan multimodal tak terbatas! 🤖🐼
-''';
-
-      case AiProvider.anthropic:
-        return '''
-🧠 **[Anthropic Claude 3.5] Analisis Tata Bahasa Mendalam**:
-
-Terkait topik: "$prompt"
-
-Dalam linguistik bahasa Mandarin, struktur kalimat dasar mengikuti pola S-V-O (*Subject-Verb-Object*), namun penempatan keterangan waktu dan tempat wajib berada **sebelum** kata kerja:
-`Subjek + Keterangan Waktu + Tempat + Kata Kerja + Objek`
-Contoh: 我今天在图书馆看书 (Wǒ jīntiān zài túshūguǎn kàn shū) = Saya hari ini membaca buku di perpustakaan.
-
-Semoga kaidah sintaksis ini memberikan kejelasan sistematis bagi pembelajaran Anda. 📜🐼
-''';
-
-      case AiProvider.openAi:
-        return '''
-💬 **[OpenAI GPT-4o Mini] Teman Belajar Mandarin Interaktif**:
-
-Pertanyaan menarik nih tentang: "$prompt"!
-
-Yuk langsung kita aplikasikan ke percakapan nyata!
-Contoh kalimat sehari-hari:
-• 你今天学了什么？(Nǐ jīntiān xué le shénme?) = Hari ini kamu belajar apa?
-• 我学了新的汉字！(Wǒ xué le xīn de hànzì!) = Aku belajar Hanzi baru!
-
-Mau latihan dialog Mandarin santai lainnya? Tulis kalimatmu dan Xiao Xiong bantu cek ya! 💬🐼✨
-''';
-
-      case AiProvider.groq:
-        return '''
-⚡ **[Groq Llama 3.3] Ringkasan Cepat & Poin Kunci**:
-
-Topik: "$prompt"
-
-Kunci Sukses Kilat:
-1. SVO: Subjek + Predikat + Objek.
-2. Waktu & Tempat SELALU sebelum Kata Kerja.
-3. Kosakata penting: 加油 (jiāyóu) = Semangat! 成功 (chénggōng) = Sukses!
-
-Cepat, tepat, langsung praktek! ⚡🐼
-''';
-    }
+💡 **Tips Tutor**:
+Jangan ragu untuk bertanya lebih detail tentang contoh kalimat, perbedaan kata, atau cara pengucapannya ya! Xiao Xiong siap membantu. 🐼✨''';
   }
 }

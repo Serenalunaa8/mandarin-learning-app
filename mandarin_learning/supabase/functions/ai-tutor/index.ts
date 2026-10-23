@@ -8,35 +8,44 @@ const corsHeaders = {
 const providers = {
   gemini: {
     label: "Gemini",
-    model: "gemini-2.5-flash",
+    model: "gemini-3.5-flash-lite",
     secret: "GEMINI_API_KEY",
+    style: "Susun penjelasan dengan rapi dan gunakan perbandingan atau konteks budaya bila benar-benar relevan.",
   },
   openai: {
     label: "OpenAI",
     model: "gpt-6-luna",
     secret: "OPENAI_API_KEY",
+    style: "Gunakan gaya percakapan yang hangat. Beri dialog latihan singkat bila sesuai dengan pertanyaan.",
   },
   anthropic: {
     label: "Anthropic",
     model: "claude-haiku-5-5",
     secret: "ANTHROPIC_API_KEY",
+    style: "Jelaskan alasan tata bahasa dan nuansa pemakaian secara teliti, lalu bedakan dari kesalahan umum.",
   },
   groq: {
-    label: "Groq",
-    model: "llama-3.3-70b-versatile",
+    label: "Groq GPT-OSS",
+    model: "openai/gpt-oss-120b",
     secret: "GROQ_API_KEY",
+    style: "Jawab dengan ringkas, langsung ke inti, dan tutup dengan rumus atau contoh singkat yang mudah diingat.",
   },
 } as const;
 
-const systemPrompt =
+const baseSystemPrompt =
   "Kamu adalah tutor bahasa Mandarin untuk pemula berbahasa Indonesia. " +
-  "Jawab jelas dan ringkas, sertakan Hanzi, pinyin bertanda nada, dan terjemahan Indonesia jika relevan. " +
-  "Jangan mengarang data atau menyatakan jawaban pasti jika tidak yakin.";
+  "Jawab pertanyaan yang benar-benar diajukan dalam bahasa Indonesia. " +
+  "Untuk setiap contoh Mandarin, sertakan Hanzi, pinyin bertanda nada, dan arti Indonesia. " +
+  "Utamakan aturan tata bahasa dan kosakata Mandarin yang baku; jangan mengarang fakta, " +
+  "dan nyatakan dengan jujur jika ada lebih dari satu pemakaian atau jika tidak yakin.";
 
 function jsonResponse(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json; charset=utf-8",
+    },
   });
 }
 
@@ -130,6 +139,7 @@ Deno.serve(async (request) => {
   }
 
   const provider = providers[providerId];
+  const systemPrompt = `${baseSystemPrompt} ${provider.style}`;
   const apiKey = Deno.env.get(provider.secret);
   if (!apiKey) {
     return jsonResponse(
@@ -144,12 +154,15 @@ Deno.serve(async (request) => {
   switch (providerId) {
     case "gemini":
       endpoint =
-        `https://generativelanguage.googleapis.com/v1beta/models/${provider.model}:generateContent?key=${apiKey}`;
-      headers = { "Content-Type": "application/json" };
+        `https://generativelanguage.googleapis.com/v1beta/models/${provider.model}:generateContent`;
+      headers = {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      };
       requestBody = {
         systemInstruction: { parts: [{ text: systemPrompt }] },
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 1200, temperature: 0.4 },
+        generationConfig: { maxOutputTokens: 1200 },
       };
       break;
     case "anthropic":
@@ -167,10 +180,20 @@ Deno.serve(async (request) => {
       };
       break;
     case "openai":
+      endpoint = "https://api.openai.com/v1/responses";
+      headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      };
+      requestBody = {
+        model: provider.model,
+        instructions: systemPrompt,
+        input: prompt,
+        max_output_tokens: 1200,
+      };
+      break;
     case "groq":
-      endpoint = providerId === "openai"
-        ? "https://api.openai.com/v1/chat/completions"
-        : "https://api.groq.com/openai/v1/chat/completions";
+      endpoint = "https://api.groq.com/openai/v1/chat/completions";
       headers = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
@@ -181,9 +204,8 @@ Deno.serve(async (request) => {
           { role: "system", content: systemPrompt },
           { role: "user", content: prompt },
         ],
-        ...(providerId === "openai"
-          ? { max_completion_tokens: 1200, reasoning_effort: "none" }
-          : { max_tokens: 1200, temperature: 0.4 }),
+        max_tokens: 1200,
+        temperature: 0.7,
       };
       break;
     default:
@@ -191,21 +213,41 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const response = await fetch(endpoint, {
+    const fetchProvider = () => fetch(endpoint, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(45000),
     });
+    let response = await fetchProvider();
+    if (providerId === "gemini" && response.status === 503) {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      response = await fetchProvider();
+    }
+    const responseText = await response.text();
     if (!response.ok) {
-      console.error(`${providerId} returned HTTP ${response.status}`);
+      let providerMessage = responseText;
+      try {
+        const errorBody = JSON.parse(responseText);
+        providerMessage = errorBody.error?.message ?? responseText;
+      } catch {
+        // Keep the original response text when the provider doesn't return JSON.
+      }
+      const safeProviderMessage = providerMessage.slice(0, 500);
+      console.error(
+        `${providerId} returned HTTP ${response.status}: ${safeProviderMessage}`,
+      );
       return jsonResponse(
-        { error: `${provider.label} menolak permintaan (HTTP ${response.status}).` },
+        {
+          error:
+            `${provider.label} menolak permintaan (HTTP ${response.status}): ` +
+            safeProviderMessage,
+        },
         502,
       );
     }
 
-    const result = await response.json();
+    const result = JSON.parse(responseText);
     let answer: string | undefined;
     if (providerId === "gemini") {
       answer = result.candidates?.[0]?.content?.parts
@@ -214,6 +256,15 @@ Deno.serve(async (request) => {
     } else if (providerId === "anthropic") {
       answer = result.content
         ?.map((part: { text?: string }) => part.text ?? "")
+        .join("");
+    } else if (providerId === "openai") {
+      answer = result.output
+        ?.filter((item: { type?: string }) => item.type === "message")
+        .flatMap((item: { content?: { type?: string; text?: string }[] }) =>
+          item.content ?? []
+        )
+        .filter((part: { type?: string }) => part.type === "output_text")
+        .map((part: { text?: string }) => part.text ?? "")
         .join("");
     } else {
       answer = result.choices?.[0]?.message?.content;
@@ -225,7 +276,11 @@ Deno.serve(async (request) => {
     }
     return jsonResponse({ answer: answer.trim(), provider: providerId });
   } catch (error) {
-    console.error(`${providerId} request failed`, error);
-    return jsonResponse({ error: "Layanan AI gagal dihubungi." }, 502);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`${providerId} request failed: ${errorMessage}`);
+    return jsonResponse(
+      { error: `Layanan ${provider.label} gagal dihubungi: ${errorMessage}` },
+      502,
+    );
   }
 });
