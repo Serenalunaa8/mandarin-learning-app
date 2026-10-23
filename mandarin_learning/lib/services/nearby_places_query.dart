@@ -21,11 +21,8 @@ String buildNearbyPlacesQuery({
   nwr(around:$radiusMeters,$latitude,$longitude)["name"]["tourism"];
   nwr(around:$radiusMeters,$latitude,$longitude)["name"]["leisure"];
   nwr(around:$radiusMeters,$latitude,$longitude)["name"]["public_transport"];
-  nwr(around:$radiusMeters,$latitude,$longitude)["amenity"~"^(restaurant|cafe|fast_food|food_court|ice_cream|bakery|bar|pub|canteen)\$"];
-  nwr(around:$radiusMeters,$latitude,$longitude)["amenity"="bus_station"];
-  nwr(around:$radiusMeters,$latitude,$longitude)["highway"="bus_stop"];
-  nwr(around:$radiusMeters,$latitude,$longitude)["railway"~"^(station|halt|tram_stop|subway_entrance)\$"];
-  nwr(around:$radiusMeters,$latitude,$longitude)["public_transport"~"^(platform|station|stop_position)\$"];
+  nwr(around:$radiusMeters,$latitude,$longitude)["name"]["highway"="bus_stop"];
+  nwr(around:$radiusMeters,$latitude,$longitude)["name"]["office"];
 );
 out center;
 ''';
