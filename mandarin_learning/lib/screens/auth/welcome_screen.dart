@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/chinese_scenery_background.dart';
@@ -17,7 +18,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
-  
+
   bool _isLogin = true;
   bool _obscurePassword = true;
   bool _enableBiometric = true;
@@ -34,7 +35,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     final auth = context.read<AuthProvider>();
 
     if (_isLogin) {
-      if (_identifierController.text.trim().isEmpty || _passwordController.text.isEmpty) {
+      if (_identifierController.text.trim().isEmpty ||
+          _passwordController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Silakan masukkan username/email dan kata sandi.'),
@@ -59,7 +61,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(auth.errorMessage ?? 'Gagal masuk. Periksa kredensial Anda.'),
+            content: Text(
+              auth.errorMessage ?? 'Gagal masuk. Periksa kredensial Anda.',
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -78,7 +82,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       }
 
       final rawIdentifier = _identifierController.text.trim();
-      final username = rawIdentifier.contains('@') ? rawIdentifier.split('@').first : rawIdentifier;
+      final username = rawIdentifier.contains('@')
+          ? rawIdentifier.split('@').first
+          : rawIdentifier;
       final email = rawIdentifier.contains('@') ? rawIdentifier : null;
 
       final success = await auth.register(
@@ -99,7 +105,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Pendaftaran berhasil! Akun telah tersimpan di database. Silakan masukkan kata sandi untuk masuk.'),
+            content: Text(
+              'Pendaftaran berhasil! Akun telah tersimpan di database. Silakan masukkan kata sandi untuk masuk.',
+            ),
             backgroundColor: AppColors.success,
             duration: Duration(seconds: 4),
           ),
@@ -118,45 +126,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Future<void> _handleBiometricLogin() async {
     final auth = context.read<AuthProvider>();
 
-    // Jika biometrik belum didaftarkan terlebih dahulu:
-    if (!auth.isBiometricEnrolled) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
-            children: [
-              Icon(Icons.fingerprint_rounded, color: AppColors.primary, size: 28),
-              SizedBox(width: 6),
-              Icon(Icons.face_retouching_natural_rounded, color: AppColors.primary, size: 28),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Biometrik Belum Didaftarkan',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          content: const Text(
-            'Anda belum mendaftarkan sidik jari atau pengenalan wajah untuk akun manapun di perangkat ini.\n\nSilakan masuk terlebih dahulu menggunakan kata sandi, lalu daftarkan biometrik Anda di menu Pengaturan.',
-            style: TextStyle(fontSize: 13, height: 1.4),
-          ),
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Saya Mengerti'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
     final success = await auth.loginWithBiometrics();
 
     if (!mounted) return;
@@ -169,7 +138,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.errorMessage ?? 'Biometrik dibatalkan atau tidak cocok.'),
+          content: Text(
+            auth.errorMessage ?? 'Biometrik dibatalkan atau tidak cocok.',
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -203,10 +174,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
                 // Top Mascot
                 const Center(
-                  child: MascotWidget(
-                    size: 110,
-                    pose: MascotPose.celebrating,
-                  ),
+                  child: MascotWidget(size: 110, pose: MascotPose.celebrating),
                 ),
                 const SizedBox(height: 10),
 
@@ -250,11 +218,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       controller: _nameController,
                       decoration: const InputDecoration(
                         hintText: 'Nama Lengkap',
-                        prefixIcon: Icon(Icons.badge_outlined, color: AppColors.textMuted),
+                        prefixIcon: Icon(
+                          Icons.badge_outlined,
+                          color: AppColors.textMuted,
+                        ),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
                       ),
                     ),
                   ),
@@ -278,11 +252,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     controller: _identifierController,
                     decoration: InputDecoration(
                       hintText: _isLogin ? 'Username / Email' : 'Username baru',
-                      prefixIcon: const Icon(Icons.person_outline_rounded, color: AppColors.textMuted),
+                      prefixIcon: const Icon(
+                        Icons.person_outline_rounded,
+                        color: AppColors.textMuted,
+                      ),
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -306,18 +286,28 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       hintText: 'Kata Sandi (Terenkripsi SHA-256)',
-                      prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.textMuted),
+                      prefixIcon: const Icon(
+                        Icons.lock_outline_rounded,
+                        color: AppColors.textMuted,
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           color: AppColors.textMuted,
                         ),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -326,7 +316,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 if (!_isLogin && auth.isBiometricSupported) ...[
                   const SizedBox(height: 14),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -343,9 +336,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.fingerprint_rounded, color: AppColors.primary, size: 24),
+                            Icon(
+                              Icons.fingerprint_rounded,
+                              color: AppColors.primary,
+                              size: 24,
+                            ),
                             SizedBox(width: 4),
-                            Icon(Icons.face_retouching_natural_rounded, color: AppColors.primary, size: 24),
+                            Icon(
+                              Icons.face_retouching_natural_rounded,
+                              color: AppColors.primary,
+                              size: 24,
+                            ),
                           ],
                         ),
                         const SizedBox(width: 12),
@@ -355,11 +356,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             children: [
                               Text(
                                 'Daftarkan Sidik Jari & Wajah',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
                               ),
                               Text(
                                 'Aktifkan login biometrik untuk akun baru ini',
-                                style: TextStyle(color: AppColors.textMuted, fontSize: 11),
+                                style: TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontSize: 11,
+                                ),
                               ),
                             ],
                           ),
@@ -367,7 +374,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         Switch(
                           value: _enableBiometric,
                           activeThumbColor: AppColors.primary,
-                          onChanged: (val) => setState(() => _enableBiometric = val),
+                          onChanged: (val) =>
+                              setState(() => _enableBiometric = val),
                         ),
                       ],
                     ),
@@ -394,11 +402,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ? const SizedBox(
                             width: 22,
                             height: 22,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
                           )
                         : Text(
                             _isLogin ? 'Masuk' : 'Daftar Sekarang',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                   ),
                 ),
@@ -413,27 +427,43 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       onPressed: auth.isLoading ? null : _handleBiometricLogin,
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(
-                          color: auth.isBiometricEnrolled ? AppColors.primary : AppColors.border,
+                          color: auth.biometricLoginUsername != null
+                              ? AppColors.primary
+                              : AppColors.border,
                           width: 1.5,
                         ),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
-                        backgroundColor: auth.isBiometricEnrolled
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26),
+                        ),
+                        backgroundColor: auth.biometricLoginUsername != null
                             ? AppColors.primaryLight.withValues(alpha: 0.3)
                             : Colors.white,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.fingerprint_rounded, size: 22, color: AppColors.primaryDark),
+                          const Icon(
+                            Icons.fingerprint_rounded,
+                            size: 22,
+                            color: AppColors.primaryDark,
+                          ),
                           const SizedBox(width: 4),
-                          const Icon(Icons.face_retouching_natural_rounded, size: 22, color: AppColors.primaryDark),
+                          const Icon(
+                            Icons.face_retouching_natural_rounded,
+                            size: 22,
+                            color: AppColors.primaryDark,
+                          ),
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
-                              auth.isBiometricEnrolled
-                                  ? 'Masuk sebagai @${auth.enrolledBiometricUsername}'
+                              auth.biometricLoginUsername != null
+                                  ? 'Masuk sebagai @${auth.biometricLoginUsername}'
                                   : 'Masuk dengan Biometrik (Sidik Jari / Wajah)',
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryDark, fontSize: 13),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryDark,
+                                fontSize: 13,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -447,10 +477,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 // Mode Tamu / Demo Cepat
                 TextButton.icon(
                   onPressed: _handleGuestLogin,
-                  icon: const Icon(Icons.offline_bolt_rounded, size: 18, color: AppColors.primaryDark),
+                  icon: const Icon(
+                    Icons.offline_bolt_rounded,
+                    size: 18,
+                    color: AppColors.primaryDark,
+                  ),
                   label: const Text(
                     'Coba Langsung Tanpa Akun (Mode Tamu)',
-                    style: TextStyle(color: AppColors.primaryDark, fontSize: 13, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: AppColors.primaryDark,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
 
@@ -462,7 +500,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   children: [
                     Text(
                       _isLogin ? 'Belum punya akun? ' : 'Sudah punya akun? ',
-                      style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      style: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 13,
+                      ),
                     ),
                     GestureDetector(
                       onTap: () {
