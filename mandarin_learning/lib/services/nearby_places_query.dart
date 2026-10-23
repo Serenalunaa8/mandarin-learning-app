@@ -21,7 +21,6 @@ String buildNearbyPlacesQuery({
   nwr(around:$radiusMeters,$latitude,$longitude)["name"]["tourism"];
   nwr(around:$radiusMeters,$latitude,$longitude)["name"]["leisure"];
   nwr(around:$radiusMeters,$latitude,$longitude)["name"]["public_transport"];
-  nwr(around:$radiusMeters,$latitude,$longitude)["name"]["highway"="bus_stop"];
   nwr(around:$radiusMeters,$latitude,$longitude)["name"]["office"];
 );
 out center;

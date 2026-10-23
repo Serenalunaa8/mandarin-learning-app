@@ -7,10 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'supabase_service.dart';
 
 enum AiProvider {
-  gemini('gemini', 'Google Gemini', 'gemini-3.5-flash-lite'),
-  anthropic('anthropic', 'Anthropic Claude', 'claude-haiku-5-5'),
-  openAi('openai', 'OpenAI GPT', 'gpt-6-luna'),
-  groq('groq', 'Groq GPT-OSS', 'openai/gpt-oss-120b');
+  gemini('gemini', 'Google Gemini', 'gemini-1.5-flash'),
+  anthropic('anthropic', 'Anthropic Claude', 'claude-3-5-haiku-20241022'),
+  openAi('openai', 'OpenAI GPT', 'gpt-4o-mini'),
+  groq('groq', 'Groq Llama 3.3', 'llama-3.3-70b-versatile');
 
   const AiProvider(this.id, this.label, this.model);
 
