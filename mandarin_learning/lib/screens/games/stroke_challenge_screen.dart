@@ -130,16 +130,8 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
       } else {
         setState(() {
           _isAnimationComplete = true;
-        });
-        Future.delayed(const Duration(milliseconds: 1400), () {
-          if (!mounted || !_isPlayingAnimation || !_isAnimationComplete) return;
-          setState(() {
-            _animStrokeIndex = 0;
-            _activeStrokeStep = 0;
-            _isAnimationComplete = false;
-          });
-          _animController.duration = Duration(milliseconds: (750 / _animSpeed).round());
-          _animController.forward(from: 0.0);
+          _isPlayingAnimation = false;
+          _showActiveStepGuide = false; // Arahan penulisan pada kanvas hanya diputar sekali saja
         });
       }
     }
@@ -155,7 +147,6 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
     if (_animStrokeIndex >= strokes.length - 1 && _animController.value >= 1.0) {
       setState(() {
         _animStrokeIndex = 0;
-        _activeStrokeStep = 0;
       });
     }
     _animController.duration = Duration(milliseconds: (750 / _animSpeed).round());
@@ -170,13 +161,13 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
   }
 
   void _replayAnimation() {
+    // Video pemutar di bawah dapat diputar ulang berkali-kali sesuai kebutuhan pengguna
     final strokes = _strokeData?.strokes ?? [];
     if (strokes.isEmpty) return;
     setState(() {
       _isPlayingAnimation = true;
       _isAnimationComplete = false;
       _animStrokeIndex = 0;
-      _activeStrokeStep = 0;
     });
     _animController.duration = Duration(milliseconds: (750 / _animSpeed).round());
     _animController.forward(from: 0.0);
@@ -812,16 +803,25 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                     Row(
                       children: [
                         Text(
+                          word.hanzi,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF14532D),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
                           word.pinyin,
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF15803D),
                           ),
                         ),
                         const SizedBox(width: 6),
                         GestureDetector(
-                          onTap: () => AudioService.instance.speak(_currentCharacter),
+                          onTap: () => AudioService.instance.speak(word.hanzi),
                           child: const Icon(
                             Icons.volume_up_rounded,
                             size: 20,

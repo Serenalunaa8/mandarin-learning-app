@@ -33,7 +33,9 @@ class HanziStrokeData {
         }
         final rawX = (point[0] as num).toDouble();
         final rawY = (point[1] as num).toDouble();
-        // Invert Y untuk data font metrics: Y=900 (atas) -> screen Y=0 (atas)
+        // Make Me a Hanzi outlines and medians share the same font coordinate
+        // plane, whose top edge is y=900. Reflect around that same edge as the
+        // SVG parser below so the active guide sits on its gray stroke.
         final screenY = isFontCoordinates ? (900.0 - rawY) : rawY;
         points.add(Offset(rawX, screenY));
       }
@@ -1146,7 +1148,7 @@ HanziEvaluationResult evaluateHanziWriting({
 }) {
   final expectedCount = reference.strokes.length;
   final actualCount = drawnStrokes.length;
-  final isCountValid = (actualCount == expectedCount);
+  final isCountValid = actualCount > 0 && (actualCount - expectedCount).abs() <= 1;
 
   if (drawnStrokes.isEmpty || canvasSize.isEmpty) {
     return HanziEvaluationResult(
@@ -1167,8 +1169,9 @@ HanziEvaluationResult evaluateHanziWriting({
   final left = (canvasSize.width - side) / 2;
   final top = (canvasSize.height - side) / 2;
 
-  // 1. Kumpulkan semua titik yang digambar pengguna (dinormalisasi ke ruang 1024 x 1024)
-  final allDrawnPoints = <Offset>[];
+  // Normalize user strokes into the same 1024-unit canvas used by references.
+  // Keep stroke boundaries: matching only the pooled silhouette can give a
+  // high score to misplaced, repeated, or incorrectly ordered strokes.
   final normalizedDrawn = <List<Offset>>[];
   for (final stroke in drawnStrokes) {
     final normStroke = <Offset>[];
@@ -1181,110 +1184,41 @@ HanziEvaluationResult evaluateHanziWriting({
     }
     if (normStroke.isNotEmpty) {
       normalizedDrawn.add(normStroke);
-      allDrawnPoints.addAll(_resample(normStroke, 24));
     }
   }
 
-  // 2. Kumpulkan semua titik referensi bentuk karakter asli
-  final allRefPoints = <Offset>[];
-  for (final refStroke in reference.strokes) {
-    allRefPoints.addAll(_resample(refStroke, 24));
-  }
-
-  // 3. Evaluasi Ketepatan Bentuk (Shape Matching & Bounding Box Alignment):
-  // Menyelaraskan kotak pembatas (Bounding Box) dan titik tengah coretan pengguna
-  // terhadap geometri karakter asli agar penilaian akurat dan adil ketika pengguna
-  // menirukan watermark bayangan karakter pada kanvas.
-  double minRefX = double.infinity, maxRefX = -double.infinity;
-  double minRefY = double.infinity, maxRefY = -double.infinity;
-  for (final p in allRefPoints) {
-    if (p.dx < minRefX) minRefX = p.dx;
-    if (p.dx > maxRefX) maxRefX = p.dx;
-    if (p.dy < minRefY) minRefY = p.dy;
-    if (p.dy > maxRefY) maxRefY = p.dy;
-  }
-  final refW = math.max(maxRefX - minRefX, 20.0);
-  final refH = math.max(maxRefY - minRefY, 20.0);
-  final refCenterX = (minRefX + maxRefX) / 2;
-  final refCenterY = (minRefY + maxRefY) / 2;
-
-  double minDrawnX = double.infinity, maxDrawnX = -double.infinity;
-  double minDrawnY = double.infinity, maxDrawnY = -double.infinity;
-  for (final p in allDrawnPoints) {
-    if (p.dx < minDrawnX) minDrawnX = p.dx;
-    if (p.dx > maxDrawnX) maxDrawnX = p.dx;
-    if (p.dy < minDrawnY) minDrawnY = p.dy;
-    if (p.dy > maxDrawnY) maxDrawnY = p.dy;
-  }
-  final drawnW = math.max(maxDrawnX - minDrawnX, 20.0);
-  final drawnH = math.max(maxDrawnY - minDrawnY, 20.0);
-  final drawnCenterX = (minDrawnX + maxDrawnX) / 2;
-  final drawnCenterY = (minDrawnY + maxDrawnY) / 2;
-
-  final scaleX = (refW / drawnW).clamp(0.3, 3.2);
-  final scaleY = (refH / drawnH).clamp(0.3, 3.2);
-
-  final alignedDrawnPoints = <Offset>[];
-  for (final p in allDrawnPoints) {
-    final ax = refCenterX + (p.dx - drawnCenterX) * scaleX;
-    final ay = refCenterY + (p.dy - drawnCenterY) * scaleY;
-    alignedDrawnPoints.add(Offset(ax, ay));
-  }
-
-  // Evaluasi kelengkapan bentuk (Coverage): menguji terhadap titik aligned dan raw
-  var coveredPoints = 0;
-  for (final refP in allRefPoints) {
-    double minDist = double.infinity;
-    for (final p in alignedDrawnPoints) {
-      final d = (refP - p).distance;
-      if (d < minDist) minDist = d;
-      if (minDist <= 60) break;
-    }
-    for (final p in allDrawnPoints) {
-      final d = (refP - p).distance;
-      if (d < minDist) minDist = d;
-      if (minDist <= 60) break;
-    }
-    if (minDist <= 155) {
-      coveredPoints++;
-    }
-  }
-  final coverageRatio = allRefPoints.isNotEmpty
-      ? (coveredPoints / allRefPoints.length)
-      : 0.0;
-
-  // Evaluasi presisi (titik pengguna yang berada di sekitar jalur karakter asli)
-  var inBoundsPoints = 0;
-  for (final p in alignedDrawnPoints) {
-    double minDist = double.infinity;
-    for (final refP in allRefPoints) {
-      final d = (p - refP).distance;
-      if (d < minDist) minDist = d;
-      if (minDist <= 60) break;
-    }
-    if (minDist <= 175) {
-      inBoundsPoints++;
-    }
-  }
-  final precisionRatio = alignedDrawnPoints.isNotEmpty
-      ? (inBoundsPoints / alignedDrawnPoints.length)
-      : 0.0;
-
-  final shapeScore = ((coverageRatio * 0.70 + precisionRatio * 0.30) * 100)
-      .round()
-      .clamp(0, 100);
-
-  // 4. Verifikasi arah & urutan garis (sebagai indikator tambahan / bonus, bukan penghalang kelulusan)
+  // Compare each user stroke only with the reference stroke at the same index.
+  // Do not move or resize the writing to fit: its actual placement matters.
   final comparedCount = math.min(
     normalizedDrawn.length,
     reference.strokes.length,
   );
   var totalDirSim = 0.0;
   var validDirCount = 0;
+  var totalStrokeShapeScore = 0.0;
   for (var i = 0; i < comparedCount; i++) {
     final refStroke = reference.strokes[i];
     final userStroke = normalizedDrawn[i];
-    if (refStroke.length < 2 || userStroke.length < 2) continue;
+    if (refStroke.length < 2 || userStroke.length < 2) {
+      validDirCount++;
+      continue;
+    }
+
+    const sampleCount = 32;
+    final refSamples = _resample(refStroke, sampleCount);
+    final userSamples = _resample(userStroke, sampleCount);
+    var distanceTotal = 0.0;
+    var nearCount = 0;
+    for (var sample = 0; sample < sampleCount; sample++) {
+      final distance = (refSamples[sample] - userSamples[sample]).distance;
+      distanceTotal += distance;
+      if (distance <= 80) nearCount++;
+    }
+    final averageDistance = distanceTotal / sampleCount;
+    final pathAccuracy = (1 - averageDistance / 220).clamp(0.0, 1.0);
+    final pathCoverage = nearCount / sampleCount;
+    totalStrokeShapeScore += (pathAccuracy * 0.7 + pathCoverage * 0.3) * 100;
+
     final rVec = refStroke.last - refStroke.first;
     final uVec = userStroke.last - userStroke.first;
     final rLen = rVec.distance;
@@ -1296,31 +1230,49 @@ HanziEvaluationResult evaluateHanziWriting({
       validDirCount++;
     }
   }
+  final matchedShapeScore = comparedCount > 0
+      ? totalStrokeShapeScore / comparedCount
+      : 0.0;
+  final countRatio = expectedCount > 0
+      ? math.min(actualCount, expectedCount) / expectedCount
+      : 0.0;
+  final shapeScore = (matchedShapeScore * countRatio)
+      .round()
+      .clamp(0, 100)
+      .toInt();
   final directionScore = validDirCount > 0
       ? ((totalDirSim / validDirCount) * 100).round()
-      : 70;
+      : 0;
   final isOrderAndDirectionValid = directionScore >= 60;
 
-  // Skor utama berbasis bentuk bentuk tulisan (Shape-First Validation)
-  // Bonus hingga 5 poin jika urutan goresan juga tepat
-  final orderBonus = isOrderAndDirectionValid ? 5 : 0;
-  final totalScore = ((shapeScore * 0.95) + orderBonus).round().clamp(0, 100);
-
-  // Ambang batas kelulusan realistis: jika sudah mirip (>= 50%), katakan hampir mirip & nyatakan lulus
-  final isPassed = shapeScore >= 50 || totalScore >= 50;
+  // Wrong stroke count, order, or direction cannot pass on silhouette alone.
+  final totalScore = isCountValid
+      ? ((shapeScore * 0.7) + (directionScore * 0.3))
+            .round()
+            .clamp(0, 100)
+            .toInt()
+      : math.min(49, (shapeScore * 0.7).round()).toInt();
+  final isPassed = isCountValid && shapeScore >= 58 && directionScore >= 50;
 
   String title;
   String message;
 
-  if (totalScore >= 78) {
+  if (isPassed && totalScore >= 78) {
     title = 'Bentuk Sangat Tepat! 很好';
-    message = 'Bentuk tulisan Hanzi kamu sudah sangat rapi dan tepat sesuai karakter aslinya.';
+    message = 'Bentuk tulisan Hanzi kamu sudah sangat rapi dan benar sesuai tulisan Hanzi di atas.';
   } else if (isPassed) {
-    title = 'Bentuk Sudah Hampir Mirip! 加油';
-    message = 'Goresan Hanzi kamu sudah hampir mirip dengan karakter aslinya. Terus latih keluwesannya!';
+    title = 'Tulisan Hanzi Sudah Benar! 加油';
+    message = 'Tulisanmu sudah sesuai dengan karakter Hanzi di atas. Pertahankan dan latih keluwesannya!';
+  } else if (!isCountValid) {
+    title = 'Jumlah Goresan Belum Tepat';
+    message =
+        'Karakter ini membutuhkan $expectedCount goresan (kamu menulis $actualCount). Ikuti panduan goresan karakter di atas, lalu coba lagi.';
+  } else if (!isOrderAndDirectionValid) {
+    title = 'Arah atau Urutan Goresan Belum Tepat';
+    message = 'Ikuti titik awal dan arah pada panduan, lalu tulis ulang karakter dari goresan pertama.';
   } else {
-    title = 'Bentuk Masih Belum Lengkap';
-    message = 'Sebagian goresan karakter belum terbentuk. Coba ikuti bayangan karakter pada kanvas secara utuh.';
+    title = 'Bentuk Belum Sesuai Hanzi di Atas';
+    message = 'Tulisan kamu belum sesuai dengan karakter Hanzi yang ada di atas. Ikuti goresan karakter pada kanvas secara utuh.';
   }
 
   return HanziEvaluationResult(
