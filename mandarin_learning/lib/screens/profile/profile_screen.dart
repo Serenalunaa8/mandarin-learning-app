@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
-import '../../widgets/mascot_widget.dart';
+import '../../widgets/avatar_picker_modal.dart';
 import '../auth/landing_screen.dart';
 import '../auth/register_screen.dart';
 import '../practice/dictionary_screen.dart';
@@ -18,184 +18,451 @@ class ProfileScreen extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final vocab = context.watch<VocabularyProvider>();
     final user = auth.profile;
-    final fullName = user?.fullName ?? 'Pelajar Mandarin';
-    final username = user?.username ?? '';
+    final fullName = user?.fullName ?? (auth.isGuest ? 'Tamu' : 'Pelajar Mandarin');
+    final username = user?.username ?? (auth.isGuest ? 'tamu' : 'pelajar');
+    final avatarUrl = (user?.avatarUrl != null && user!.avatarUrl.isNotEmpty)
+        ? user.avatarUrl
+        : 'assets/image/register/09_mascot_head.png';
+
+    // Tier badge calculation
+    String badgeEmoji = '🥈';
+    String badgeTitle = 'Silver';
+    if (auth.isGuest) {
+      badgeEmoji = '👤';
+      badgeTitle = 'Mode Tamu';
+    } else {
+      final xp = auth.totalXp;
+      if (xp >= 500) {
+        badgeEmoji = '🥇';
+        badgeTitle = 'Gold';
+      } else if (xp >= 150) {
+        badgeEmoji = '🥈';
+        badgeTitle = 'Silver';
+      } else {
+        badgeEmoji = '🥉';
+        badgeTitle = 'Bronze';
+      }
+    }
+
+    Widget buildAvatarImage() {
+      if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
+        return Image.network(
+          avatarUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Image.asset(
+            'assets/image/register/09_mascot_head.png',
+            fit: BoxFit.contain,
+          ),
+        );
+      }
+      return Image.asset(
+        avatarUrl,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => Image.asset(
+          'assets/image/register/09_mascot_head.png',
+          fit: BoxFit.contain,
+        ),
+      );
+    }
 
     return Scaffold(
-      backgroundColor: AppColors.mintBackground,
+      backgroundColor: const Color(0xFFF1F8F4),
       appBar: AppBar(
-        title: const Text('Profil'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          'Profil',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1E3A24),
+          ),
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined, color: AppColors.textDark),
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              ),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF1E3A24).withValues(alpha: 0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.settings_outlined,
+                  color: Color(0xFF1E3A24),
+                  size: 22,
+                ),
+              ),
+            ),
           ),
         ],
       ),
       body: Stack(
         children: [
-          // Bottom Pagoda & Garden Landscape decoration
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: 120,
-            child: Opacity(
-              opacity: 0.6,
-              child: CustomPaint(
-                painter: _BottomPagodaPainter(),
+          // Background Gradient
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFFE2F3F5),
+                    Color(0xFFF3FBF5),
+                    Color(0xFFEAF8EF),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
               ),
             ),
           ),
 
-          // Main Scroll Content
+          // Bottom Flower Bushes / Meadow (Mockup asset)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 110,
+            child: IgnorePointer(
+              child: Image.asset(
+                'assets/image/beranda/semak_bunga_besar.png',
+                fit: BoxFit.fill,
+                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+              ),
+            ),
+          ),
+
+          // Scrollable Content
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Avatar & Name Header
-                  Center(
-                    child: Column(
+                  // Main Green Profile Card
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF1B4D2E),
+                          Color(0xFF26663E),
+                          Color(0xFF1E5631),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF1E3A24).withValues(alpha: 0.18),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Stack(
                       children: [
-                        Container(
-                          width: 86,
-                          height: 86,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFDCFCE7),
-                            border: Border.all(color: AppColors.primary, width: 3),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.06),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: const Center(
-                            child: MascotWidget(size: 78, pose: MascotPose.headOnly),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          fullName,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                        if (username.isNotEmpty) ...[
-                          const SizedBox(height: 3),
-                          Text(
-                            '@$username',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primaryDark,
+                        // Decorative leaf overlays in background corners
+                        Positioned(
+                          right: -10,
+                          top: -10,
+                          width: 140,
+                          height: 140,
+                          child: Opacity(
+                            opacity: 0.22,
+                            child: Image.asset(
+                              'assets/image/beranda/daun_lebat.png',
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                             ),
                           ),
-                        ],
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: auth.isGuest ? const Color(0xFFFEF3C7) : const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: auth.isGuest ? const Color(0xFFF59E0B).withValues(alpha: 0.5) : const Color(0xFFE2E8F0),
+                        ),
+                        Positioned(
+                          right: 15,
+                          bottom: -20,
+                          width: 110,
+                          height: 110,
+                          child: Opacity(
+                            opacity: 0.25,
+                            child: Image.asset(
+                              'assets/image/beranda/daun_lebat.png',
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                             ),
                           ),
+                        ),
+                        Positioned(
+                          left: -15,
+                          bottom: -15,
+                          width: 80,
+                          height: 80,
+                          child: Opacity(
+                            opacity: 0.20,
+                            child: Image.asset(
+                              'assets/image/beranda/daun_tunas.png',
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                            ),
+                          ),
+                        ),
+
+                        // Card Content
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(auth.isGuest ? '👤' : '🥈', style: const TextStyle(fontSize: 14)),
-                              const SizedBox(width: 6),
-                              Text(
-                                auth.isGuest ? 'Mode Tamu' : 'Silver',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: auth.isGuest ? const Color(0xFF92400E) : const Color(0xFF475569),
+                              // Avatar with Glowing Rings & Edit Button
+                              GestureDetector(
+                                onTap: () => showAvatarPickerModal(context, auth),
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    // Outer Glowing Ring
+                                    Container(
+                                      width: 86,
+                                      height: 86,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white.withValues(alpha: 0.12),
+                                        border: Border.all(
+                                          color: Colors.white.withValues(alpha: 0.40),
+                                          width: 2.5,
+                                        ),
+                                      ),
+                                      padding: const EdgeInsets.all(5),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: const Color(0xFFDCFCE7),
+                                          border: Border.all(
+                                            color: Colors.white,
+                                            width: 2.0,
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.all(3),
+                                        child: ClipOval(
+                                          child: buildAvatarImage(),
+                                        ),
+                                      ),
+                                    ),
+
+                                    // Edit Pencil Button
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Container(
+                                        width: 26,
+                                        height: 26,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: const Color(0xFF16A34A),
+                                          border: Border.all(
+                                            color: Colors.white,
+                                            width: 2,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.25),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 1),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Center(
+                                          child: Icon(
+                                            Icons.edit_rounded,
+                                            size: 13,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 18),
+
+                              // Name, Username & Tier Pill
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Full Name + Sprout Icon
+                                    Row(
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            fullName,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: -0.3,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Image.asset(
+                                          'assets/image/beranda/daun_tunas.png',
+                                          width: 20,
+                                          height: 20,
+                                          errorBuilder: (context, error, stackTrace) => const Text(
+                                            '🌱',
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 2),
+
+                                    // Username
+                                    Text(
+                                      '@$username',
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.82),
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+
+                                    // Tier Badge Pill
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.08),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(badgeEmoji, style: const TextStyle(fontSize: 13)),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            badgeTitle,
+                                            style: const TextStyle(
+                                              color: Color(0xFF1E3A24),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        if (auth.isGuest) ...[
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFEF3C7),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.6)),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.info_outline_rounded, color: Color(0xFFB45309), size: 20),
-                                const SizedBox(width: 8),
-                                const Expanded(
-                                  child: Text(
-                                    'Akses terbatas: progres & koin tidak disimpan.',
-                                    style: TextStyle(fontSize: 11, color: Color(0xFF78350F)),
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFD97706),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                    minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                    elevation: 0,
-                                  ),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                                    );
-                                  },
-                                  child: const Text('Daftar', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-                  // 3 Stat Cards in a row (Streak, XP, Peringkat)
+                  // Guest Notice (if in guest mode)
+                  if (auth.isGuest) ...[
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF3C7),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.5)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline_rounded, color: Color(0xFFB45309), size: 20),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              'Mode Tamu: Progres belajar & koin tidak disimpan.',
+                              style: TextStyle(fontSize: 12, color: Color(0xFF78350F)),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFD97706),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                              );
+                            },
+                            child: const Text('Daftar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  // 3 Stat Cards Row: Streak, XP, Koin
                   Row(
                     children: [
+                      // Streak
                       Expanded(
                         child: _buildProfileStatCard(
-                          icon: '🔥',
+                          iconEmoji: '🔥',
+                          iconBgColor: const Color(0xFFFEF3C7),
                           title: 'Streak',
                           value: '${auth.streak}',
                           unit: 'hari',
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
+
+                      // XP
                       Expanded(
                         child: _buildProfileStatCard(
-                          icon: '💎',
+                          iconEmoji: '💎',
+                          iconBgColor: const Color(0xFFE0F2FE),
                           title: 'XP',
-                          value: '${auth.isGuest ? auth.totalXp : (auth.totalXp > 0 ? auth.totalXp : 320)}',
+                          value: '${auth.isGuest ? auth.totalXp : (auth.totalXp > 0 ? auth.totalXp : 185)}',
                           unit: 'Total XP',
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
+
+                      // Koin
                       Expanded(
                         child: _buildProfileStatCard(
-                          icon: '🪙',
+                          iconEmoji: '🪙',
+                          iconBgColor: const Color(0xFFFEF9C3),
                           title: 'Koin',
-                          value: '${auth.coins}',
+                          value: '${auth.isGuest ? auth.coins : (auth.coins > 0 ? auth.coins : 185)}',
                           unit: 'Tersedia',
                         ),
                       ),
@@ -203,34 +470,43 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Section Title
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Menu Pembelajaran',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
+                  // Section Title: Menu Pembelajaran
+                  Row(
+                    children: [
+                      Image.asset(
+                        'assets/image/beranda/daun_tunas.png',
+                        width: 22,
+                        height: 22,
+                        errorBuilder: (context, error, stackTrace) => const Text('🌱', style: TextStyle(fontSize: 18)),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Menu Pembelajaran',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1E3A24),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
 
-                  // Menu Items
-                  _buildMenuItem(
+                  // Menu 1: Hasil & Progres Belajar
+                  _buildMenuCard(
                     context,
-                    icon: Icons.auto_stories_rounded,
                     title: 'Hasil & Progres Belajar',
-                    onTap: () {
-                      _showStudySummary(context, vocab, auth);
-                    },
+                    iconAsset: 'assets/image/beranda/ikon_buku.png',
+                    fallbackIcon: Icons.menu_book_rounded,
+                    onTap: () => _showStudySummary(context, vocab, auth),
                   ),
 
-                  _buildMenuItem(
+                  // Menu 2: Kamus Lengkap HSK 1–6
+                  _buildMenuCard(
                     context,
-                    icon: Icons.menu_book_rounded,
                     title: 'Kamus Lengkap HSK 1–6',
+                    iconAsset: 'assets/image/beranda/ikon_terjemah.png',
+                    fallbackIcon: Icons.import_contacts_rounded,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -239,10 +515,12 @@ class ProfileScreen extends StatelessWidget {
                     },
                   ),
 
-                  _buildMenuItem(
+                  // Menu 3: Beri Ulasan & Masukan
+                  _buildMenuCard(
                     context,
-                    icon: Icons.rate_review_outlined,
                     title: 'Beri Ulasan & Masukan (Feedback)',
+                    iconAsset: 'assets/image/beranda/ikon_surat.png',
+                    fallbackIcon: Icons.rate_review_outlined,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -251,38 +529,41 @@ class ProfileScreen extends StatelessWidget {
                     },
                   ),
 
-                  _buildMenuItem(
+                  // Menu 4: Bantuan & FAQ
+                  _buildMenuCard(
                     context,
-                    icon: Icons.help_outline_rounded,
                     title: 'Bantuan & FAQ',
-                    onTap: () {
-                      _showFaqDialog(context);
-                    },
+                    fallbackIcon: Icons.help_outline_rounded,
+                    onTap: () => _showFaqDialog(context),
                   ),
 
-                  _buildMenuItem(
+                  // Menu 5: Tentang Aplikasi
+                  _buildMenuCard(
                     context,
-                    icon: Icons.info_outline_rounded,
                     title: 'Tentang Aplikasi',
-                    onTap: () {
-                      _showAboutDialog(context);
-                    },
+                    fallbackIcon: Icons.info_outline_rounded,
+                    onTap: () => _showAboutDialog(context),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
-                  // Tombol Logout
+                  // Logout Button
                   SizedBox(
                     width: double.infinity,
                     height: 48,
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.error,
-                        side: const BorderSide(color: Color(0xFFFCA5A5)),
+                        side: const BorderSide(color: Color(0xFFFCA5A5), width: 1.2),
+                        backgroundColor: Colors.white.withValues(alpha: 0.8),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                        elevation: 0,
                       ),
                       icon: const Icon(Icons.logout_rounded, size: 20),
-                      label: Text(auth.isGuest ? 'Keluar dari Mode Tamu' : 'Keluar dari Akun (Logout)', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      label: Text(
+                        auth.isGuest ? 'Keluar dari Mode Tamu' : 'Keluar dari Akun (Logout)',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
                       onPressed: () async {
                         await auth.logout();
                         if (context.mounted) {
@@ -295,7 +576,9 @@ class ProfileScreen extends StatelessWidget {
                       },
                     ),
                   ),
-                  const SizedBox(height: 40),
+
+                  // Ample padding for floating translucent bottom navbar
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
@@ -306,88 +589,152 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildProfileStatCard({
-    required String icon,
+    required String iconEmoji,
+    required Color iconBgColor,
     required String title,
     required String value,
     required String unit,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
+            color: const Color(0xFF1E3A24).withValues(alpha: 0.04),
+            blurRadius: 10,
             offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 22)),
-          const SizedBox(height: 6),
+          // Emoji with soft circular background
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: iconBgColor,
+            ),
+            child: Center(
+              child: Text(
+                iconEmoji,
+                style: const TextStyle(fontSize: 22),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
           Text(
             title,
-            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF64748B),
+            ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 3),
           Text(
             value,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
+              color: Color(0xFF1E3A24),
             ),
           ),
+          const SizedBox(height: 1),
           Text(
             unit,
-            style: const TextStyle(fontSize: 10, color: AppColors.textLight),
+            style: const TextStyle(
+              fontSize: 11,
+              color: Color(0xFF94A3B8),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMenuItem(
+  Widget _buildMenuCard(
     BuildContext context, {
-    required IconData icon,
     required String title,
+    String? iconAsset,
+    required IconData fallbackIcon,
     required VoidCallback onTap,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 6,
+            color: const Color(0xFF1E3A24).withValues(alpha: 0.03),
+            blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
-          leading: Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0FDF4),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: AppColors.primaryDark, size: 22),
-          ),
-          title: Text(
-            title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textDark),
-          ),
-          trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textLight),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
           onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                // Rounded leading icon
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDCFCE7),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Center(
+                    child: iconAsset != null
+                        ? Image.asset(
+                            iconAsset,
+                            width: 24,
+                            height: 24,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              fallbackIcon,
+                              color: const Color(0xFF16A34A),
+                              size: 22,
+                            ),
+                          )
+                        : Icon(
+                            fallbackIcon,
+                            color: const Color(0xFF16A34A),
+                            size: 22,
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+
+                // Title
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E3A24),
+                    ),
+                  ),
+                ),
+
+                // Trailing Chevron
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0xFF94A3B8),
+                  size: 24,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -406,7 +753,14 @@ class ProfileScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Hasil & Progres Belajar', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Hasil & Progres Belajar',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E3A24),
+              ),
+            ),
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.school, color: AppColors.primary),
@@ -454,18 +808,24 @@ class ProfileScreen extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Tentang Aplikasi'),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            MascotWidget(size: 60, pose: MascotPose.headOnly),
-            SizedBox(height: 12),
-            Text(
+            Image.asset(
+              'assets/image/register/09_mascot_head.png',
+              width: 60,
+              height: 60,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => const Icon(Icons.school, size: 40, color: Color(0xFF16A34A)),
+            ),
+            const SizedBox(height: 12),
+            const Text(
               'Aplikasi Pembelajaran Mandarin untuk Pemula\nVersi 1.0 (HSK 1-6)',
               textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8),
-            Text(
+            const SizedBox(height: 8),
+            const Text(
               'Dilengkapi Autentikasi Enkripsi SHA-256, Sesi Login, Biometrik Sidik Jari, Penyimpanan Database Lokal SQLite & Online Supabase.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: AppColors.textMuted),
@@ -478,52 +838,4 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-class _BottomPagodaPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFC7EBC8).withValues(alpha: 0.6)
-      ..style = PaintingStyle.fill;
-
-    // Rolling hill
-    final path = Path();
-    path.moveTo(0, size.height * 0.6);
-    path.quadraticBezierTo(size.width * 0.4, size.height * 0.3, size.width, size.height * 0.7);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
-    canvas.drawPath(path, paint);
-
-    // Pagoda silhouette on right
-    final px = size.width * 0.85;
-    final py = size.height * 0.35;
-    final pagodaPaint = Paint()
-      ..color = const Color(0xFF5A8E5C).withValues(alpha: 0.4)
-      ..style = PaintingStyle.fill;
-
-    // Roof 1
-    final r1 = Path()
-      ..moveTo(px - 14, py)
-      ..quadraticBezierTo(px, py - 4, px + 14, py)
-      ..lineTo(px + 8, py - 6)
-      ..quadraticBezierTo(px, py - 7, px - 8, py - 6)
-      ..close();
-    canvas.drawPath(r1, pagodaPaint);
-
-    // Roof 2
-    final r2 = Path()
-      ..moveTo(px - 18, py + 8)
-      ..quadraticBezierTo(px, py + 4, px + 18, py + 8)
-      ..lineTo(px + 12, py + 2)
-      ..quadraticBezierTo(px, py + 1, px - 12, py + 2)
-      ..close();
-    canvas.drawPath(r2, pagodaPaint);
-
-    canvas.drawRect(Rect.fromLTWH(px - 10, py + 8, 20, 16), pagodaPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
