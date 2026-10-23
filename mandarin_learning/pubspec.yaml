@@ -81,11 +81,8 @@ flutter:
   assets:
     - data/mandarin_id.json
     - assets/image/landing_page/
-<<<<<<< HEAD
-    - assets/image/register/
-=======
     - assets/image/games/
->>>>>>> 725bd756cd76a3b38ad3d0ac815bd9dcb0d3f39f
+    - assets/image/register/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
