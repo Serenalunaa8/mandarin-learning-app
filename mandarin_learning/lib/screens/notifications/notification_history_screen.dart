@@ -204,8 +204,12 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
                 ],
                 const SizedBox(height: 8),
                 Text(
-                  notification.receivedAt == null
+                  notification.isActive
                       ? 'Masih aktif di perangkat'
+                      : notification.scheduledAt != null
+                      ? 'Dijadwalkan · ${_formatTime(notification.scheduledAt!)}'
+                      : notification.receivedAt == null
+                      ? 'Waktu tidak tersedia'
                       : _formatDate(notification.receivedAt!),
                   style: TextStyle(
                     color: notification.isActive
@@ -278,5 +282,13 @@ class _NotificationHistoryScreenState extends State<NotificationHistoryScreen> {
     if (difference.inDays < 1) return '${difference.inHours} jam lalu';
     if (difference.inDays < 7) return '${difference.inDays} hari lalu';
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    return '$day/$month/${dateTime.year} pukul $hour:$minute';
   }
 }

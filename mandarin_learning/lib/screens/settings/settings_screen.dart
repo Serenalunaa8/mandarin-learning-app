@@ -1,4 +1,5 @@
 import '../auth/landing_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -143,11 +144,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _toggleReminder(bool val) async {
     setState(() => _dailyReminderEnabled = val);
     if (val) {
-      await NotificationService.instance.requestPermission();
-      await NotificationService.instance.scheduleDailyReminder(
-        hour: _reminderHour,
-        minute: _reminderMinute,
-      );
+      final permissionGranted = await NotificationService.instance
+          .requestPermission();
+      if (!permissionGranted) {
+        await NotificationService.instance.cancelReminder();
+        if (!mounted) return;
+        setState(() => _dailyReminderEnabled = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Izin notifikasi belum diberikan. Aktifkan notifikasi aplikasi di pengaturan perangkat.',
+            ),
+          ),
+        );
+        return;
+      }
+      try {
+        await NotificationService.instance.scheduleDailyReminder(
+          hour: _reminderHour,
+          minute: _reminderMinute,
+          requestPermissions: false,
+        );
+      } catch (error) {
+        if (!mounted) return;
+        setState(() => _dailyReminderEnabled = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Pengingat gagal dijadwalkan: $error')),
+        );
+        return;
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -179,10 +204,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _reminderMinute = picked.minute;
       });
       if (_dailyReminderEnabled) {
-        await NotificationService.instance.scheduleDailyReminder(
-          hour: _reminderHour,
-          minute: _reminderMinute,
-        );
+        try {
+          await NotificationService.instance.scheduleDailyReminder(
+            hour: _reminderHour,
+            minute: _reminderMinute,
+            requestPermissions: true,
+          );
+        } catch (error) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Pengingat gagal dijadwalkan: $error')),
+            );
+          }
+          return;
+        }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -199,11 +234,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _testNotificationIn5Seconds() async {
-    await NotificationService.instance.scheduleNotificationInSeconds(
-      seconds: 5,
-      title: '⏰ Waktunya Belajar Mandarin!',
-      body: 'Hebat! Pengingat belajar berhasil masuk meski aplikasi di luar/tertutup! 🎯',
-    );
+    try {
+      await NotificationService.instance.scheduleNotificationInSeconds(
+        seconds: 5,
+        title: '⏰ Waktunya Belajar Mandarin!',
+        body: 'Hebat! Pengingat belajar berhasil masuk meski aplikasi di luar/tertutup! 🎯',
+      );
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Notifikasi gagal dijadwalkan: $error')),
+        );
+      }
+      return;
+    }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -300,9 +344,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         fontSize: 14,
                       ),
                     ),
-                    subtitle: Text(
-                      '${auth.dailyGoalMinutes} menit per hari',
-                    ),
+                    subtitle: Text('${auth.dailyGoalMinutes} menit per hari'),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => showDailyGoalBottomSheet(context, auth),
                   ),
@@ -343,12 +385,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.no_accounts_rounded, color: Color(0xFFB45309), size: 24),
+                              Icon(
+                                Icons.no_accounts_rounded,
+                                color: Color(0xFFB45309),
+                                size: 24,
+                              ),
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   'Fitur Tidak Tersedia untuk Mode Tamu',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFB45309)),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Color(0xFFB45309),
+                                  ),
                                 ),
                               ),
                             ],
@@ -356,7 +406,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           SizedBox(height: 8),
                           Text(
                             'Pendaftaran biometrik dan penyimpanan preferensi akun hanya tersedia untuk akun terdaftar. Mode Tamu tidak menyimpan progres atau pengaturan apapun.',
-                            style: TextStyle(fontSize: 12, color: Color(0xFF78350F)),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF78350F),
+                            ),
                           ),
                         ],
                       ),
@@ -759,7 +812,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       leading: const SizedBox(width: 40),
                       title: const Text(
                         'Uji Notifikasi Luar Aplikasi',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       subtitle: const Text(
                         'Kirim notif 5 detik lagi (bisa sambil tutup app)',
@@ -768,12 +824,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       trailing: ElevatedButton.icon(
                         onPressed: _testNotificationIn5Seconds,
                         icon: const Icon(Icons.send_rounded, size: 14),
-                        label: const Text('Tes (5s)', style: TextStyle(fontSize: 12)),
+                        label: const Text(
+                          'Tes (5s)',
+                          style: TextStyle(fontSize: 12),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFEF3C7),
                           foregroundColor: const Color(0xFFB45309),
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                         ),
                       ),
                     ),
@@ -985,7 +1047,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () async {
               Navigator.pop(ctx);
