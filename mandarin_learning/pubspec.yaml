@@ -88,6 +88,7 @@ flutter:
     - assets/image/games/
     - assets/image/register/
     - assets/image/beranda/
+    - assets/image/icon_beranda/
     - assets/image/background/
 
   # An image asset can refer to one or more resolution-specific "variants", see
