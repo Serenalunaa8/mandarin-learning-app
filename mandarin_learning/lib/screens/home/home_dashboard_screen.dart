@@ -783,12 +783,13 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                   crossAxisCount: 4,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.78,
+                  crossAxisSpacing: 2,
+                  mainAxisSpacing: 4,
+                  childAspectRatio: 0.95,
                   children: [
                     _buildQuickActionItem(
-                      icon: Icons.quiz_rounded,
+                      imageAsset:
+                          'assets/image/icon_beranda/kuis_artipinyin.png',
                       color: const Color(0xFFE76F51),
                       title: 'Kuis Arti & Pinyin',
                       onTap: () => _openQuickFeature(
@@ -798,7 +799,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       ),
                     ),
                     _buildQuickActionItem(
-                      icon: Icons.graphic_eq_rounded,
+                      imageAsset: 'assets/image/icon_beranda/pelafalan.png',
                       color: const Color(0xFF398A9A),
                       title: 'Pelafalan & Nada',
                       onTap: () {
@@ -823,7 +824,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       },
                     ),
                     _buildQuickActionItem(
-                      icon: Icons.extension_rounded,
+                      imageAsset:
+                          'assets/image/icon_beranda/hanzi_matching.png',
                       color: const Color(0xFF5184B8),
                       title: 'Hanzi Matching',
                       onTap: () => _openQuickFeature(
@@ -833,7 +835,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       ),
                     ),
                     _buildQuickActionItem(
-                      icon: Icons.draw_rounded,
+                      imageAsset:
+                          'assets/image/icon_beranda/stroke_challange.png',
                       color: const Color(0xFF6D9B53),
                       title: 'Stroke Challenge',
                       onTap: () => _openQuickFeature(
@@ -843,7 +846,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       ),
                     ),
                     _buildQuickActionItem(
-                      icon: Icons.screen_rotation_alt_rounded,
+                      imageAsset:
+                          'assets/image/icon_beranda/tilt_to_answer.png',
                       color: const Color(0xFF8B6B9E),
                       title: 'Tilt to Answer',
                       onTap: () => _openQuickFeature(
@@ -853,7 +857,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       ),
                     ),
                     _buildQuickActionItem(
-                      icon: Icons.sports_basketball_rounded,
+                      imageAsset:
+                          'assets/image/icon_beranda/mandarin_catcher.png',
                       color: const Color(0xFFE89B45),
                       title: 'Mandarin Catcher',
                       onTap: () => _openQuickFeature(
@@ -863,7 +868,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       ),
                     ),
                     _buildQuickActionItem(
-                      icon: Icons.account_balance_wallet_rounded,
+                      imageAsset: 'assets/image/beranda/koin.png',
                       color: const Color(0xFFD3A32F),
                       title: 'Saldo & Riwayat',
                       onTap: () => _openQuickFeature(
@@ -873,7 +878,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       ),
                     ),
                     _buildQuickActionItem(
-                      icon: Icons.explore_rounded,
+                      imageAsset:
+                          'assets/image/icon_beranda/direction_explorer.png',
                       color: const Color(0xFF398A9A),
                       title: 'Direction Explorer',
                       onTap: () => _openQuickFeature(
@@ -883,7 +889,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       ),
                     ),
                     _buildQuickActionItem(
-                      icon: Icons.currency_exchange_rounded,
+                      imageAsset:
+                          'assets/image/icon_beranda/konversi_mata_uang.png',
                       color: const Color(0xFF6D9B53),
                       title: 'Konversi Mata Uang',
                       onTap: () => _openQuickFeature(
@@ -893,7 +900,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       ),
                     ),
                     _buildQuickActionItem(
-                      icon: Icons.public_rounded,
+                      imageAsset: 'assets/image/icon_beranda/zona_waktu.png',
                       color: const Color(0xFF5184B8),
                       title: 'Zona Waktu Dunia',
                       onTap: () => _openQuickFeature(
@@ -942,7 +949,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   }
 
   Widget _buildQuickActionItem({
-    required IconData icon,
+    required String imageAsset,
     required Color color,
     required String title,
     required VoidCallback onTap,
@@ -954,15 +961,18 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 54,
-            height: 54,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(18),
             ),
-            child: Icon(icon, size: 28, color: color),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Image.asset(imageAsset, fit: BoxFit.contain),
+            ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 2),
           Text(
             title,
             textAlign: TextAlign.center,
