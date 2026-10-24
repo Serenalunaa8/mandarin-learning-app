@@ -82,8 +82,10 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - data/mandarin_id.json
-    - Data/contoh_kalimat_hsk1_2.json
-    - data/contoh_kalimat_hsk1_2.json
+    - Data/contoh_kalimat_hsk1_3.json
+    - Data/contoh_kalimat_hsk4.json
+    - Data/contoh-kalimat-hsk5.json
+    - Data/contoh_kalimat_hsk6.json
     - assets/image/landing_page/
     - assets/image/games/
     - assets/image/register/
