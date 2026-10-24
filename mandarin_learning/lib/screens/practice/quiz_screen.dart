@@ -8,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../../services/audio_service.dart';
 import '../../widgets/mascot_widget.dart';
+import '../../widgets/in_app_notification.dart';
 import 'speech_practice_screen.dart';
 
 class QuizQuestion {
@@ -182,6 +183,21 @@ class _QuizScreenState extends State<QuizScreen> {
         createdAt: DateTime.now(),
       ),
     );
+
+    // Tampilkan notifikasi reward di dalam aplikasi (In-App Notification)
+    if (mounted) {
+      InAppNotification.showReward(
+        context,
+        title: score >= 70
+            ? '🎉 Kuis Selesai! Skor: $score/100'
+            : '📚 Kuis Selesai! Skor: $score/100',
+        message: rewardCoins > 0
+            ? 'Hebat! Kamu berhasil menyelesaikan kuis dan memperoleh +$rewardCoins Koin!'
+            : 'Terus semangat! Tingkatkan skor untuk memperoleh koin reward.',
+        score: score,
+        coins: rewardCoins,
+      );
+    }
   }
 
   // Bantuan Kuis (FR-19: 20 Koin)

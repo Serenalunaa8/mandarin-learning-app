@@ -183,7 +183,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
           hour: _reminderHour,
           minute: _reminderMinute,
         );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '⏰ Pengingat harian disetel: Pukul  WIB (Notif masuk walau app ditutup).',
+              ),
+              backgroundColor: AppColors.primaryGreen,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
       }
+    }
+  }
+
+  Future<void> _testNotificationIn5Seconds() async {
+    await NotificationService.instance.scheduleNotificationInSeconds(
+      seconds: 5,
+      title: '⏰ Waktunya Belajar Mandarin!',
+      body: 'Hebat! Pengingat belajar berhasil masuk meski aplikasi di luar/tertutup! 🎯',
+    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            '🔔 Notifikasi dijadwalkan! Segera kunci layar atau keluar aplikasi untuk melihat notif masuk dalam 5 detik.',
+          ),
+          backgroundColor: AppColors.primaryGreen,
+          duration: Duration(seconds: 4),
+        ),
+      );
     }
   }
 
@@ -723,6 +753,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       onTap: _pickReminderTime,
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const SizedBox(width: 40),
+                      title: const Text(
+                        'Uji Notifikasi Luar Aplikasi',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: const Text(
+                        'Kirim notif 5 detik lagi (bisa sambil tutup app)',
+                        style: TextStyle(fontSize: 11),
+                      ),
+                      trailing: ElevatedButton.icon(
+                        onPressed: _testNotificationIn5Seconds,
+                        icon: const Icon(Icons.send_rounded, size: 14),
+                        label: const Text('Tes (5s)', style: TextStyle(fontSize: 12)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFEF3C7),
+                          foregroundColor: const Color(0xFFB45309),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        ),
+                      ),
                     ),
                   ],
                 ],

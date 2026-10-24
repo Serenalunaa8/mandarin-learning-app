@@ -5,6 +5,7 @@ import 'providers/auth_provider.dart';
 import 'providers/vocabulary_provider.dart';
 import 'services/supabase_service.dart';
 import 'services/audio_service.dart';
+import 'services/notification_service.dart';
 import 'screens/auth/landing_screen.dart';
 
 void main() async {
