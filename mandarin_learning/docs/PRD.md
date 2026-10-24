@@ -188,7 +188,7 @@ Pengguna utama adalah pemula Bahasa Mandarin, seperti pelajar atau mahasiswa yan
 
 
 
-Nilai bonus streak 25 koin merupakan nilai awal yang diusulkan untuk PRD dan dapat disesuaikan sebelum implementasi. Koin dari skor hanya diberikan sekali untuk satu hasil/attempt yang sah agar pengulangan tidak dapat dieksploitasi. XP/progres, bila diterapkan, terpisah dari koin yang dapat dibelanjakan. 
+Nilai bonus streak 25 koin merupakan nilai awal yang diusulkan untuk PRD dan dapat disesuaikan sebelum implementasi. Koin dari skor hanya diberikan sekali untuk satu hasil/attempt yang sah agar pengulangan tidak dapat dieksploitasi. Sistem XP tidak digunakan; hanya koin yang dapat diperoleh dan dibelanjakan.
 
 ###### **6.2 Aturan Mandarin Direction Explorer** 
 

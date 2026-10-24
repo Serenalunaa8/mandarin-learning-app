@@ -7,7 +7,6 @@ class UserProfile {
   final int currentHskLevel;
   final int streak;
   final DateTime lastActiveDate;
-  final int totalXp;
   final int coins;
 
   UserProfile({
@@ -19,7 +18,6 @@ class UserProfile {
     required this.currentHskLevel,
     required this.streak,
     required this.lastActiveDate,
-    required this.totalXp,
     required this.coins,
   });
 
@@ -35,7 +33,6 @@ class UserProfile {
       lastActiveDate: json['last_active_date'] != null
           ? DateTime.tryParse(json['last_active_date'].toString()) ?? DateTime.now()
           : DateTime.now(),
-      totalXp: (json['total_xp'] as num?)?.toInt() ?? 0,
       coins: (json['coins'] as num?)?.toInt() ?? 50,
     );
   }
@@ -49,7 +46,6 @@ class UserProfile {
     'current_hsk_level': currentHskLevel,
     'streak': streak,
     'last_active_date': lastActiveDate.toIso8601String().split('T').first,
-    'total_xp': totalXp,
     'coins': coins,
   };
 
@@ -61,7 +57,6 @@ class UserProfile {
     int? currentHskLevel,
     int? streak,
     DateTime? lastActiveDate,
-    int? totalXp,
     int? coins,
   }) {
     return UserProfile(
@@ -73,7 +68,6 @@ class UserProfile {
       currentHskLevel: currentHskLevel ?? this.currentHskLevel,
       streak: streak ?? this.streak,
       lastActiveDate: lastActiveDate ?? this.lastActiveDate,
-      totalXp: totalXp ?? this.totalXp,
       coins: coins ?? this.coins,
     );
   }

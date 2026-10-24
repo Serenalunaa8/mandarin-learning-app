@@ -20,7 +20,7 @@ class AppColors {
   ); // Latar belakang utama seluruh layar
   static const Color surfaceLight = Color(0xFFF9FDF9);
 
-  // Aksen gamifikasi (Streak, XP, Permata/Koin)
+  // Aksen gamifikasi (Streak, Permata/Koin)
   static const Color streakOrange = Color(0xFFF97316); // Api streak
   static const Color coinGold = Color(0xFFF59E0B); // Permata / Koin
   static const Color leagueSilver = Color(0xFF94A3B8); // Medali Silver
