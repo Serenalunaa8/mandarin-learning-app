@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../services/ai_tutor_service.dart';
 import '../../services/audio_service.dart';
@@ -16,13 +17,16 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<AiChatMessage> _messages = [];
   bool _isGenerating = false;
-  String? _providerConfigHint;
-  final AiProvider _selectedProvider = AiProvider.gemini;
+
+  AiTutorMode _selectedMode = AiTutorMode.appApi;
 
   final List<String> _quickSuggestions = [
     'Perbedaan 的, 得, 地',
     'Cara membedakan Nada 2 dan Nada 3',
     'Kapan pakai 不 vs 没?',
+    'Perbedaan 想 (xiǎng) vs 要 (yào)',
+    'Perbedaan 能, 会, 可以',
+    'Struktur kalimat dasar Mandarin',
     'Percakapan pesan makanan',
     'Tips menghafal Hanzi',
   ];
@@ -30,14 +34,15 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAvailableProviders();
     _messages.add(
       AiChatMessage(
         text:
-            'Halo! Aku Xiao Xiong, AI Tutor Mandarin pribadimu 🐼. '
-            'Ada topik tata bahasa atau kosakata yang ingin kamu tanyakan hari ini?',
+            'Halo! Aku Xiao Xiong, AI Tutor Mandarin pribadimu 🐼.\n\n'
+            'Pilih AI Tutor + Supabase untuk belajar Mandarin dari database aplikasi, '
+            'atau Gemini Murni untuk bertanya berbagai hal.',
         isUser: false,
         timestamp: DateTime.now(),
+        mode: AiTutorMode.appApi,
         modelBadge: 'Xiao Xiong Assistant',
       ),
     );
@@ -50,197 +55,39 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     super.dispose();
   }
 
-  Future<void> _loadAvailableProviders() async {
-    if (mounted) {
-      setState(() {
-        _providerConfigHint = null;
-      });
-    }
-  }
-
-  String _friendlyApiError(Object error) {
-    final details = error.toString().toLowerCase();
-    if (details.contains('404') || details.contains('not_found')) {
-      return 'Layanan AI belum aktif: Edge Function "ai-tutor" belum ditemukan di proyek Supabase. Deploy fungsi dari folder mandarin_learning/supabase/functions/ai-tutor, lalu atur API Key provider di Supabase. Untuk memakai API Key pribadi, isi melalui ikon kunci.';
-    }
-    return 'Pastikan Gemini API Key sudah dikonfigurasi di Supabase atau dimasukkan melalui ikon kunci. Detail: $error';
-  }
-
-  Future<void> _showApiKeySettingsDialog() async {
-    final geminiKey =
-        await AiTutorService.instance.getApiKey(AiProvider.gemini) ?? '';
-
-    final geminiController = TextEditingController(text: geminiKey);
-
-    if (!mounted) return;
-
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.key_rounded, color: AppColors.primaryGreen),
-                        SizedBox(width: 8),
-                        Text(
-                          'Pengaturan API Key Gemini',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Gunakan API Key di Supabase atau masukkan key milikmu sendiri. '
-                  'Key pribadi Gemini disimpan di perangkat dan dikirim ke Google. '
-                  'Untuk aplikasi publik, simpan key di Supabase.',
-                  style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-                ),
-                const SizedBox(height: 16),
-
-                // Gemini Field
-                _buildApiKeyInput(
-                  label: 'Google Gemini API Key',
-                  controller: geminiController,
-                  hint: 'AIzaSy...',
-                  helper: 'Dapatkan gratis di aistudio.google.com',
-                ),
-                const SizedBox(height: 20),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGreen,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    onPressed: () async {
-                      await AiTutorService.instance.saveApiKey(
-                        AiProvider.gemini,
-                        geminiController.text,
-                      );
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'API Key berhasil disimpan di perangkat.',
-                            ),
-                            backgroundColor: AppColors.primaryGreen,
-                          ),
-                        );
-                        await _loadAvailableProviders();
-                      }
-                    },
-                    child: const Text(
-                      'Simpan API Key Gemini',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildApiKeyInput({
-    required String label,
-    required TextEditingController controller,
-    required String hint,
-    required String helper,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
-        ),
-        const SizedBox(height: 4),
-        TextField(
-          controller: controller,
-          obscureText: true,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(fontSize: 12, color: Colors.black26),
-            helperText: helper,
-            helperStyle: const TextStyle(
-              fontSize: 10,
-              color: AppColors.textMuted,
-            ),
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 10,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: AppColors.primaryGreen,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Future<void> _sendMessage(String text) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty || _isGenerating) return;
 
     _textController.clear();
-    final provider = _selectedProvider;
+    final currentMode = _selectedMode;
+    final history = _messages
+        .where(
+          (message) =>
+              message.mode == currentMode &&
+              !message.text.startsWith('Halo! Aku Xiao Xiong') &&
+              !message.text.startsWith('Belum bisa mendapat jawaban:'),
+        )
+        .toList()
+        .reversed
+        .take(8)
+        .toList()
+        .reversed
+        .map(
+          (message) => {
+            'role': message.isUser ? 'user' : 'model',
+            'text': message.text,
+          },
+        )
+        .toList();
     setState(() {
       _messages.add(
-        AiChatMessage(text: trimmed, isUser: true, timestamp: DateTime.now()),
+        AiChatMessage(
+          text: trimmed,
+          isUser: true,
+          timestamp: DateTime.now(),
+          mode: currentMode,
+        ),
       );
       _isGenerating = true;
     });
@@ -251,11 +98,12 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     try {
       response = await AiTutorService.instance.askAiTutor(
         trimmed,
-        provider: provider,
+        mode: currentMode,
+        history: history,
       );
     } catch (error) {
-      response =
-          'Gagal menerima jawaban dari ${provider.label}. ${_friendlyApiError(error)}';
+      final detail = error.toString().replaceFirst('Bad state: ', '');
+      response = 'Belum bisa mendapat jawaban: $detail';
     }
 
     if (!mounted) return;
@@ -267,8 +115,10 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           text: response,
           isUser: false,
           timestamp: DateTime.now(),
-          provider: provider,
-          modelBadge: '${provider.label} • ${provider.model}',
+          mode: currentMode,
+          modelBadge: currentMode == AiTutorMode.appApi
+              ? 'AI Tutor • API aplikasi + Supabase'
+              : 'Gemini Murni • Tanpa konteks database',
           audioText: AudioService.instance.extractMandarinText(response),
         ),
       );
@@ -302,45 +152,61 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             Text('AI Tutor Mandarin'),
           ],
         ),
-        actions: [
-          Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              margin: const EdgeInsets.symmetric(vertical: 8),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Dua mode: konteks aplikasi atau Gemini umum.
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFBBF7D0)),
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 16,
-                    color: AppColors.primaryGreen,
+                  Expanded(
+                    child: _ModeButton(
+                      label: 'AI Tutor + Supabase',
+                      icon: Icons.psychology_rounded,
+                      selected: _selectedMode == AiTutorMode.appApi,
+                      color: AppColors.primaryGreen,
+                      onTap: () =>
+                          setState(() => _selectedMode = AiTutorMode.appApi),
+                    ),
                   ),
                   const SizedBox(width: 4),
-                  const Text(
-                    'Google Gemini',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
+                  Expanded(
+                    child: _ModeButton(
+                      label: 'Gemini Murni',
+                      icon: Icons.auto_awesome_rounded,
+                      selected: _selectedMode == AiTutorMode.gemini,
+                      color: const Color(0xFF2563EB),
+                      onTap: () =>
+                          setState(() => _selectedMode = AiTutorMode.gemini),
                     ),
                   ),
                 ],
               ),
             ),
-          const SizedBox(width: 12),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              child: Text(
+                _selectedMode == AiTutorMode.appApi
+                    ? 'Tutor memakai referensi kosakata dari database Supabase.'
+                    : 'Gemini menjawab berbagai topik tanpa konteks database.',
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ),
+
             // Quick suggestions horizontal chips
             Container(
               height: 44,
-              margin: const EdgeInsets.symmetric(vertical: 6),
+              margin: const EdgeInsets.symmetric(vertical: 4),
               child: ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 scrollDirection: Axis.horizontal,
@@ -372,7 +238,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 12,
+                  vertical: 8,
                 ),
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
@@ -398,8 +264,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
+                        boxShadow: const [
+                          BoxShadow(color: Colors.black12, blurRadius: 4),
+                        ],
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           SizedBox(
@@ -407,13 +276,17 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                             height: 14,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppColors.primary,
+                              color: _selectedMode == AiTutorMode.appApi
+                                  ? AppColors.primaryGreen
+                                  : const Color(0xFF2563EB),
                             ),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
-                            'Tutor sedang mengetik...',
-                            style: TextStyle(
+                            _selectedMode == AiTutorMode.appApi
+                                ? 'AI sedang mencari konteks belajar...'
+                                : 'Gemini sedang menyiapkan jawaban...',
+                            style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textMuted,
                             ),
@@ -446,7 +319,9 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                       textInputAction: TextInputAction.send,
                       onSubmitted: _sendMessage,
                       decoration: InputDecoration(
-                        hintText: 'Tanyakan tata bahasa atau kosakata...',
+                        hintText: _selectedMode == AiTutorMode.appApi
+                            ? 'Tanyakan tentang Mandarin...'
+                            : 'Tanyakan langsung kepada Gemini...',
                         hintStyle: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textLight,
@@ -466,8 +341,10 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
+                    decoration: BoxDecoration(
+                      color: _selectedMode == AiTutorMode.appApi
+                          ? AppColors.primaryGreen
+                          : const Color(0xFF2563EB),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -496,7 +373,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           margin: const EdgeInsets.only(bottom: 12, left: 48),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: const BoxDecoration(
-            color: AppColors.primary,
+            color: AppColors.primaryDark,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -509,44 +386,24 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             style: const TextStyle(
               color: Colors.white,
               fontSize: 14,
-              height: 1.3,
+              height: 1.35,
             ),
           ),
         ),
       );
     }
 
-    final provider = msg.provider;
-    final Color badgeBg;
-    final Color badgeText;
-    final IconData badgeIcon;
-    switch (provider) {
-      case AiProvider.gemini:
-        badgeBg = const Color(0xFFE0F2FE);
-        badgeText = const Color(0xFF0369A1);
-        badgeIcon = Icons.auto_awesome_rounded;
-        break;
-      case AiProvider.anthropic:
-        badgeBg = const Color(0xFFFEF3C7);
-        badgeText = const Color(0xFFB45309);
-        badgeIcon = Icons.psychology_rounded;
-        break;
-      case AiProvider.openAi:
-        badgeBg = const Color(0xFFDCFCE7);
-        badgeText = const Color(0xFF15803D);
-        badgeIcon = Icons.smart_toy_rounded;
-        break;
-      case AiProvider.groq:
-        badgeBg = const Color(0xFFF3E8FF);
-        badgeText = const Color(0xFF7E22CE);
-        badgeIcon = Icons.bolt_rounded;
-        break;
-      case null:
-        badgeBg = const Color(0xFFECFDF5);
-        badgeText = const Color(0xFF047857);
-        badgeIcon = Icons.support_agent_rounded;
-        break;
-    }
+    final mode = msg.mode;
+    final isGemini = mode == AiTutorMode.gemini;
+    final badgeBg = isGemini
+        ? const Color(0xFFEFF6FF)
+        : const Color(0xFFF0FDF4);
+    final badgeText = isGemini
+        ? const Color(0xFF1D4ED8)
+        : const Color(0xFF15803D);
+    final badgeIcon = isGemini
+        ? Icons.auto_awesome_rounded
+        : Icons.psychology_rounded;
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -579,27 +436,30 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (msg.modelBadge != null || provider != null) ...[
+                    if (msg.modelBadge != null || mode != null) ...[
                       Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
-                          vertical: 3,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
                           color: badgeBg,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: badgeText.withValues(alpha: 0.2),
+                            color: badgeText.withValues(alpha: 0.25),
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(badgeIcon, size: 12, color: badgeText),
-                            const SizedBox(width: 4),
+                            Icon(badgeIcon, size: 13, color: badgeText),
+                            const SizedBox(width: 5),
                             Text(
-                              msg.modelBadge ?? provider?.label ?? 'Xiao Xiong',
+                              msg.modelBadge ??
+                                  (isGemini
+                                      ? 'Gemini Murni'
+                                      : 'AI Tutor • API aplikasi + Supabase'),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -626,7 +486,6 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              // Ekstrak karakter mandarin atau baca jawaban
                               final mandarinText = msg.audioText ?? '';
                               if (mandarinText.isNotEmpty) {
                                 AudioService.instance.speak(mandarinText);
@@ -634,8 +493,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                                horizontal: 10,
+                                vertical: 5,
                               ),
                               decoration: BoxDecoration(
                                 color: AppColors.primaryLight,
@@ -665,6 +524,60 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                         ],
                       ),
                   ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ModeButton extends StatelessWidget {
+  const _ModeButton({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        decoration: BoxDecoration(
+          color: selected ? color : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 17,
+              color: selected ? Colors.white : AppColors.textDark,
+            ),
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: selected ? Colors.white : AppColors.textDark,
                 ),
               ),
             ),
