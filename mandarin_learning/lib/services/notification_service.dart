@@ -1,8 +1,43 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/services.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
+
+class AppNotificationEntry {
+  final String id;
+  final String title;
+  final String body;
+  final DateTime? receivedAt;
+  final bool isActive;
+
+  const AppNotificationEntry({
+    required this.id,
+    required this.title,
+    required this.body,
+    this.receivedAt,
+    this.isActive = false,
+  });
+
+  factory AppNotificationEntry.fromJson(Map<String, dynamic> json) {
+    return AppNotificationEntry(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      body: json['body'] as String,
+      receivedAt: DateTime.tryParse(json['received_at'] as String? ?? ''),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'body': body,
+    'received_at': receivedAt?.toIso8601String(),
+  };
+}
 
 /// Layanan notifikasi lokal & pengingat (flutter_local_notifications 22.x).
 /// Menggunakan named parameters sesuai API versi 22+.
@@ -13,6 +48,7 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
+  static const _historyKey = 'app_notification_history';
 
   // ─── Inisialisasi ────────────────────────────────────────────────────────────
 
@@ -29,44 +65,50 @@ class NotificationService {
       const AndroidInitializationSettings initAndroid =
           AndroidInitializationSettings('@mipmap/ic_launcher');
 
-      const InitializationSettings initSettings =
-          InitializationSettings(android: initAndroid);
-
-      await _notificationsPlugin.initialize(
-        settings: initSettings,
+      const InitializationSettings initSettings = InitializationSettings(
+        android: initAndroid,
       );
+
+      await _notificationsPlugin.initialize(settings: initSettings);
 
       // Buat Notification Channels secara eksplisit agar Android OS tidak mendrop notif
       final androidPlugin = _notificationsPlugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+            AndroidFlutterLocalNotificationsPlugin
+          >();
 
       if (androidPlugin != null) {
-        const AndroidNotificationChannel dailyChannel = AndroidNotificationChannel(
-          'mandarin_daily_reminders',
-          'Pengingat Belajar Harian',
-          description: 'Pengingat rutin untuk belajar kosakata Mandarin HSK',
-          importance: Importance.max,
-          playSound: true,
-          enableVibration: true,
-          showBadge: true,
-        );
+        const AndroidNotificationChannel dailyChannel =
+            AndroidNotificationChannel(
+              'mandarin_daily_reminders',
+              'Pengingat Belajar Harian',
+              description:
+                  'Pengingat rutin untuk belajar kosakata Mandarin HSK',
+              importance: Importance.max,
+              playSound: true,
+              enableVibration: true,
+              showBadge: true,
+            );
         await androidPlugin.createNotificationChannel(dailyChannel);
 
-        const AndroidNotificationChannel instantChannel = AndroidNotificationChannel(
-          'mandarin_learning_reminders',
-          'Pengingat Belajar',
-          description: 'Pengingat rutin untuk belajar kosakata Mandarin HSK',
-          importance: Importance.max,
-          playSound: true,
-          enableVibration: true,
-          showBadge: true,
-        );
+        const AndroidNotificationChannel instantChannel =
+            AndroidNotificationChannel(
+              'mandarin_learning_reminders',
+              'Pengingat Belajar',
+              description:
+                  'Pengingat rutin untuk belajar kosakata Mandarin HSK',
+              importance: Importance.max,
+              playSound: true,
+              enableVibration: true,
+              showBadge: true,
+            );
         await androidPlugin.createNotificationChannel(instantChannel);
       }
 
       _isInitialized = true;
-      debugPrint('[NotificationService] Notifikasi lokal berhasil diinisialisasi.');
+      debugPrint(
+        '[NotificationService] Notifikasi lokal berhasil diinisialisasi.',
+      );
     } catch (e) {
       debugPrint('[NotificationService] Gagal inisialisasi: $e');
     }
@@ -79,7 +121,8 @@ class NotificationService {
       if (!_isInitialized) await initialize();
       final androidImpl = _notificationsPlugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       final granted = await androidImpl?.requestNotificationsPermission();
       try {
         await androidImpl?.requestExactAlarmsPermission();
@@ -99,20 +142,23 @@ class NotificationService {
   }) async {
     if (!_isInitialized) await initialize();
 
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'mandarin_daily_reminders',
-      'Pengingat Belajar Harian',
-      channelDescription: 'Pengingat harian untuk latihan kosakata & streak Mandarin',
-      importance: Importance.max,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      playSound: true,
-      enableVibration: true,
-      visibility: NotificationVisibility.public,
-    );
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'mandarin_daily_reminders',
+          'Pengingat Belajar Harian',
+          channelDescription:
+              'Pengingat harian untuk latihan kosakata & streak Mandarin',
+          importance: Importance.max,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+          playSound: true,
+          enableVibration: true,
+          visibility: NotificationVisibility.public,
+        );
 
-    const NotificationDetails details =
-        NotificationDetails(android: androidDetails);
+    const NotificationDetails details = NotificationDetails(
+      android: androidDetails,
+    );
 
     await _notificationsPlugin.show(
       id: 0,
@@ -120,6 +166,85 @@ class NotificationService {
       body: body,
       notificationDetails: details,
     );
+    await recordInAppNotification(title: title, body: body);
+  }
+
+  Future<void> recordInAppNotification({
+    required String title,
+    required String body,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final history = prefs.getStringList(_historyKey) ?? [];
+    final now = DateTime.now();
+    final entry = AppNotificationEntry(
+      id: '${now.microsecondsSinceEpoch}',
+      title: title,
+      body: body,
+      receivedAt: now,
+    );
+    history.insert(0, jsonEncode(entry.toJson()));
+    await prefs.setStringList(_historyKey, history);
+  }
+
+  Future<List<AppNotificationEntry>> getNotificationHistory() async {
+    if (!_isInitialized) await initialize();
+
+    final prefs = await SharedPreferences.getInstance();
+    final history = <AppNotificationEntry>[];
+    for (final value in prefs.getStringList(_historyKey) ?? const []) {
+      try {
+        final json = jsonDecode(value) as Map<String, dynamic>;
+        history.add(AppNotificationEntry.fromJson(json));
+      } on FormatException catch (error) {
+        debugPrint(
+          '[NotificationService] Riwayat notifikasi tidak valid: $error',
+        );
+      } on TypeError catch (error) {
+        debugPrint(
+          '[NotificationService] Format notifikasi tidak valid: $error',
+        );
+      }
+    }
+
+    try {
+      final activeNotifications = await _notificationsPlugin
+          .getActiveNotifications();
+      final existingNotifications = history
+          .map((entry) => '${entry.title}\u0000${entry.body}')
+          .toSet();
+
+      for (final notification in activeNotifications) {
+        final title = notification.title ?? 'Notifikasi';
+        final body = notification.body ?? '';
+        final key = '$title\u0000$body';
+        if (existingNotifications.add(key)) {
+          history.add(
+            AppNotificationEntry(
+              id: 'active-${notification.id ?? key.hashCode}',
+              title: title,
+              body: body,
+              isActive: true,
+            ),
+          );
+        }
+      }
+    } on PlatformException catch (error) {
+      debugPrint(
+        '[NotificationService] Tidak dapat membaca notifikasi sistem aktif: $error',
+      );
+    } on MissingPluginException catch (error) {
+      debugPrint(
+        '[NotificationService] Riwayat sistem tidak tersedia di platform ini: $error',
+      );
+    }
+
+    history.sort((a, b) {
+      if (a.receivedAt == null && b.receivedAt == null) return 0;
+      if (a.receivedAt == null) return 1;
+      if (b.receivedAt == null) return -1;
+      return b.receivedAt!.compareTo(a.receivedAt!);
+    });
+    return history;
   }
 
   // ─── Kalkulasi Jadwal Waktu Berikutnya ────────────────────────────────────────
@@ -153,20 +278,23 @@ class NotificationService {
     await prefs.setInt('reminder_hour', hour);
     await prefs.setInt('reminder_minute', minute);
 
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'mandarin_daily_reminders',
-      'Pengingat Belajar Harian',
-      channelDescription: 'Pengingat harian untuk latihan kosakata & streak Mandarin',
-      importance: Importance.max,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      playSound: true,
-      enableVibration: true,
-      visibility: NotificationVisibility.public,
-    );
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'mandarin_daily_reminders',
+          'Pengingat Belajar Harian',
+          channelDescription:
+              'Pengingat harian untuk latihan kosakata & streak Mandarin',
+          importance: Importance.max,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+          playSound: true,
+          enableVibration: true,
+          visibility: NotificationVisibility.public,
+        );
 
-    const NotificationDetails details =
-        NotificationDetails(android: androidDetails);
+    const NotificationDetails details = NotificationDetails(
+      android: androidDetails,
+    );
 
     final scheduled = _nextInstanceOfTime(hour, minute);
 
@@ -181,7 +309,8 @@ class NotificationService {
         matchDateTimeComponents: DateTimeComponents.time,
       );
       debugPrint(
-          '[NotificationService] Pengingat harian dijadwalkan pada: $scheduled (WIB)');
+        '[NotificationService] Pengingat harian dijadwalkan pada: $scheduled (WIB)',
+      );
     } catch (e) {
       debugPrint('[NotificationService] Fallback ke inexact schedule: $e');
       try {
@@ -195,7 +324,9 @@ class NotificationService {
           matchDateTimeComponents: DateTimeComponents.time,
         );
       } catch (e2) {
-        debugPrint('[NotificationService] Gagal menjadwalkan notif harian: $e2');
+        debugPrint(
+          '[NotificationService] Gagal menjadwalkan notif harian: $e2',
+        );
       }
     }
   }
@@ -210,23 +341,26 @@ class NotificationService {
     if (!_isInitialized) await initialize();
     await requestPermission();
 
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'mandarin_daily_reminders',
-      'Pengingat Belajar Harian',
-      channelDescription: 'Pengingat harian untuk latihan kosakata & streak Mandarin',
-      importance: Importance.max,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      playSound: true,
-      enableVibration: true,
-      visibility: NotificationVisibility.public,
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'mandarin_daily_reminders',
+          'Pengingat Belajar Harian',
+          channelDescription:
+              'Pengingat harian untuk latihan kosakata & streak Mandarin',
+          importance: Importance.max,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+          playSound: true,
+          enableVibration: true,
+          visibility: NotificationVisibility.public,
+        );
+
+    const NotificationDetails details = NotificationDetails(
+      android: androidDetails,
     );
 
-    const NotificationDetails details =
-        NotificationDetails(android: androidDetails);
-
-    final scheduled =
-        tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
+    final scheduled = tz.TZDateTime.now(tz.local)
+        .add(Duration(seconds: seconds));
 
     try {
       await _notificationsPlugin.zonedSchedule(
@@ -238,7 +372,8 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       );
       debugPrint(
-          '[NotificationService] Notifikasi uji dijadwalkan dalam $seconds detik: $scheduled');
+        '[NotificationService] Notifikasi uji dijadwalkan dalam $seconds detik: $scheduled',
+      );
     } catch (e) {
       debugPrint('[NotificationService] Uji fallback inexact: $e');
       try {

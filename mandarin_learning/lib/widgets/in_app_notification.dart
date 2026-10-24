@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../core/constants/app_colors.dart';
+import '../services/notification_service.dart';
 
 /// Komponen Notifikasi di Dalam Aplikasi (In-App Notification Banner).
 /// Menampilkan banner mengambang (floating banner) dari atas layar
@@ -49,6 +53,16 @@ class InAppNotification {
     final overlay = Overlay.maybeOf(context);
     if (overlay == null) return;
 
+    unawaited(
+      NotificationService.instance
+          .recordInAppNotification(title: title, body: message)
+          .catchError((Object error) {
+            debugPrint(
+              '[InAppNotification] Gagal menyimpan notifikasi: $error',
+            );
+          }),
+    );
+
     late OverlayEntry entry;
     entry = OverlayEntry(
       builder: (ctx) => _InAppNotificationWidget(
@@ -56,7 +70,8 @@ class InAppNotification {
         message: message,
         badgeText: badgeText,
         icon: icon,
-        gradientColors: gradientColors ??
+        gradientColors:
+            gradientColors ??
             const [AppColors.primaryDark, AppColors.primaryGreen],
         accentColor: accentColor,
         duration: duration,
@@ -122,15 +137,9 @@ class _InAppNotificationWidgetState extends State<_InAppNotificationWidget>
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0.0, -1.2),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutBack,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
-    _fadeAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
     _controller.forward();
 
@@ -178,8 +187,10 @@ class _InAppNotificationWidgetState extends State<_InAppNotificationWidget>
             child: Material(
               color: Colors.transparent,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: widget.gradientColors,
@@ -240,7 +251,9 @@ class _InAppNotificationWidgetState extends State<_InAppNotificationWidget>
                                 const SizedBox(width: 6),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFF59E0B),
                                     borderRadius: BorderRadius.circular(12),
@@ -274,8 +287,11 @@ class _InAppNotificationWidgetState extends State<_InAppNotificationWidget>
                     const SizedBox(width: 6),
                     // Tombol Close kecil
                     IconButton(
-                      icon: const Icon(Icons.close_rounded,
-                          color: Colors.white70, size: 18),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white70,
+                        size: 18,
+                      ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       onPressed: _dismiss,
