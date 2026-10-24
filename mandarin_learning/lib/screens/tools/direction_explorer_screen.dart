@@ -16,7 +16,7 @@ import '../../services/compass_heading_service.dart';
 // import '../../services/nearby_places_query.dart';
 
 // FR-11 & FR-12: Direction Explorer dengan GPS Real Device, In-Map Compass,
-// Pencarian Tempat Pintar, dan Konversi 3 Mata Uang (CNY, IDR, USD) Kontekstual
+// Pencarian Tempat Pintar, Kompas Mata Angin, dan Navigasi Rute
 
 class RelatedVocab {
   final String hanzi;
@@ -302,6 +302,7 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
 
   void _applyLocation(Position position, String label) {
     if (!mounted) return;
+    final defaultPlaces = _generateNearbyContextualPlaces(position.latitude, position.longitude);
     setState(() {
       _currentPosition = position;
       _currentLocationName =
@@ -309,6 +310,10 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
       _locationErrorMessage = null;
       _isLocationServiceDisabled = false;
       _isLocationPermissionDenied = false;
+      if (_nearbyPlaces.isEmpty) {
+        _nearbyPlaces = defaultPlaces;
+        _selectedPlace ??= defaultPlaces.first;
+      }
     });
 
     if (_isMapReady) {
@@ -469,7 +474,7 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
       final minLat = position.latitude - 0.055;
 
       final categoriesToFetch = [
-        ('stasiun halte bus', 'Transportasi', '车站', 'Chēzhàn', '🚆', 5.0, 25.0),
+        ('stasiun', 'Transportasi', '车站', 'Chēzhàn', '🚆', 5.0, 25.0),
         ('cafe', 'Kafe', '咖啡馆', 'Kāfēiguǎn', '☕', 15.0, 45.0),
         ('restaurant', 'Restoran', '餐厅', 'Cāntīng', '🍽️', 30.0, 120.0),
         ('hotel', 'Hotel', '酒店', 'Jiǔdiàn', '🏨', 200.0, 650.0),
@@ -943,7 +948,7 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
   }
 
   // ─────────────────────────────────────────────────────────────
-  // MODAL DETAIL TEMPAT & KONVERSI 3 MATA UANG KONTEKSTUAL
+  // MODAL DETAIL TEMPAT & KOSAKATA MANDARIN
   // ─────────────────────────────────────────────────────────────
   void _openPlaceBottomSheet(PlaceItem place) {
     final userPos = _currentPosition;
@@ -1264,47 +1269,71 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
                                   ),
                                 ),
                               ...activePlaces.map(
-                                (place) => Marker(
-                                  point: LatLng(place.latitude, place.longitude),
-                                  width: 140,
-                                  height: 60,
-                                  child: GestureDetector(
-                                    onTap: () => _openPlaceBottomSheet(place),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          width: 32,
-                                          height: 32,
-                                          decoration: BoxDecoration(
-                                            color: _getCategoryColor(place.category),
-                                            shape: BoxShape.circle,
-                                            border: Border.all(color: Colors.white, width: 2),
-                                            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                                (place) {
+                                  final isSelected = _selectedPlace?.nameId == place.nameId;
+                                  final iconData = _getCategoryIcon(place.category);
+                                  final color = _getCategoryColor(place.category);
+                                  return Marker(
+                                    point: LatLng(place.latitude, place.longitude),
+                                    width: 140,
+                                    height: 68,
+                                    alignment: Alignment.center,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedPlace = place;
+                                        });
+                                        if (_isMapReady) {
+                                          _mapController.move(LatLng(place.latitude, place.longitude), 16.0);
+                                        }
+                                        _openPlaceBottomSheet(place);
+                                      },
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: isSelected ? const Color(0xFFDC2626) : color,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(color: Colors.white, width: 2.5),
+                                              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 5)],
+                                            ),
+                                            child: Center(
+                                              child: Icon(iconData, color: Colors.white, size: 19),
+                                            ),
                                           ),
-                                          child: Center(
-                                            child: Text(place.iconEmoji, style: const TextStyle(fontSize: 16)),
+                                          const SizedBox(height: 2),
+                                          Container(
+                                            constraints: const BoxConstraints(maxWidth: 136),
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(6),
+                                              border: Border.all(
+                                                color: isSelected ? const Color(0xFFDC2626) : Colors.transparent,
+                                                width: 1,
+                                              ),
+                                              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3)],
+                                            ),
+                                            child: Text(
+                                              place.nameId,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                                color: isSelected ? const Color(0xFFDC2626) : AppColors.textDark,
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                        Container(
-                                          constraints: const BoxConstraints(maxWidth: 136),
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(6),
-                                            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3)],
-                                          ),
-                                          child: Text(
-                                            place.nameId,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                                          ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -1345,46 +1374,142 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
                         top: 10,
                         right: 10,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(18),
                             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6)],
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Transform.rotate(
-                                angle: -_headingDegrees * (math.pi / 180),
-                                child: Container(
-                                  width: 30,
-                                  height: 30,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Color(0xFFF1F5F9),
-                                  ),
-                                  child: const Center(
-                                    child: Icon(Icons.navigation_rounded, color: Color(0xFFEF4444), size: 18),
-                                  ),
+                          child: _selectedPlace != null && userPos != null
+                              ? Builder(
+                                  builder: (context) {
+                                    final place = _selectedPlace!;
+                                    final bearing = _calculateBearingDegrees(
+                                      userPos.latitude,
+                                      userPos.longitude,
+                                      place.latitude,
+                                      place.longitude,
+                                    );
+                                    final dir = _directionForDegrees(bearing);
+                                    final dist = _calculateDistance(
+                                      userPos.latitude,
+                                      userPos.longitude,
+                                      place.latitude,
+                                      place.longitude,
+                                    );
+                                    final targetRelativeAngle =
+                                        (bearing - _headingDegrees) * (math.pi / 180);
+
+                                    return Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Transform.rotate(
+                                              angle: -_headingDegrees * (math.pi / 180),
+                                              child: Container(
+                                                width: 36,
+                                                height: 36,
+                                                decoration: const BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Color(0xFFF1F5F9),
+                                                ),
+                                                child: const Center(
+                                                  child: Icon(Icons.navigation_rounded, color: Color(0xFFEF4444), size: 20),
+                                                ),
+                                              ),
+                                            ),
+                                            Transform.rotate(
+                                              angle: targetRelativeAngle,
+                                              child: const Icon(Icons.arrow_upward_rounded, color: Color(0xFF16A34A), size: 22),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  '${dir.hanzi} (${dir.pinyin})',
+                                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF15803D)),
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  dir.arti,
+                                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                                                ),
+                                              ],
+                                            ),
+                                            Text(
+                                              '${_formatDistance(dist)} • ${place.nameId}',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(fontSize: 9.5, color: AppColors.textMuted),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(width: 6),
+                                        GestureDetector(
+                                          onTap: () => _showRouteView(place),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF16A34A),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: const Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(Icons.directions_walk_rounded, color: Colors.white, size: 14),
+                                                SizedBox(width: 2),
+                                                Text('Rute', style: TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.bold)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                )
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Transform.rotate(
+                                      angle: -_headingDegrees * (math.pi / 180),
+                                      child: Container(
+                                        width: 32,
+                                        height: 32,
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Color(0xFFF1F5F9),
+                                        ),
+                                        child: const Center(
+                                          child: Icon(Icons.navigation_rounded, color: Color(0xFFEF4444), size: 18),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '${_headingDegrees.toStringAsFixed(0)}° ${_directionForDegrees(_headingDegrees).hanzi}',
+                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                                        ),
+                                        Text(
+                                          _directionForDegrees(_headingDegrees).arti,
+                                          style: const TextStyle(fontSize: 9.5, color: AppColors.textMuted),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(width: 6),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '${_headingDegrees.toStringAsFixed(0)}° ${_directionForDegrees(_headingDegrees).hanzi}',
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                                  ),
-                                  Text(
-                                    _directionForDegrees(_headingDegrees).arti,
-                                    style: const TextStyle(fontSize: 9.5, color: AppColors.textMuted),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
                         ),
                       ),
 
@@ -1852,8 +1977,8 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 11),
                           ),
                           onPressed: () => _openPlaceBottomSheet(place),
-                          icon: const Icon(Icons.currency_exchange_rounded, color: Color(0xFF15803D), size: 18),
-                          label: const Text('Konversi Harga', style: TextStyle(color: Color(0xFF15803D), fontSize: 12, fontWeight: FontWeight.bold)),
+                          icon: const Icon(Icons.info_outline_rounded, color: Color(0xFF15803D), size: 18),
+                          label: const Text('Detail Tempat', style: TextStyle(color: Color(0xFF15803D), fontSize: 12, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -2061,6 +2186,29 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
     );
   }
 
+  IconData _getCategoryIcon(String cat) {
+    final lower = cat.toLowerCase();
+    if (lower.contains('kafe') || lower.contains('cafe') || lower.contains('kopi')) {
+      return Icons.local_cafe_rounded;
+    }
+    if (lower.contains('restoran') || lower.contains('resto') || lower.contains('makan') || lower.contains('kuliner')) {
+      return Icons.restaurant_rounded;
+    }
+    if (lower.contains('hotel') || lower.contains('penginapan')) {
+      return Icons.hotel_rounded;
+    }
+    if (lower.contains('baju') || lower.contains('pakaian') || lower.contains('fashion')) {
+      return Icons.checkroom_rounded;
+    }
+    if (lower.contains('transport') || lower.contains('stasiun') || lower.contains('halte') || lower.contains('bus') || lower.contains('kereta')) {
+      return Icons.directions_bus_rounded;
+    }
+    if (lower.contains('taman') || lower.contains('park')) {
+      return Icons.park_rounded;
+    }
+    return Icons.place_rounded;
+  }
+
   Color _getCategoryColor(String cat) {
     final lower = cat.toLowerCase();
     if (lower.contains('baju') || lower.contains('pakaian') || lower.contains('fashion')) {
@@ -2090,7 +2238,7 @@ enum _ActiveSubView {
 }
 
 // ─────────────────────────────────────────────────────────────
-// WIDGET MODAL DETAIL TEMPAT DENGAN KONVERSI 3 MATA UANG
+// WIDGET MODAL DETAIL TEMPAT & KOSAKATA MANDARIN
 // ─────────────────────────────────────────────────────────────
 class _PlaceDetailModal extends StatelessWidget {
   final PlaceItem place;

@@ -6,7 +6,24 @@ import '../../core/constants/app_colors.dart';
 
 enum CurrencyCode { idr, cny, usd }
 
-enum TravelStyle { budget, standard, comfort }
+class _TripOption {
+  final String label;
+  final String detail;
+  final double priceCny;
+
+  const _TripOption(this.label, this.detail, this.priceCny);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _TripOption &&
+          runtimeType == other.runtimeType &&
+          label == other.label &&
+          priceCny == other.priceCny;
+
+  @override
+  int get hashCode => Object.hash(label, priceCny);
+}
 
 class CurrencyConverterScreen extends StatefulWidget {
   const CurrencyConverterScreen({super.key});
@@ -22,7 +39,34 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
   // ─── Budget Planner State ──────────────────────────────────────────────────
   final TextEditingController _budgetController =
       TextEditingController(text: '2.000.000');
-  TravelStyle _travelStyle = TravelStyle.standard;
+  static const List<_TripOption> _transportOptions = [
+    _TripOption('Metro + bus', 'Beijing · sekitar ¥25/orang/hari', 25),
+    _TripOption('Metro + sesekali DiDi', 'Beijing · sekitar ¥70/orang/hari', 70),
+    _TripOption('DiDi/taksi lebih sering', 'Beijing · sekitar ¥180/orang/hari', 180),
+  ];
+  static const List<_TripOption> _hotelOptions = [
+    _TripOption('Hostel (ranjang dorm)', 'Per orang · ¥120/malam', 120),
+    _TripOption('Hotel budget', 'Kamar sederhana · ¥300/kamar/malam', 300),
+    _TripOption('Hotel kelas menengah', 'Kamar · ¥600/kamar/malam', 600),
+  ];
+  static const List<_TripOption> _foodOptions = [
+    _TripOption('Hemat (jajanan/lokal)', '¥50/orang/hari', 50),
+    _TripOption('Kuliner lokal', 'Warung/restoran lokal · ¥90/orang/hari', 90),
+    _TripOption('Restoran nyaman', '¥180/orang/hari', 180),
+  ];
+  static const List<_TripOption> _activityOptions = [
+    _TripOption('Gratis + taman kota', 'Contoh: Tiananmen area (reservasi), taman gratis · ¥0', 0),
+    _TripOption('Kota Terlarang', 'Tiket dewasa musim rendah ¥40 / tinggi ¥60', 60),
+    _TripOption('Kota Terlarang + taman', 'Tiket + estimasi transport lokal · ¥80/orang', 80),
+    _TripOption('Wisata berbayar lebih banyak', 'Estimasi tiket beberapa lokasi · ¥180/orang', 180),
+  ];
+
+  int _tripDays = 3;
+  int _travelerCount = 1;
+  _TripOption _transport = _transportOptions[0];
+  _TripOption _hotel = _hotelOptions[1];
+  _TripOption _food = _foodOptions[1];
+  _TripOption _activity = _activityOptions[2];
 
   // ─── Quick Converter State ─────────────────────────────────────────────────
   final TextEditingController _amountController =
@@ -178,35 +222,18 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
     final totalCny = budgetIdr * rateIdrToCny;
     final totalUsd = budgetIdr * rateIdrToUsd;
 
-    // Alokasi kategori berdasarkan gaya perjalanan
-    double pctTransport = 0.25;
-    double pctHotel = 0.35;
-    double pctFood = 0.25;
-    double pctActivity = 0.15;
-
-    if (_travelStyle == TravelStyle.budget) {
-      pctTransport = 0.20;
-      pctHotel = 0.25;
-      pctFood = 0.30;
-      pctActivity = 0.25;
-    } else if (_travelStyle == TravelStyle.comfort) {
-      pctTransport = 0.20;
-      pctHotel = 0.45;
-      pctFood = 0.20;
-      pctActivity = 0.15;
-    }
-
-    final idrTransport = budgetIdr * pctTransport;
-    final cnyTransport = totalCny * pctTransport;
-
-    final idrHotel = budgetIdr * pctHotel;
-    final cnyHotel = totalCny * pctHotel;
-
-    final idrFood = budgetIdr * pctFood;
-    final cnyFood = totalCny * pctFood;
-
-    final idrActivity = budgetIdr * pctActivity;
-    final cnyActivity = totalCny * pctActivity;
+    final nights = _tripDays > 1 ? _tripDays - 1 : 1;
+    final cnyTransport = _transport.priceCny * _tripDays * _travelerCount;
+    final cnyHotel = _hotel.priceCny * nights *
+        (_hotel.label.startsWith('Hostel') ? _travelerCount : (_travelerCount / 2).ceil());
+    final cnyFood = _food.priceCny * _tripDays * _travelerCount;
+    final cnyActivity = _activity.priceCny * _travelerCount;
+    final idrTransport = cnyTransport / rateIdrToCny;
+    final idrHotel = cnyHotel / rateIdrToCny;
+    final idrFood = cnyFood / rateIdrToCny;
+    final idrActivity = cnyActivity / rateIdrToCny;
+    final plannedCny = cnyTransport + cnyHotel + cnyFood + cnyActivity;
+    final remainingCny = totalCny - plannedCny;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
@@ -488,43 +515,24 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
           ),
           const SizedBox(height: 18),
 
-          // Pilihan Gaya Perjalanan (Travel Style Presets)
+          // Pilihan dan estimasi berbasis harga lokal Beijing
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Gaya Alokasi Perjalanan:',
+                'Sesuaikan rencana perjalanan · Beijing',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
                 ),
               ),
-              Text(
-                '${(pctTransport * 100).toInt()}% • ${(pctHotel * 100).toInt()}% • ${(pctFood * 100).toInt()}% • ${(pctActivity * 100).toInt()}%',
-                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
-              ),
             ],
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              _buildStyleChip(
-                label: '⚖️ Standar (Seimbang)',
-                style: TravelStyle.standard,
-              ),
-              const SizedBox(width: 8),
-              _buildStyleChip(
-                label: '🎒 Backpacker (Hemat)',
-                style: TravelStyle.budget,
-              ),
-              const SizedBox(width: 8),
-              _buildStyleChip(
-                label: '⭐ Nyaman (Hotel+)',
-                style: TravelStyle.comfort,
-              ),
-            ],
-          ),
+          _buildTripSettingsCard(),
+          const SizedBox(height: 12),
+          _buildTripEstimateCard(totalCny, plannedCny, remainingCny),
           const SizedBox(height: 18),
 
           // ─── 4 KATEGORI UTAMA PERENCANAAN PERJALANAN ──────────────────────────
@@ -543,7 +551,6 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
             titleId: 'Transportasi',
             titleZh: '交通 · Jiāotōng',
             emoji: '🚆',
-            percentage: (pctTransport * 100).toInt(),
             idrAmount: idrTransport,
             cnyAmount: cnyTransport,
             colorAccent: const Color(0xFF0284C7),
@@ -565,7 +572,6 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
             titleId: 'Penginapan & Hotel',
             titleZh: '住宿 · Zhùsù',
             emoji: '🏨',
-            percentage: (pctHotel * 100).toInt(),
             idrAmount: idrHotel,
             cnyAmount: cnyHotel,
             colorAccent: const Color(0xFF7C3AED),
@@ -587,7 +593,6 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
             titleId: 'Makanan & Kuliner',
             titleZh: '餐饮 · Cānyǐn',
             emoji: '🍜',
-            percentage: (pctFood * 100).toInt(),
             idrAmount: idrFood,
             cnyAmount: cnyFood,
             colorAccent: const Color(0xFFD97706),
@@ -609,7 +614,6 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
             titleId: 'Aktivitas & Tiket Wisata',
             titleZh: '活动与门票 · Huódòng',
             emoji: '🎟️',
-            percentage: (pctActivity * 100).toInt(),
             idrAmount: idrActivity,
             cnyAmount: cnyActivity,
             colorAccent: const Color(0xFF059669),
@@ -672,6 +676,100 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
     );
   }
 
+  Widget _buildTripSettingsCard() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const Expanded(child: Text('Lama perjalanan', style: TextStyle(fontWeight: FontWeight.w600))),
+          IconButton(onPressed: _tripDays > 1 ? () => setState(() => _tripDays--) : null, icon: const Icon(Icons.remove_circle_outline)),
+          Text('$_tripDays hari', style: const TextStyle(fontWeight: FontWeight.bold)),
+          IconButton(onPressed: _tripDays < 30 ? () => setState(() => _tripDays++) : null, icon: const Icon(Icons.add_circle_outline)),
+        ]),
+        Row(children: [
+          const Expanded(child: Text('Jumlah orang', style: TextStyle(fontWeight: FontWeight.w600))),
+          IconButton(onPressed: _travelerCount > 1 ? () => setState(() => _travelerCount--) : null, icon: const Icon(Icons.remove_circle_outline)),
+          Text('$_travelerCount', style: const TextStyle(fontWeight: FontWeight.bold)),
+          IconButton(onPressed: _travelerCount < 12 ? () => setState(() => _travelerCount++) : null, icon: const Icon(Icons.add_circle_outline)),
+        ]),
+        _buildOptionDropdown('Transportasi', _transport, _transportOptions, (value) => _transport = value),
+        _buildOptionDropdown('Penginapan', _hotel, _hotelOptions, (value) => _hotel = value),
+        _buildOptionDropdown('Makanan', _food, _foodOptions, (value) => _food = value),
+        _buildOptionDropdown('Aktivitas & wisata', _activity, _activityOptions, (value) => _activity = value),
+        const SizedBox(height: 4),
+        const Text('Asumsi: kamar hotel berbagi maksimal 2 orang. Acuan resmi Beijing: metro mulai ¥3 (tarif bertingkat menurut jarak); tiket Palace Museum ¥40 musim rendah / ¥60 musim tinggi. Tarif hotel, makan, dan DiDi di atas adalah kisaran perencanaan, bukan penawaran langsung; cek harga saat memesan.', style: TextStyle(fontSize: 11, color: AppColors.textMuted, height: 1.35)),
+      ]),
+    );
+  }
+
+  Widget _buildOptionDropdown(
+    String title,
+    _TripOption selected,
+    List<_TripOption> options,
+    ValueChanged<_TripOption> onSelected,
+  ) {
+    final effectiveValue = options.contains(selected)
+        ? selected
+        : options.firstWhere(
+            (o) => o.label == selected.label && o.priceCny == selected.priceCny,
+            orElse: () => options.first,
+          );
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: DropdownButtonFormField<_TripOption>(
+        value: effectiveValue,
+        isExpanded: true,
+        decoration: InputDecoration(
+          labelText: title,
+          isDense: true,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+        items: options
+            .map(
+              (option) => DropdownMenuItem<_TripOption>(
+                value: option,
+                child: Text(
+                  '${option.label} — ${option.detail}',
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            )
+            .toList(),
+        onChanged: (value) {
+          if (value != null) {
+            setState(() => onSelected(value));
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildTripEstimateCard(double budgetCny, double plannedCny, double remainingCny) {
+    final overBudget = remainingCny < 0;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: overBudget ? const Color(0xFFFFF7ED) : const Color(0xFFF0FDF4), borderRadius: BorderRadius.circular(16), border: Border.all(color: overBudget ? const Color(0xFFFED7AA) : const Color(0xFFBBF7D0))),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text('Perkiraan biaya pilihanmu', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        const SizedBox(height: 8),
+        _estimateRow('Transportasi', _transport.priceCny * _tripDays * _travelerCount),
+        _estimateRow('Hotel (${_tripDays > 1 ? _tripDays - 1 : 1} malam)', _hotel.priceCny * (_tripDays > 1 ? _tripDays - 1 : 1) * (_hotel.label.startsWith('Hostel') ? _travelerCount : (_travelerCount / 2).ceil())),
+        _estimateRow('Makanan', _food.priceCny * _tripDays * _travelerCount),
+        _estimateRow('Aktivitas', _activity.priceCny * _travelerCount),
+        const Divider(),
+        Text('Total: ¥ ${_formatNumber(plannedCny, CurrencyCode.cny)}  (≈ Rp ${_formatIdrOnly(plannedCny / _getRate(CurrencyCode.idr, CurrencyCode.cny))})', style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(overBudget ? 'Melebihi anggaran sekitar ¥ ${_formatNumber(-remainingCny, CurrencyCode.cny)}.' : 'Sisa anggaran: ¥ ${_formatNumber(remainingCny, CurrencyCode.cny)} dari ¥ ${_formatNumber(budgetCny, CurrencyCode.cny)}.', style: TextStyle(color: overBudget ? Colors.deepOrange : AppColors.primaryDark, fontWeight: FontWeight.w600)),
+      ]),
+    );
+  }
+
+  Widget _estimateRow(String label, double value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: const TextStyle(fontSize: 12)), Text('¥ ${_formatNumber(value, CurrencyCode.cny)}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))]),
+      );
+
   Widget _buildBudgetPresetChip(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -689,46 +787,10 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
     );
   }
 
-  Widget _buildStyleChip({required String label, required TravelStyle style}) {
-    final isSelected = _travelStyle == style;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _travelStyle = style;
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryGreen : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? AppColors.primaryGreen
-                  : const Color(0xFFE2E8F0),
-            ),
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.bold,
-              color: isSelected ? Colors.white : AppColors.textDark,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildCategoryCard({
     required String titleId,
     required String titleZh,
     required String emoji,
-    required int percentage,
     required double idrAmount,
     required double cnyAmount,
     required Color colorAccent,
@@ -771,22 +833,6 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textDark,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: bgAccent,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                '$percentage%',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: colorAccent,
-                ),
               ),
             ),
           ],
