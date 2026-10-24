@@ -12,7 +12,7 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 -- ====================================================================
 -- 2. TABEL APP_USERS
 -- Tabel utama akun pengguna: username, password terenkripsi SHA-256,
--- profil belajar, dan statistik (koin, streak, XP, level HSK).
+-- profil belajar, dan statistik (koin, streak, level HSK).
 -- Digunakan untuk login TANPA Firebase / Supabase Auth native.
 -- ====================================================================
 CREATE TABLE IF NOT EXISTS public.app_users (
@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS public.app_users (
     avatar_url TEXT DEFAULT '',
     current_hsk_level INT DEFAULT 1 CHECK (current_hsk_level BETWEEN 1 AND 6),
     streak INT DEFAULT 1 CHECK (streak >= 0),
-    total_xp INT DEFAULT 0 CHECK (total_xp >= 0),
     coins INT DEFAULT 50 CHECK (coins >= 0),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()

@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS public.app_users (
     avatar_url TEXT DEFAULT '',
     current_hsk_level INT DEFAULT 1,
     streak INT DEFAULT 1,
-    total_xp INT DEFAULT 0,
     coins INT DEFAULT 50,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()

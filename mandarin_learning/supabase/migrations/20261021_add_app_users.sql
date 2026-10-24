@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS public.app_users (
     email TEXT,
     current_hsk_level INT DEFAULT 1 CHECK (current_hsk_level BETWEEN 1 AND 6),
     streak INT DEFAULT 1,
-    total_xp INT DEFAULT 0,
     coins INT DEFAULT 50 CHECK (coins >= 0),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()

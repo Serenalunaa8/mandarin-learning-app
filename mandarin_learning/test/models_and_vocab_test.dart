@@ -13,7 +13,6 @@ void main() {
         'current_hsk_level': 2,
         'streak': 5,
         'last_active_date': '2026-10-19',
-        'total_xp': 320,
         'coins': 150,
       };
 
@@ -22,7 +21,6 @@ void main() {
       expect(profile.fullName, 'Serena Luna');
       expect(profile.currentHskLevel, 2);
       expect(profile.streak, 5);
-      expect(profile.totalXp, 320);
       expect(profile.coins, 150);
 
       // Test copyWith
@@ -65,9 +63,9 @@ void main() {
         'hsk_level': 1,
         'jenis_kata': null,
         'contoh_kalimat': [
-          {'hanzi': '我爱你', 'arti': 'Aku cinta kamu'}
+          {'hanzi': '我爱你', 'arti': 'Aku cinta kamu'},
         ],
-        'sumber': 'HSK 2.0 Official Vocabulary'
+        'sumber': 'HSK 2.0 Official Vocabulary',
       };
 
       final item = VocabularyItem.fromJson(json);
@@ -82,11 +80,7 @@ void main() {
     });
 
     test('VocabularyItem handles nulls gracefully', () {
-      final json = {
-        'id': 2,
-        'hanzi': '八',
-        'pinyin': 'bā',
-      };
+      final json = {'id': 2, 'hanzi': '八', 'pinyin': 'bā'};
 
       final item = VocabularyItem.fromJson(json);
       expect(item.id, 2);
