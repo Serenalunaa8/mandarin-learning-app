@@ -25,6 +25,7 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late int _currentIndex;
   late final PageController _pageController;
+  double _navBarDragDistance = 0;
 
   @override
   void initState() {
@@ -171,38 +172,57 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(32),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(
-                    alpha: 0.38,
-                  ), // Bening transparan ala iOS
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.65),
-                    width: 1.2,
+          child: GestureDetector(
+            onHorizontalDragStart: (_) => _navBarDragDistance = 0,
+            onHorizontalDragUpdate: (details) {
+              _navBarDragDistance += details.delta.dx;
+            },
+            onHorizontalDragEnd: (_) {
+              if (_navBarDragDistance.abs() >= 24) {
+                final nextIndex =
+                    _currentIndex + (_navBarDragDistance < 0 ? 1 : -1);
+                if (nextIndex >= 0 && nextIndex < 5) {
+                  _onTabTapped(nextIndex);
+                }
+              }
+              _navBarDragDistance = 0;
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 8,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF1E3A24).withValues(alpha: 0.08),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(
+                      alpha: 0.38,
+                    ), // Bening transparan ala iOS
+                    borderRadius: BorderRadius.circular(32),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.65),
+                      width: 1.2,
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildNavItem(0, Icons.home_rounded, 'Beranda'),
-                    _buildNavItem(1, Icons.menu_book_rounded, 'Kosakata'),
-                    _buildNavItem(2, Icons.auto_awesome_rounded, 'Praktik'),
-                    _buildNavItem(3, Icons.bar_chart_rounded, 'Progres'),
-                    _buildNavItem(4, Icons.person_rounded, 'Profil'),
-                  ],
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF1E3A24).withValues(alpha: 0.08),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildNavItem(0, Icons.home_rounded, 'Beranda'),
+                      _buildNavItem(1, Icons.menu_book_rounded, 'Kosakata'),
+                      _buildNavItem(2, Icons.auto_awesome_rounded, 'Praktik'),
+                      _buildNavItem(3, Icons.bar_chart_rounded, 'Progres'),
+                      _buildNavItem(4, Icons.person_rounded, 'Profil'),
+                    ],
+                  ),
                 ),
               ),
             ),

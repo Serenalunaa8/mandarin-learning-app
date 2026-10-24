@@ -105,13 +105,13 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Main Green Profile Card (Background bg_gelap.png)
+                  // Main profile card with river background
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
                       image: const DecorationImage(
-                        image: AssetImage('assets/image/beranda/bg_gelap.png'),
+                        image: AssetImage('assets/image/beranda/bg_sungai.png'),
                         fit: BoxFit.cover,
                       ),
                       boxShadow: [

@@ -1,13 +1,24 @@
 import '../../widgets/avatar_image_helper.dart';
+
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../practice/speech_practice_screen.dart';
+import '../practice/quiz_screen.dart';
+import '../games/hanzi_matching_screen.dart';
+import '../games/stroke_challenge_screen.dart';
+import '../games/tilt_to_answer_screen.dart';
+import '../games/mandarin_catcher_screen.dart';
 import '../coins/coin_ledger_screen.dart';
 import '../auth/register_screen.dart';
 import '../lesson/lesson_path_screen.dart';
+import '../tools/direction_explorer_screen.dart';
+import '../tools/currency_converter_screen.dart';
+import '../tools/time_converter_screen.dart';
 import '../../widgets/daily_goal_modal.dart';
 
 class HomeDashboardScreen extends StatefulWidget {
@@ -51,12 +62,18 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     final level = vocab.selectedLevel;
     final progress = vocab.getLevelProgress(level);
     final displayProgress = progress;
-    final cardCategory = auth.isGuest ? 'Mulai Belajar' : 'Lanjutkan Pembelajaran';
+    final cardCategory = auth.isGuest
+        ? 'Mulai Belajar'
+        : 'Lanjutkan Pembelajaran';
     final cardSubtitle = auth.isGuest
         ? 'Pelajaran 1 · Mulai Belajar Mandarin'
         : 'Pelajaran 3 · Salam dan Perkenalan';
-    final cardProgressValue = auth.isGuest ? 0.0 : (displayProgress == 0 ? 0.6 : displayProgress);
-    final cardProgressText = auth.isGuest ? '0%' : '${((displayProgress == 0 ? 0.6 : displayProgress) * 100).toInt()}%';
+    final cardProgressValue = auth.isGuest
+        ? 0.0
+        : (displayProgress == 0 ? 0.6 : displayProgress);
+    final cardProgressText = auth.isGuest
+        ? '0%'
+        : '${((displayProgress == 0 ? 0.6 : displayProgress) * 100).toInt()}%';
     final cardButtonText = auth.isGuest ? 'Mulai  →' : 'Lanjut  →';
     final targetMin = auth.dailyGoalMinutes;
     final activeSeconds = auth.activeStudySecondsToday;
@@ -72,11 +89,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
         child: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Color(0xFFE2F3F5),
-                Color(0xFFF3FBF5),
-                Color(0xFFEAF8EF),
-              ],
+              colors: [Color(0xFFE2F3F5), Color(0xFFF3FBF5), Color(0xFFEAF8EF)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -101,7 +114,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                           border: Border.all(color: Colors.white, width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF1E3A24).withValues(alpha: 0.08),
+                              color: const Color(0xFF1E3A24)
+                                  .withValues(alpha: 0.08),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -123,7 +137,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                     const Spacer(),
                     // Streak Pill
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
@@ -156,10 +173,15 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                     GestureDetector(
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const CoinLedgerScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const CoinLedgerScreen(),
+                        ),
                       ),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
@@ -193,7 +215,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                     GestureDetector(
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Belum ada notifikasi baru.')),
+                          const SnackBar(
+                            content: Text('Belum ada notifikasi baru.'),
+                          ),
                         );
                       },
                       child: Container(
@@ -225,11 +249,16 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                 if (auth.isGuest) ...[
                   Container(
                     margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFEF3C7),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.6)),
+                      border: Border.all(
+                        color: const Color(0xFFF59E0B).withValues(alpha: 0.6),
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.amber.withValues(alpha: 0.08),
@@ -268,7 +297,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                               SizedBox(height: 2),
                               Text(
                                 'Progres belajar & koin tidak disimpan.',
-                                style: TextStyle(fontSize: 11, color: Color(0xFF78350F)),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Color(0xFF78350F),
+                                ),
                               ),
                             ],
                           ),
@@ -277,16 +309,29 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                           style: TextButton.styleFrom(
                             backgroundColor: const Color(0xFFD97706),
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                              MaterialPageRoute(
+                                builder: (_) => const RegisterScreen(),
+                              ),
                             );
                           },
-                          child: const Text('Daftar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          child: const Text(
+                            'Daftar',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -373,10 +418,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                   height: 185,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF225534),
-                        Color(0xFF17472A),
-                      ],
+                      colors: [Color(0xFF225534), Color(0xFF17472A)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -485,7 +527,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
 
                         // Left content: Lesson Info, Progress, and Lanjut Button
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 16,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -514,7 +559,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                   Text(
                                     cardSubtitle,
                                     style: TextStyle(
-                                      color: Colors.white.withValues(alpha: 0.85),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.85,
+                                      ),
                                       fontSize: 12,
                                     ),
                                   ),
@@ -526,15 +573,23 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                   SizedBox(
                                     width: 165,
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         ClipRRect(
-                                          borderRadius: BorderRadius.circular(6),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
                                           child: LinearProgressIndicator(
                                             value: cardProgressValue,
                                             minHeight: 7,
-                                            backgroundColor: const Color(0xFF133F23),
-                                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF52E686)),
+                                            backgroundColor: const Color(
+                                              0xFF133F23,
+                                            ),
+                                            valueColor:
+                                                const AlwaysStoppedAnimation<
+                                                  Color
+                                                >(Color(0xFF52E686)),
                                           ),
                                         ),
                                         const SizedBox(height: 3),
@@ -554,18 +609,25 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFFDCFCE7),
                                       foregroundColor: const Color(0xFF1E5631),
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 8,
+                                      ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       elevation: 0,
                                       minimumSize: Size.zero,
-                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
                                     ),
                                     onPressed: () {
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (_) => const LessonPathScreen()),
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const LessonPathScreen(),
+                                        ),
                                       );
                                     },
                                     child: Text(
@@ -590,7 +652,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
 
                 // "Tujuan Hari Ini" Card
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -627,7 +692,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                   ),
                                 ),
                                 GestureDetector(
-                                  onTap: () => showDailyGoalBottomSheet(context, auth),
+                                  onTap: () =>
+                                      showDailyGoalBottomSheet(context, auth),
                                   child: const Text(
                                     'Edit',
                                     style: TextStyle(
@@ -693,7 +759,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       child: const Row(
                         children: [
                           Text(
-                            'Lihat Semua',
+                            'AI Tutor',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
@@ -701,7 +767,11 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                             ),
                           ),
                           SizedBox(width: 2),
-                          Icon(Icons.chevron_right_rounded, size: 18, color: Color(0xFF225232)),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            size: 18,
+                            color: Color(0xFF225232),
+                          ),
                         ],
                       ),
                     ),
@@ -709,24 +779,128 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                 ),
                 const SizedBox(height: 14),
 
-                // Latihan Cepat: Hanya ikon Latihan (Tata Bahasa & Profil dihapus per request)
-                Row(
+                GridView.count(
+                  crossAxisCount: 4,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.78,
                   children: [
                     _buildQuickActionItem(
-                      imageAsset: 'assets/image/beranda/ikon_headset.png',
-                      title: 'Latihan',
+                      icon: Icons.quiz_rounded,
+                      color: const Color(0xFFE76F51),
+                      title: 'Kuis Arti & Pinyin',
+                      onTap: () => _openQuickFeature(
+                        context,
+                        isGuest: auth.isGuest,
+                        builder: (_) => const QuizScreen(),
+                      ),
+                    ),
+                    _buildQuickActionItem(
+                      icon: Icons.graphic_eq_rounded,
+                      color: const Color(0xFF398A9A),
+                      title: 'Pelafalan & Nada',
                       onTap: () {
                         final words = vocab.currentLevelVocabulary;
-                        final targetWord = words.isNotEmpty ? words.first : null;
-                        if (targetWord != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => SpeechPracticeScreen(item: targetWord),
+                        final targetWord = words.isNotEmpty
+                            ? words.first
+                            : null;
+                        if (targetWord == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Kosakata latihan belum tersedia.'),
                             ),
                           );
+                          return;
                         }
+                        _openQuickFeature(
+                          context,
+                          isGuest: auth.isGuest,
+                          builder: (_) =>
+                              SpeechPracticeScreen(item: targetWord),
+                        );
                       },
+                    ),
+                    _buildQuickActionItem(
+                      icon: Icons.extension_rounded,
+                      color: const Color(0xFF5184B8),
+                      title: 'Hanzi Matching',
+                      onTap: () => _openQuickFeature(
+                        context,
+                        isGuest: auth.isGuest,
+                        builder: (_) => const HanziMatchingScreen(),
+                      ),
+                    ),
+                    _buildQuickActionItem(
+                      icon: Icons.draw_rounded,
+                      color: const Color(0xFF6D9B53),
+                      title: 'Stroke Challenge',
+                      onTap: () => _openQuickFeature(
+                        context,
+                        isGuest: auth.isGuest,
+                        builder: (_) => const StrokeChallengeScreen(),
+                      ),
+                    ),
+                    _buildQuickActionItem(
+                      icon: Icons.screen_rotation_alt_rounded,
+                      color: const Color(0xFF8B6B9E),
+                      title: 'Tilt to Answer',
+                      onTap: () => _openQuickFeature(
+                        context,
+                        isGuest: auth.isGuest,
+                        builder: (_) => const TiltToAnswerScreen(),
+                      ),
+                    ),
+                    _buildQuickActionItem(
+                      icon: Icons.sports_basketball_rounded,
+                      color: const Color(0xFFE89B45),
+                      title: 'Mandarin Catcher',
+                      onTap: () => _openQuickFeature(
+                        context,
+                        isGuest: auth.isGuest,
+                        builder: (_) => const MandarinCatcherScreen(),
+                      ),
+                    ),
+                    _buildQuickActionItem(
+                      icon: Icons.account_balance_wallet_rounded,
+                      color: const Color(0xFFD3A32F),
+                      title: 'Saldo & Riwayat',
+                      onTap: () => _openQuickFeature(
+                        context,
+                        isGuest: auth.isGuest,
+                        builder: (_) => const CoinLedgerScreen(),
+                      ),
+                    ),
+                    _buildQuickActionItem(
+                      icon: Icons.explore_rounded,
+                      color: const Color(0xFF398A9A),
+                      title: 'Direction Explorer',
+                      onTap: () => _openQuickFeature(
+                        context,
+                        isGuest: auth.isGuest,
+                        builder: (_) => const DirectionExplorerScreen(),
+                      ),
+                    ),
+                    _buildQuickActionItem(
+                      icon: Icons.currency_exchange_rounded,
+                      color: const Color(0xFF6D9B53),
+                      title: 'Konversi Mata Uang',
+                      onTap: () => _openQuickFeature(
+                        context,
+                        isGuest: auth.isGuest,
+                        builder: (_) => const CurrencyConverterScreen(),
+                      ),
+                    ),
+                    _buildQuickActionItem(
+                      icon: Icons.public_rounded,
+                      color: const Color(0xFF5184B8),
+                      title: 'Zona Waktu Dunia',
+                      onTap: () => _openQuickFeature(
+                        context,
+                        isGuest: auth.isGuest,
+                        builder: (_) => const TimeConverterScreen(),
+                      ),
                     ),
                   ],
                 ),
@@ -739,11 +913,38 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     );
   }
 
+  void _openQuickFeature(
+    BuildContext context, {
+    required bool isGuest,
+    required WidgetBuilder builder,
+  }) {
+    if (isGuest) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Fitur ini hanya tersedia untuk akun terdaftar. Silakan daftar untuk mengakses.',
+          ),
+          action: SnackBarAction(
+            label: 'Daftar',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RegisterScreen()),
+              );
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(context, MaterialPageRoute(builder: builder));
+  }
 
   Widget _buildQuickActionItem({
-    required String imageAsset,
+    required IconData icon,
+    required Color color,
     required String title,
-    IconData? fallbackIcon,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -752,25 +953,23 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(
-            imageAsset,
-            width: 58,
-            height: 58,
-            fit: BoxFit.contain,
-            errorBuilder: fallbackIcon == null
-                ? null
-                : (context, error, stackTrace) => Icon(
-                    fallbackIcon,
-                    size: 42,
-                    color: const Color(0xFF22A447),
-                  ),
+          Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(icon, size: 28, color: color),
           ),
           const SizedBox(height: 6),
           Text(
             title,
             textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: FontWeight.w600,
               color: Color(0xFF1E3A24),
             ),
