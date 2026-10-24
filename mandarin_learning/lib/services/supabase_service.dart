@@ -108,7 +108,6 @@ class SupabaseService {
     String? email,
     int currentHskLevel = 1,
     int streak = 1,
-    int totalXp = 0,
     int coins = 50,
     String? createdAt,
   }) async {
@@ -125,7 +124,6 @@ class SupabaseService {
         'email': email?.trim().toLowerCase() ?? '',
         'current_hsk_level': currentHskLevel,
         'streak': streak,
-        'total_xp': totalXp,
         'coins': coins,
         'created_at': createdAt ?? now,
         'updated_at': now,
@@ -145,7 +143,6 @@ class SupabaseService {
     required String id,
     int? coins,
     int? streak,
-    int? totalXp,
     int? currentHskLevel,
     String? fullName,
   }) async {
@@ -156,7 +153,6 @@ class SupabaseService {
       };
       if (coins != null) updateData['coins'] = coins;
       if (streak != null) updateData['streak'] = streak;
-      if (totalXp != null) updateData['total_xp'] = totalXp;
       if (currentHskLevel != null) updateData['current_hsk_level'] = currentHskLevel;
       if (fullName != null) updateData['full_name'] = fullName;
 

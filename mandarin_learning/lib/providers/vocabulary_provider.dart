@@ -60,7 +60,10 @@ class VocabularyProvider extends ChangeNotifier {
 
     await VocabularyService.instance.loadVocabulary();
 
-    final isGuestUser = userId == null || userId == 'guest_local_user' || userId == 'guest_temp';
+    final isGuestUser =
+        userId == null ||
+        userId == 'guest_local_user' ||
+        userId == 'guest_temp';
     final prefs = await SharedPreferences.getInstance();
 
     // 1. Muat progres yang sudah dipelajari (PB-05 & FR-15)
@@ -135,6 +138,7 @@ class VocabularyProvider extends ChangeNotifier {
   Future<void> markAsLearned({
     required int vocabId,
     required String userId,
+    int? hskLevel,
   }) async {
     if (_learnedVocabIds.contains(vocabId)) return;
 
@@ -145,7 +149,7 @@ class VocabularyProvider extends ChangeNotifier {
       await SupabaseService.instance.recordProgress(
         userId: userId,
         vocabId: vocabId,
-        hskLevel: _selectedLevel,
+        hskLevel: hskLevel ?? _selectedLevel,
       );
     }
   }
@@ -155,9 +159,12 @@ class VocabularyProvider extends ChangeNotifier {
     notifyListeners();
 
     // Mode Tamu tidak menyimpan riwayat kuis ke disk maupun online
-    if (attempt.userId != 'guest_local_user' && attempt.userId != 'guest_temp') {
+    if (attempt.userId != 'guest_local_user' &&
+        attempt.userId != 'guest_temp') {
       final prefs = await SharedPreferences.getInstance();
-      final jsonList = _quizAttempts.map((e) => jsonEncode(e.toJson())).toList();
+      final jsonList = _quizAttempts
+          .map((e) => jsonEncode(e.toJson()))
+          .toList();
       await prefs.setStringList('local_quiz_attempts', jsonList);
 
       await SupabaseService.instance.saveQuizAttempt(

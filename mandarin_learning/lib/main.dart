@@ -6,7 +6,6 @@ import 'providers/vocabulary_provider.dart';
 import 'services/supabase_service.dart';
 import 'services/audio_service.dart';
 import 'screens/auth/landing_screen.dart';
-import 'screens/home/main_navigation_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -86,9 +85,7 @@ class _MandarinLearningAppState extends State<MandarinLearningApp> {
                 ),
               ),
             )
-          : auth.isAuthenticated
-              ? const MainNavigationScreen()
-              : const LandingScreen(),
+          : const LandingScreen(),
     );
   }
 }

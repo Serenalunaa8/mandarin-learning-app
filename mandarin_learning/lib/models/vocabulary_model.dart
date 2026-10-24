@@ -1,18 +1,25 @@
 class ExampleSentence {
   final String hanzi;
+  final String? pinyin;
   final String arti;
 
-  ExampleSentence({required this.hanzi, required this.arti});
+  ExampleSentence({
+    required this.hanzi,
+    this.pinyin,
+    required this.arti,
+  });
 
   factory ExampleSentence.fromJson(Map<String, dynamic> json) {
     return ExampleSentence(
       hanzi: (json['hanzi'] ?? json['zh'] ?? '').toString(),
+      pinyin: json['pinyin']?.toString(),
       arti: (json['arti'] ?? json['id'] ?? '').toString(),
     );
   }
 
   Map<String, dynamic> toJson() => {
     'hanzi': hanzi,
+    if (pinyin != null) 'pinyin': pinyin,
     'arti': arti,
   };
 }
@@ -83,4 +90,28 @@ class VocabularyItem {
     'contoh_kalimat': contohKalimat.map((e) => e.toJson()).toList(),
     'sumber': sumber,
   };
+
+  VocabularyItem copyWith({
+    int? id,
+    String? hanzi,
+    String? pinyin,
+    String? artiIndonesia,
+    List<String>? translations,
+    int? hskLevel,
+    String? jenisKata,
+    List<ExampleSentence>? contohKalimat,
+    String? sumber,
+  }) {
+    return VocabularyItem(
+      id: id ?? this.id,
+      hanzi: hanzi ?? this.hanzi,
+      pinyin: pinyin ?? this.pinyin,
+      artiIndonesia: artiIndonesia ?? this.artiIndonesia,
+      translations: translations ?? this.translations,
+      hskLevel: hskLevel ?? this.hskLevel,
+      jenisKata: jenisKata ?? this.jenisKata,
+      contohKalimat: contohKalimat ?? this.contohKalimat,
+      sumber: sumber ?? this.sumber,
+    );
+  }
 }
