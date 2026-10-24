@@ -44,8 +44,9 @@ class AiChatMessage {
 
 class AiTutorService {
   static final AiTutorService instance = AiTutorService._internal();
+  
   AiTutorService._internal();
-
+  
   Future<String> askAiTutor(
     String prompt, {
     AiTutorMode mode = AiTutorMode.appApi,
@@ -59,6 +60,7 @@ class AiTutorService {
         'Pertanyaan tidak boleh kosong.',
       );
     }
+
     if (trimmedPrompt.length > 4000) {
       throw ArgumentError.value(
         prompt,
@@ -66,6 +68,8 @@ class AiTutorService {
         'Pertanyaan maksimal 4.000 karakter.',
       );
     }
+
+    
 
     final safeHistory = history
         .where(

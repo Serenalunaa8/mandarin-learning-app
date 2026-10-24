@@ -336,10 +336,10 @@ class PracticeHubScreen extends StatelessWidget {
             _buildFeatureCard(
               context,
               title: 'Mandarin Direction Explorer',
-              desc: 'Eksplorasi tempat sekitar, kompas arah mata angin (方向), dan jarak dengan LBS',
+              desc: 'Peta GPS real-time, pencarian tempat pintar, in-map kompas mata angin & kalkulator konversi harga 3 mata uang',
               emoji: '🧭',
               color: const Color(0xFFF0FDF4),
-              tag: 'LBS & Kompas',
+              tag: 'LBS, Search & Kurs',
               locked: isGuest,
               onTap: () {
                 if (isGuest) {
@@ -357,11 +357,11 @@ class PracticeHubScreen extends StatelessWidget {
             // 2. Konversi Mata Uang
             _buildFeatureCard(
               context,
-              title: 'Konversi Mata Uang (CNY / IDR / USD)',
-              desc: 'Kalkulator kurs Yuan (人民币), Rupiah, dan Dolar dengan tabel belanja Mandarin',
-              emoji: '💱',
+              title: 'China Trip Budget Planner (旅行预算)',
+              desc: 'Rencanakan anggaran ke Tiongkok dalam Rupiah, konversi Yuan (CNY) & alokasi 4 kebutuhan',
+              emoji: '🇨🇳',
               color: const Color(0xFFFFFBEB),
-              tag: 'Kurs Uang',
+              tag: 'Budget & Kurs',
               locked: isGuest,
               onTap: () {
                 if (isGuest) {

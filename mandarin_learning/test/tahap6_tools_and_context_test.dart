@@ -26,16 +26,27 @@ void main() {
 
     String degreesToCardinal(double deg) {
       final normalized = (deg % 360 + 360) % 360;
-      if (normalized >= 337.5 || normalized < 22.5) return '北 (Běi - Utara)';
-      if (normalized >= 22.5 && normalized < 67.5)
+      if (normalized >= 337.5 || normalized < 22.5) {
+        return '北 (Běi - Utara)';
+      }
+      if (normalized >= 22.5 && normalized < 67.5) {
         return '东北 (Dōngběi - Timur Laut)';
-      if (normalized >= 67.5 && normalized < 112.5) return '东 (Dōng - Timur)';
-      if (normalized >= 112.5 && normalized < 157.5)
+      }
+      if (normalized >= 67.5 && normalized < 112.5) {
+        return '东 (Dōng - Timur)';
+      }
+      if (normalized >= 112.5 && normalized < 157.5) {
         return '东南 (Dōngnán - Tenggara)';
-      if (normalized >= 157.5 && normalized < 202.5) return '南 (Nán - Selatan)';
-      if (normalized >= 202.5 && normalized < 247.5)
+      }
+      if (normalized >= 157.5 && normalized < 202.5) {
+        return '南 (Nán - Selatan)';
+      }
+      if (normalized >= 202.5 && normalized < 247.5) {
         return '西南 (Xīnán - Barat Daya)';
-      if (normalized >= 247.5 && normalized < 292.5) return '西 (Xī - Barat)';
+      }
+      if (normalized >= 247.5 && normalized < 292.5) {
+        return '西 (Xī - Barat)';
+      }
       return '西北 (Xīběi - Barat Laut)';
     }
 
@@ -87,6 +98,33 @@ void main() {
       expect(degreesToCardinal(90), '东 (Dōng - Timur)');
       expect(degreesToCardinal(180), '南 (Nán - Selatan)');
       expect(degreesToCardinal(270), '西 (Xī - Barat)');
+    });
+
+    test('Studi Kasus Toko Baju: Perhitungan jarak dan arah mata angin antar 5 cabang 华服风尚', () {
+      // Cabang 1: Pusat (0, 0 referensi lokal)
+      const latPusat = 3.5652;
+      const lonPusat = 98.6565;
+
+      // Cabang 2: Butik Utara (~330m ke utara)
+      const latUtara = 3.5682;
+      const lonUtara = 98.6565;
+
+      // Cabang 3: Mall Plaza (~330m ke timur)
+      const latMall = 3.5652;
+      const lonMall = 98.6595;
+
+      final distToNorth = calculateDistance(latPusat, lonPusat, latUtara, lonUtara);
+      expect(distToNorth, greaterThan(300.0));
+      expect(distToNorth, lessThan(360.0));
+
+      final distToEast = calculateDistance(latPusat, lonPusat, latMall, lonMall);
+      expect(distToEast, greaterThan(300.0));
+      expect(distToEast, lessThan(360.0));
+
+      // Jarak Cabang Mall Plaza ke Butik Utara (diagonal)
+      final distDiagonal = calculateDistance(latMall, lonMall, latUtara, lonUtara);
+      expect(distDiagonal, greaterThan(400.0));
+      expect(distDiagonal, lessThan(500.0));
     });
   });
 
