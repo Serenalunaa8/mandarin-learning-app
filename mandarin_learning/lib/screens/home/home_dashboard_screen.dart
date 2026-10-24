@@ -868,16 +868,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                       ),
                     ),
                     _buildQuickActionItem(
-                      imageAsset: 'assets/image/beranda/koin.png',
-                      color: const Color(0xFFD3A32F),
-                      title: 'Saldo & Riwayat',
-                      onTap: () => _openQuickFeature(
-                        context,
-                        isGuest: auth.isGuest,
-                        builder: (_) => const CoinLedgerScreen(),
-                      ),
-                    ),
-                    _buildQuickActionItem(
                       imageAsset:
                           'assets/image/icon_beranda/direction_explorer.png',
                       color: const Color(0xFF398A9A),
