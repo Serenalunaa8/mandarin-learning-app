@@ -373,6 +373,51 @@ class SupabaseService {
 
   // ===================== FEEDBACK =====================
 
+  Future<List<Map<String, dynamic>>> fetchAiConversations(String userId) async {
+    final rows = await client
+        .from('ai_conversations')
+        .select('id, title, messages, updated_at')
+        .eq('user_id', userId)
+        .order('updated_at', ascending: false);
+    return (rows as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<String> saveAiConversation({
+    required String userId,
+    String? conversationId,
+    required String title,
+    required List<Map<String, dynamic>> messages,
+  }) async {
+    final data = <String, dynamic>{
+      'user_id': userId,
+      'title': title,
+      'messages': messages,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    };
+    if (conversationId == null) {
+      final row = await client
+          .from('ai_conversations')
+          .insert(data)
+          .select('id')
+          .single();
+      return row['id'].toString();
+    }
+    await client
+        .from('ai_conversations')
+        .update(data)
+        .eq('id', conversationId)
+        .eq('user_id', userId);
+    return conversationId;
+  }
+
+  Future<void> deleteAiConversation(String userId, String conversationId) async {
+    await client
+        .from('ai_conversations')
+        .delete()
+        .eq('id', conversationId)
+        .eq('user_id', userId);
+  }
+
   Future<bool> submitFeedback({
     String? userId,
     required String category,
