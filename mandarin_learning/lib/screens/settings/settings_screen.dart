@@ -1,3 +1,4 @@
+import '../auth/landing_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -870,7 +871,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 6),
                   Text(
                     auth.isGuest
-                        ? 'Mode Tamu (Akses Terbatas): Progres belajar, XP, koin, dan skor bersifat sementara (in-memory) dan tidak disimpan ke perangkat maupun database.'
+                        ? 'Mode Tamu (Akses Terbatas): Progres belajar, koin, dan skor bersifat sementara (in-memory) dan tidak disimpan ke perangkat maupun database.'
                         : 'Username: ${auth.profile?.username.isNotEmpty == true ? auth.profile!.username : (auth.profile?.fullName ?? "-")}\nDatabase lokal: SQLite\nSupabase: ${_isCloudConnected == null
                               ? "sedang diperiksa"
                               : _isCloudConnected!
@@ -884,9 +885,69 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: 24),
+
+            // Tombol Keluar dari Akun
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.error,
+                  side: const BorderSide(color: Color(0xFFFCA5A5), width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                icon: const Icon(Icons.logout_rounded, size: 20),
+                label: const Text(
+                  'Keluar dari Akun',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () => _confirmLogout(context, auth),
+              ),
+            ),
             const SizedBox(height: 28),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmLogout(BuildContext context, AuthProvider auth) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Keluar dari Akun'),
+        content: const Text(
+          'Apakah Anda yakin ingin keluar? Anda harus masuk kembali dengan kata sandi atau biometrik untuk mengakses aplikasi.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await auth.logout();
+              if (context.mounted) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LandingScreen()),
+                  (route) => false,
+                );
+              }
+            },
+            child: const Text('Ya, Keluar'),
+          ),
+        ],
       ),
     );
   }

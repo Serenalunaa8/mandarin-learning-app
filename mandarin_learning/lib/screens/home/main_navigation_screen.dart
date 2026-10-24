@@ -1,6 +1,8 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import 'home_dashboard_screen.dart';
@@ -92,7 +94,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Icon(Icons.lock_rounded, size: 48, color: Color(0xFF94A3B8)),
+              const Icon(
+                Icons.lock_rounded,
+                size: 48,
+                color: Color(0xFF94A3B8),
+              ),
               const SizedBox(height: 12),
               const Text(
                 'Fitur Terkunci',
@@ -141,7 +147,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final auth = context.watch<AuthProvider>();
 
     // Guard: Pengguna tidak bisa masuk ke aplikasi sebelum login
-    if (!auth.isAuthenticated) {
+    if (!auth.isAuthenticated && !auth.isGuest) {
       return const LandingScreen();
     }
 
@@ -172,7 +178,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.38), // Bening transparan ala iOS
+                  color: Colors.white.withValues(
+                    alpha: 0.38,
+                  ), // Bening transparan ala iOS
                   borderRadius: BorderRadius.circular(32),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.65),

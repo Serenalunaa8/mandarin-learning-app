@@ -170,12 +170,11 @@ class LocalDatabaseService {
     }
   }
 
-  /// Update data profil user (koin, streak, xp, hsk) di database lokal
+  /// Update data profil user (koin, streak, dan HSK) di database lokal
   Future<bool> updateUserStats({
     required String id,
     int? coins,
     int? streak,
-    int? totalXp,
     int? currentHskLevel,
     String? fullName,
   }) async {
@@ -188,7 +187,6 @@ class LocalDatabaseService {
       };
       if (coins != null) values['coins'] = coins;
       if (streak != null) values['streak'] = streak;
-      if (totalXp != null) values['total_xp'] = totalXp;
       if (currentHskLevel != null) {
         values['current_hsk_level'] = currentHskLevel;
       }

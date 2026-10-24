@@ -42,8 +42,14 @@ class _LoginScreenState extends State<LoginScreen>
     if (widget.initialUsername != null && widget.initialUsername!.isNotEmpty) {
       _usernameController.text = widget.initialUsername!;
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<AuthProvider>().refreshBiometricStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        final auth = context.read<AuthProvider>();
+        await auth.refreshBiometricStatus();
+        if (_usernameController.text.isEmpty && auth.biometricLoginUsername != null) {
+          _usernameController.text = auth.biometricLoginUsername!;
+        }
+      }
     });
 
     _floatController = AnimationController(
@@ -527,34 +533,6 @@ class _LoginScreenState extends State<LoginScreen>
                             // Tombol: Biometrik Adaptif
                             _buildAdaptiveBiometricButton(auth),
                             const SizedBox(height: 12),
-
-                            // Opsi Masuk Sebagai Tamu
-                            TextButton(
-                              onPressed: auth.isLoading
-                                  ? null
-                                  : () async {
-                                      final nav = Navigator.of(context);
-                                      await auth.loginAsGuest();
-                                      if (mounted) {
-                                        nav.pushAndRemoveUntil(
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                const MainNavigationScreen(),
-                                          ),
-                                          (route) => false,
-                                        );
-                                      }
-                                    },
-                              child: const Text(
-                                'Masuk sebagai Tamu (Mode Offline)',
-                                style: TextStyle(
-                                  color: _loginSupportingTextColor,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
 
                             // Tautan: "Belum punya akun? Daftar Sekarang"
                             Wrap(

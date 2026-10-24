@@ -1,3 +1,4 @@
+import '../../widgets/avatar_image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
@@ -24,45 +25,11 @@ class ProfileScreen extends StatelessWidget {
         ? user.avatarUrl
         : 'assets/image/register/09_mascot_head.png';
 
-    // Tier badge calculation
-    String badgeEmoji = '🥈';
-    String badgeTitle = 'Silver';
-    if (auth.isGuest) {
-      badgeEmoji = '👤';
-      badgeTitle = 'Mode Tamu';
-    } else {
-      final xp = auth.totalXp;
-      if (xp >= 500) {
-        badgeEmoji = '🥇';
-        badgeTitle = 'Gold';
-      } else if (xp >= 150) {
-        badgeEmoji = '🥈';
-        badgeTitle = 'Silver';
-      } else {
-        badgeEmoji = '🥉';
-        badgeTitle = 'Bronze';
-      }
-    }
+    final badgeEmoji = auth.isGuest ? '👤' : '🎓';
+    final badgeTitle = auth.isGuest ? 'Mode Tamu' : 'Pelajar';
 
     Widget buildAvatarImage() {
-      if (avatarUrl.startsWith('http://') || avatarUrl.startsWith('https://')) {
-        return Image.network(
-          avatarUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Image.asset(
-            'assets/image/register/09_mascot_head.png',
-            fit: BoxFit.contain,
-          ),
-        );
-      }
-      return Image.asset(
-        avatarUrl,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => Image.asset(
-          'assets/image/register/09_mascot_head.png',
-          fit: BoxFit.contain,
-        ),
-      );
+      return buildUserAvatarWidget(avatarUrl, fit: BoxFit.cover);
     }
 
     return Scaffold(
@@ -130,21 +97,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
 
-          // Bottom Flower Bushes / Meadow (Mockup asset)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: 110,
-            child: IgnorePointer(
-              child: Image.asset(
-                'assets/image/beranda/semak_bunga_besar.png',
-                fit: BoxFit.fill,
-                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-              ),
-            ),
-          ),
-
           // Scrollable Content
           SafeArea(
             child: SingleChildScrollView(
@@ -153,19 +105,14 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Main Green Profile Card
+                  // Main Green Profile Card (Background bg_gelap.png)
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF1B4D2E),
-                          Color(0xFF26663E),
-                          Color(0xFF1E5631),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                      image: const DecorationImage(
+                        image: AssetImage('assets/image/beranda/bg_gelap.png'),
+                        fit: BoxFit.cover,
                       ),
                       boxShadow: [
                         BoxShadow(
@@ -429,7 +376,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ],
 
-                  // 3 Stat Cards Row: Streak, XP, Koin
+                  // 2 Stat Cards Row: Streak and Koin
                   Row(
                     children: [
                       // Streak
@@ -440,18 +387,6 @@ class ProfileScreen extends StatelessWidget {
                           title: 'Streak',
                           value: '${auth.streak}',
                           unit: 'hari',
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // XP
-                      Expanded(
-                        child: _buildProfileStatCard(
-                          iconEmoji: '💎',
-                          iconBgColor: const Color(0xFFE0F2FE),
-                          title: 'XP',
-                          value: '${auth.isGuest ? auth.totalXp : (auth.totalXp > 0 ? auth.totalXp : 185)}',
-                          unit: 'Total XP',
                         ),
                       ),
                       const SizedBox(width: 12),

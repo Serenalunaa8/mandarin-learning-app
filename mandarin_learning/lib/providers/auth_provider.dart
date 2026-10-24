@@ -17,6 +17,9 @@ class AuthProvider extends ChangeNotifier {
   bool _isGuest = false;
   bool _isBiometricSupported = false;
   int _dailyGoalMinutes = 20;
+  DateTime _sessionStartTime = DateTime.now();
+  int _savedSecondsToday = 0;
+  String? _savedTodayDate;
 
   // Status Pendaftaran Biometrik (Sidik Jari & Pengenalan Wajah)
   bool _isBiometricEnrolled = false;
@@ -34,7 +37,7 @@ class AuthProvider extends ChangeNotifier {
       List.unmodifiable(_coinTransactions);
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  bool get isAuthenticated => _profile != null;
+  bool get isAuthenticated => _profile != null && !_isGuest;
   bool get isGuest => _isGuest;
   bool get isBiometricSupported => _isBiometricSupported;
 
@@ -62,9 +65,97 @@ class AuthProvider extends ChangeNotifier {
 
   int get coins => _profile?.coins ?? 50;
   int get streak => _profile?.streak ?? 1;
-  int get totalXp => _profile?.totalXp ?? 0;
   int get currentHskLevel => _profile?.currentHskLevel ?? 1;
   int get dailyGoalMinutes => _dailyGoalMinutes;
+
+  /// Detik belajar aktif hari ini (berdasarkan waktu login/sesi aktif)
+  int get activeStudySecondsToday {
+    final now = DateTime.now();
+    final todayStr = now.toIso8601String().split('T').first;
+    if (_savedTodayDate != null && _savedTodayDate != todayStr) {
+      _savedTodayDate = todayStr;
+      _savedSecondsToday = 0;
+      _sessionStartTime = now;
+    }
+    final elapsed = now.difference(_sessionStartTime).inSeconds;
+    return _savedSecondsToday + (elapsed > 0 ? elapsed : 0);
+  }
+
+  /// Menit belajar aktif hari ini
+  int get activeStudyMinutesToday => activeStudySecondsToday ~/ 60;
+
+  /// Rasio progres target belajar hari ini (0.0 s.d. 1.0)
+  double get dailyGoalProgressRatio {
+    if (_dailyGoalMinutes <= 0) return 0.0;
+    return (activeStudySecondsToday / (_dailyGoalMinutes * 60)).clamp(0.0, 1.0);
+  }
+
+  Future<void> _loadTodayActiveSeconds() async {
+    final now = DateTime.now();
+    _savedTodayDate = now.toIso8601String().split('T').first;
+    _sessionStartTime = now;
+
+    if (!_isGuest && _profile != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final key = 'active_sec_${_savedTodayDate}_${_profile!.id}';
+      _savedSecondsToday = prefs.getInt(key) ?? 0;
+    } else {
+      _savedSecondsToday = 0;
+    }
+  }
+
+  Future<void> saveTodayActiveSeconds() async {
+    if (_isGuest || _profile == null) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final todayStr = DateTime.now().toIso8601String().split('T').first;
+      final key = 'active_sec_${todayStr}_${_profile!.id}';
+      await prefs.setInt(key, activeStudySecondsToday);
+    } catch (_) {}
+  }
+
+  /// Memeriksa dan memperbarui streak harian belajar secara otomatis
+  Future<void> updateDailyStreak() async {
+    if (_profile == null || _isGuest) return;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final lastActive = DateTime(
+      _profile!.lastActiveDate.year,
+      _profile!.lastActiveDate.month,
+      _profile!.lastActiveDate.day,
+    );
+
+    final diffInDays = today.difference(lastActive).inDays;
+
+    int newStreak = _profile!.streak;
+    if (diffInDays == 1) {
+      // Hari berturut-turut berikutnya: streak bertambah +1
+      newStreak += 1;
+    } else if (diffInDays > 1) {
+      // Melewati lebih dari 1 hari: streak terputus dan reset ke 1
+      newStreak = 1;
+    } else if (diffInDays == 0) {
+      // Masih di hari yang sama: jika streak 0 ubah ke 1
+      if (newStreak <= 0) newStreak = 1;
+    }
+
+    if (newStreak != _profile!.streak || diffInDays != 0) {
+      _profile = _profile!.copyWith(streak: newStreak, lastActiveDate: now);
+      notifyListeners();
+
+      try {
+        await LocalDatabaseService.instance.updateUserStats(
+          id: _profile!.id,
+          streak: newStreak,
+        );
+        await SupabaseService.instance.updateAppUserStats(
+          id: _profile!.id,
+          streak: newStreak,
+        );
+      } catch (_) {}
+    }
+  }
 
   Future<void> updateDailyGoalMinutes(int minutes) async {
     _dailyGoalMinutes = minutes;
@@ -89,7 +180,9 @@ class AuthProvider extends ChangeNotifier {
       userMap.remove('avatar_url');
       await LocalDatabaseService.instance.saveOrUpdateUser(userMap);
       try {
-        await SupabaseService.instance.updateProfile(_profile!.id, {'avatar_url': newAvatarUrl});
+        await SupabaseService.instance.updateProfile(_profile!.id, {
+          'avatar_url': newAvatarUrl,
+        });
       } catch (_) {}
     }
   }
@@ -129,81 +222,25 @@ class AuthProvider extends ChangeNotifier {
       await refreshBiometricStatus();
 
       final prefs = await SharedPreferences.getInstance();
-      final guestMode = prefs.getBool('is_guest_mode') ?? false;
-
-      if (guestMode) {
-        _isGuest = true;
-        _dailyGoalMinutes = 20;
-        // Mode Tamu (Akses Terbatas): tidak menyimpan progres apapun
-        _profile = UserProfile(
-          id: 'guest_temp',
-          username: 'guest',
-          fullName: 'Tamu (Akses Terbatas)',
-          avatarUrl: '',
-          currentHskLevel: 1,
-          streak: 0,
-          lastActiveDate: DateTime.now(),
-          totalXp: 0,
-          coins: 0,
-        );
-        _coinTransactions.clear();
-      } else {
-        _dailyGoalMinutes = await SessionService.getDailyGoalMinutes();
-        // Cek sesi aktif dari SessionService
-        final session = await SessionService.getSession();
-        if (session != null) {
-          // Cari data pengguna dari database lokal atau Supabase online
-          Map<String, dynamic>? userData = await LocalDatabaseService.instance
-              .getUserById(session.userId);
-
-          // Coba ambil dari online database jika tersedia
-          try {
-            final onlineUser = await SupabaseService.instance.getAppUserById(
-              session.userId,
-            );
-            if (onlineUser != null) {
-              userData = onlineUser;
-              await LocalDatabaseService.instance.saveOrUpdateUser(onlineUser);
-            }
-          } catch (_) {}
-
-          if (userData != null) {
-            _profile = UserProfile.fromJson(userData);
-          } else {
-            _profile = UserProfile(
-              id: session.userId,
-              username: session.username,
-              fullName: session.fullName,
-              email: session.email,
-              avatarUrl: '',
-              currentHskLevel: 1,
-              streak: 1,
-              lastActiveDate: DateTime.now(),
-              totalXp: 0,
-              coins: 50,
-            );
-          }
-        }
+      if (prefs.getBool('is_guest_mode') ?? false) {
+        await prefs.remove('is_guest_mode');
+        await prefs.remove('guest_coins');
+        await prefs.remove('guest_hsk');
+        await prefs.remove('guest_streak');
       }
-    } catch (e) {
-      debugPrint('[AuthProvider] checkSession error: $e');
-    }
 
-    if (_profile != null && !_isGuest) {
-      try {
-        _coinTransactions
-          ..clear()
-          ..addAll(
-            await SupabaseService.instance.fetchCoinHistory(_profile!.id),
-          );
-      } catch (_) {}
+      _isGuest = false;
+      _profile = null;
+      _dailyGoalMinutes = await SessionService.getDailyGoalMinutes();
+    } catch (e) {
+      debugPrint('[AuthProvider] checkSession error: ');
     }
 
     _isLoading = false;
     notifyListeners();
   }
 
-  /// Login dengan enkripsi password (tidak menggunakan Firebase)
+    /// Login dengan enkripsi password (tidak menggunakan Firebase)
   Future<bool> login(String usernameOrEmail, String password) async {
     _isLoading = true;
     _errorMessage = null;
@@ -281,6 +318,8 @@ class AuthProvider extends ChangeNotifier {
       if (savedAvatar != null && savedAvatar.isNotEmpty) {
         _profile = _profile!.copyWith(avatarUrl: savedAvatar);
       }
+      await updateDailyStreak();
+      await _loadTodayActiveSeconds();
 
       // Ambil riwayat koin
       try {
@@ -360,7 +399,6 @@ class AuthProvider extends ChangeNotifier {
           'email': cleanEmail,
           'current_hsk_level': 1,
           'streak': 1,
-          'total_xp': 0,
           'coins': 50,
           'created_at': now,
           'updated_at': now,
@@ -383,7 +421,6 @@ class AuthProvider extends ChangeNotifier {
           email: userMap['email']?.toString() ?? cleanEmail,
           currentHskLevel: (userMap['current_hsk_level'] as num?)?.toInt() ?? 1,
           streak: (userMap['streak'] as num?)?.toInt() ?? 1,
-          totalXp: (userMap['total_xp'] as num?)?.toInt() ?? 0,
           coins: (userMap['coins'] as num?)?.toInt() ?? 50,
           createdAt: userMap['created_at']?.toString(),
         );
@@ -611,6 +648,10 @@ class AuthProvider extends ChangeNotifier {
       _dailyGoalMinutes = await SessionService.getDailyGoalMinutes();
 
       _profile = UserProfile.fromJson(userData);
+      final savedAvatar = prefs.getString('user_avatar_');
+      if (savedAvatar != null && savedAvatar.isNotEmpty) {
+        _profile = _profile!.copyWith(avatarUrl: savedAvatar);
+      }
 
       try {
         _coinTransactions
@@ -638,20 +679,22 @@ class AuthProvider extends ChangeNotifier {
     await prefs.setBool('is_guest_mode', true);
     // Hapus sisa cache progres tamu lama agar sesi selalu bersih dan tidak menyimpan progres apapun
     await prefs.remove('guest_coins');
-    await prefs.remove('guest_xp');
     await prefs.remove('guest_hsk');
     await prefs.remove('guest_streak');
 
+    _savedSecondsToday = 0;
+    _sessionStartTime = DateTime.now();
+    _savedTodayDate = DateTime.now().toIso8601String().split('T').first;
+    final savedGuestAvatar = prefs.getString('user_avatar_guest');
     _profile = UserProfile(
       id: 'guest_local_user',
       username: 'guest',
       email: '',
       fullName: 'Tamu (Akses Terbatas)',
-      avatarUrl: '',
+      avatarUrl: savedGuestAvatar ?? '',
       currentHskLevel: 1,
       streak: 0,
       lastActiveDate: DateTime.now(),
-      totalXp: 0,
       coins: 0,
     );
     _coinTransactions.clear();
@@ -664,7 +707,6 @@ class AuthProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('is_guest_mode');
     await prefs.remove('guest_coins');
-    await prefs.remove('guest_xp');
     await prefs.remove('guest_hsk');
     await prefs.remove('guest_streak');
     _profile = null;
@@ -691,15 +733,13 @@ class AuthProvider extends ChangeNotifier {
     }
 
     final newCoins = profile.coins + amount;
-    final newXp = profile.totalXp + amount;
-    _profile = profile.copyWith(coins: newCoins, totalXp: newXp);
+    _profile = profile.copyWith(coins: newCoins);
 
     if (!_isGuest) {
       // Simpan ke SQLite lokal
       await LocalDatabaseService.instance.updateUserStats(
         id: profile.id,
         coins: newCoins,
-        totalXp: newXp,
       );
 
       // Simpan ke online database jika tersambung
@@ -707,7 +747,6 @@ class AuthProvider extends ChangeNotifier {
         await SupabaseService.instance.updateAppUserStats(
           id: profile.id,
           coins: newCoins,
-          totalXp: newXp,
         );
         await SupabaseService.instance.addCoinTransaction(
           userId: profile.id,

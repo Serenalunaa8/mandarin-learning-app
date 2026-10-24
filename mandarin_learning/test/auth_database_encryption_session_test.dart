@@ -131,34 +131,46 @@ void main() {
       expect(await SessionService.getEnrolledBiometricUsername(), isNull);
     });
 
-    test('Biometrik terikat 1-ke-1: Akun B menimpa/menonaktifkan biometrik Akun A', () async {
-      // Akun A mendaftarkan biometrik
-      await SessionService.enrollBiometric(
-        userId: 'user_a',
-        username: 'akun_a',
-        fullName: 'Akun A',
-        allowFingerprint: true,
-        allowFace: true,
-      );
+    test(
+      'Biometrik terikat 1-ke-1: Akun B menimpa/menonaktifkan biometrik Akun A',
+      () async {
+        // Akun A mendaftarkan biometrik
+        await SessionService.enrollBiometric(
+          userId: 'user_a',
+          username: 'akun_a',
+          fullName: 'Akun A',
+          allowFingerprint: true,
+          allowFace: true,
+        );
 
-      expect(await SessionService.isBiometricEnrolled(), isTrue);
-      expect(await SessionService.getEnrolledBiometricUsername(), equals('akun_a'));
+        expect(await SessionService.isBiometricEnrolled(), isTrue);
+        expect(
+          await SessionService.getEnrolledBiometricUsername(),
+          equals('akun_a'),
+        );
 
-      // Akun B mengaktifkan biometrik di perangkat yang sama
-      await SessionService.enrollBiometric(
-        userId: 'user_b',
-        username: 'akun_b',
-        fullName: 'Akun B',
-        allowFingerprint: true,
-        allowFace: false,
-      );
+        // Akun B mengaktifkan biometrik di perangkat yang sama
+        await SessionService.enrollBiometric(
+          userId: 'user_b',
+          username: 'akun_b',
+          fullName: 'Akun B',
+          allowFingerprint: true,
+          allowFace: false,
+        );
 
-      // Biometrik akun A sekarang tertimpa oleh akun B
-      expect(await SessionService.isBiometricEnrolled(), isTrue);
-      expect(await SessionService.getEnrolledBiometricUsername(), equals('akun_b'));
-      expect(await SessionService.getEnrolledBiometricUsername(), isNot(equals('akun_a')));
-      expect(await SessionService.isFaceAllowed(), isFalse);
-    });
+        // Biometrik akun A sekarang tertimpa oleh akun B
+        expect(await SessionService.isBiometricEnrolled(), isTrue);
+        expect(
+          await SessionService.getEnrolledBiometricUsername(),
+          equals('akun_b'),
+        );
+        expect(
+          await SessionService.getEnrolledBiometricUsername(),
+          isNot(equals('akun_a')),
+        );
+        expect(await SessionService.isFaceAllowed(), isFalse);
+      },
+    );
   });
 
   group('Ketentuan Guest Mode (Mode Tamu / Akses Terbatas)', () {
@@ -166,25 +178,23 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('Mode Tamu tidak menyimpan koin, XP, atau progres ke SharedPreferences', () async {
+    test('Mode Tamu tidak menyimpan koin atau progres ke SharedPreferences', () async {
       final auth = AuthProvider();
       await auth.loginAsGuest();
 
       expect(auth.isGuest, isTrue);
+      expect(auth.isAuthenticated, isFalse);
       expect(auth.coins, equals(0));
-      expect(auth.totalXp, equals(0));
       expect(auth.streak, equals(0));
       expect(auth.currentHskLevel, equals(1));
 
-      // Tambah koin dan XP selama sesi tamu aktif
+      // Tambah koin selama sesi tamu aktif
       await auth.addCoins(25, 'quiz_reward', 'Kuis Selesai');
       expect(auth.coins, equals(25));
-      expect(auth.totalXp, equals(25));
 
       // Periksa disk SharedPreferences: pastikan tidak ada data progres yang ditulis ke disk
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getInt('guest_coins'), isNull);
-      expect(prefs.getInt('guest_xp'), isNull);
       expect(prefs.getInt('guest_hsk'), isNull);
       expect(prefs.getInt('guest_streak'), isNull);
 
@@ -197,7 +207,6 @@ void main() {
       // Sesi tamu baru selalu mulai dari 0 (tidak mempertahankan progres lama)
       await auth.loginAsGuest();
       expect(auth.coins, equals(0));
-      expect(auth.totalXp, equals(0));
     });
   });
 
@@ -213,7 +222,6 @@ void main() {
           'avatar_url': '',
           'current_hsk_level': 2,
           'streak': 5,
-          'total_xp': 250,
           'coins': 90,
         };
 
