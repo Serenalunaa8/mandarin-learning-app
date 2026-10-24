@@ -13,6 +13,7 @@ class VocabularyProvider extends ChangeNotifier {
   int _selectedLevel = 1;
   int _selectedUnit = 1;
   final Set<int> _learnedVocabIds = {};
+  final Set<int> _quizMasteredVocabIds = {};
   final Set<int> _favoriteVocabIds = {};
   final List<QuizAttempt> _quizAttempts = [];
   String _searchQuery = '';
@@ -26,6 +27,7 @@ class VocabularyProvider extends ChangeNotifier {
   String get searchQuery => _searchQuery;
 
   int get totalQuizzesCompleted => _quizAttempts.length;
+  int get totalQuizMasteredVocabulary => _quizMasteredVocabIds.length;
 
   double get averageQuizScore {
     if (_quizAttempts.isEmpty) return 0.0;
@@ -65,6 +67,16 @@ class VocabularyProvider extends ChangeNotifier {
         userId == 'guest_local_user' ||
         userId == 'guest_temp';
     final prefs = await SharedPreferences.getInstance();
+    _quizMasteredVocabIds
+      ..clear()
+      ..addAll(
+        (prefs.getStringList(
+                  'quiz_mastered_vocab_ids_${userId ?? 'guest_local_user'}',
+                ) ??
+                [])
+            .map((id) => int.tryParse(id))
+            .whereType<int>(),
+      );
 
     // 1. Muat progres yang sudah dipelajari (PB-05 & FR-15)
     _learnedVocabIds.clear();
@@ -154,14 +166,23 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> recordQuizAttempt(QuizAttempt attempt) async {
+  Future<void> recordQuizAttempt(
+    QuizAttempt attempt, {
+    Set<int> correctVocabIds = const {},
+  }) async {
     _quizAttempts.insert(0, attempt);
+    _quizMasteredVocabIds.addAll(correctVocabIds);
     notifyListeners();
 
-    // Mode Tamu tidak menyimpan riwayat kuis ke disk maupun online
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      'quiz_mastered_vocab_ids_${attempt.userId}',
+      _quizMasteredVocabIds.map((id) => id.toString()).toList(),
+    );
+
+    // Mode Tamu tidak menyimpan riwayat kuis ke disk maupun online.
     if (attempt.userId != 'guest_local_user' &&
         attempt.userId != 'guest_temp') {
-      final prefs = await SharedPreferences.getInstance();
       final jsonList = _quizAttempts
           .map((e) => jsonEncode(e.toJson()))
           .toList();

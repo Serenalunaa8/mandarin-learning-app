@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'core/theme/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/vocabulary_provider.dart';
@@ -54,6 +55,11 @@ class _MandarinLearningAppState extends State<MandarinLearningApp> {
         final vocab = context.read<VocabularyProvider>();
         await vocab.initialize(auth.profile?.id);
       }
+      try {
+        await NotificationService.instance.restoreDailyReminder();
+      } catch (e) {
+        debugPrint('[Main] Gagal memulihkan pengingat harian: $e');
+      }
     });
   }
 
@@ -79,9 +85,7 @@ class _MandarinLearningAppState extends State<MandarinLearningApp> {
                       fit: BoxFit.contain,
                     ),
                     const SizedBox(height: 20),
-                    const CircularProgressIndicator(
-                      color: Color(0xFF22C55E),
-                    ),
+                    const CircularProgressIndicator(color: Color(0xFF22C55E)),
                   ],
                 ),
               ),
