@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../models/vocabulary_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import 'vocabulary_detail_screen.dart';
@@ -246,7 +245,7 @@ class LessonPathScreen extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFDDF8E6), Color(0xFFC4F0D1)],
+                  colors: [Color(0xFFD8F4DF), Color(0xFFB8E8C5)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -262,12 +261,12 @@ class LessonPathScreen extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned(
-                    right: 0,
-                    bottom: 0,
-                    width: 230,
-                    height: 95,
+                    left: -20,
+                    right: -20,
+                    bottom: -10,
+                    top: 0,
                     child: Opacity(
-                      opacity: 0.34,
+                      opacity: 0.45,
                       child: Image.asset(
                         'assets/image/beranda/bg_siang.png',
                         fit: BoxFit.cover,
@@ -392,7 +391,6 @@ class LessonPathScreen extends StatelessWidget {
                         title: title,
                         status: status,
                         progress: progress,
-                        vocabItems: units[unitNum] ?? [],
                         reverse: index.isOdd,
                         onTap: () {
                           if (status == 'locked') {
@@ -486,7 +484,6 @@ class LessonPathScreen extends StatelessWidget {
     required String title,
     required String status,
     double? progress,
-    required List<VocabularyItem> vocabItems,
     required bool reverse,
     required VoidCallback onTap,
   }) {
@@ -501,28 +498,37 @@ class LessonPathScreen extends StatelessWidget {
         : unitNum == 2
         ? Icons.chat_bubble_rounded
         : Icons.pin_rounded;
+    const nodePalettes = [
+      [Color(0xFFB39DDB), Color(0xFF673AB7)],
+      [Color(0xFFFFB74D), Color(0xFFEF6C00)],
+      [Color(0xFFFFE082), Color(0xFFF9A825)],
+      [Color(0xFF81D4FA), Color(0xFF0288D1)],
+      [Color(0xFFF48FB1), Color(0xFFC2185B)],
+      [Color(0xFF80CBC4), Color(0xFF00897B)],
+    ];
+    final nodeGradientColors = isLocked
+        ? const [Color(0xFFDCE5E8), Color(0xFF9EAFB8)]
+        : nodePalettes[(unitNum - 1) % nodePalettes.length];
     final nodeColor = isLocked
-        ? const Color(0xFFB6C1CA)
-        : const Color(0xFF37A853);
-    final nodeSize = isActive ? 82.0 : 74.0;
-    final leadingIcon = Container(
+        ? const Color(0xFF8B9BA6)
+        : nodeGradientColors.last;
+    final nodeSize = isActive ? 88.0 : 78.0;
+    final node = Container(
       width: nodeSize,
       height: nodeSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
-          colors: isLocked
-              ? const [Color(0xFFF8FAFC), Color(0xFFDCE4EA)]
-              : const [Color(0xFF91E878), Color(0xFF35B553)],
+          colors: nodeGradientColors,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: Colors.white, width: 5),
+        border: Border.all(color: Colors.white, width: 4),
         boxShadow: [
           BoxShadow(
-            color: nodeColor.withValues(alpha: isLocked ? 0.12 : 0.24),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
+            color: nodeColor.withValues(alpha: isLocked ? 0.12 : 0.3),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -535,17 +541,15 @@ class LessonPathScreen extends StatelessWidget {
               height: nodeSize,
               child: CircularProgressIndicator(
                 value: progress ?? 0,
-                strokeWidth: 3,
-                backgroundColor: Colors.white.withValues(alpha: 0.45),
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                  Color(0xFF249F4B),
-                ),
+                strokeWidth: 3.5,
+                backgroundColor: Colors.white.withValues(alpha: 0.55),
+                valueColor: AlwaysStoppedAnimation<Color>(nodeColor),
               ),
             ),
           Icon(
             icon,
-            color: isLocked ? const Color(0xFF94A3B8) : Colors.white,
-            size: isActive ? 34 : 30,
+            color: isLocked ? const Color(0xFFF8FAFC) : Colors.white,
+            size: isActive ? 36 : 31,
           ),
           if (isCompleted)
             Positioned(
@@ -554,7 +558,7 @@ class LessonPathScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(3),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF38A85D),
+                  color: Color(0xFF238B72),
                   shape: BoxShape.circle,
                   border: Border.fromBorderSide(
                     BorderSide(color: Colors.white, width: 2),
@@ -588,191 +592,145 @@ class LessonPathScreen extends StatelessWidget {
       ),
     );
 
-    Widget trailing;
-    if (isCompleted) {
-      trailing = const Icon(
-        Icons.check_circle_rounded,
-        color: Color(0xFF38A85D),
-        size: 22,
-      );
-    } else if (isActive) {
-      trailing = Container(
-        width: 30,
-        height: 30,
-        decoration: const BoxDecoration(
-          color: Color(0xFF38A85D),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(
-          Icons.play_arrow_rounded,
-          color: Colors.white,
-          size: 20,
-        ),
-      );
-    } else {
-      trailing = const Icon(
-        Icons.lock_outline_rounded,
-        color: Color(0xFFB2BDC8),
-        size: 20,
-      );
-    }
-
-    final card = Container(
-      constraints: const BoxConstraints(minHeight: 112),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.94),
-        borderRadius: BorderRadius.circular(26),
-        border: Border.all(
-          color: isActive ? const Color(0xFF9CE4A8) : Colors.white,
-          width: isActive ? 2 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF306B46).withValues(alpha: 0.08),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(26),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
+    final statusLabel = isCompleted
+        ? const Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isLocked
-                            ? const Color(0xFFF0F3F6)
-                            : const Color(0xFFE1F7E8),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Text(
-                        'Pelajaran $unitNum',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: isLocked
-                              ? const Color(0xFF8C9AA6)
-                              : const Color(0xFF27834A),
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        height: 1.2,
-                        fontWeight: FontWeight.w800,
-                        color: isLocked
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF243849),
-                      ),
-                    ),
-                    const SizedBox(height: 7),
-                    if (isCompleted)
-                      const Row(
-                        children: [
-                          Icon(
-                            Icons.check_circle_rounded,
-                            color: Color(0xFF38A85D),
-                            size: 15,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'Selesai',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF38A85D),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      )
-                    else if (isActive && progress != null)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                minHeight: 7,
-                                backgroundColor: const Color(0xFFE5ECE8),
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                  Color(0xFF39AE5B),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 7),
-                          Text(
-                            '${(progress * 100).toInt()}%',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF527267),
-                            ),
-                          ),
-                        ],
-                      )
-                    else if (isLocked)
-                      const Row(
-                        children: [
-                          Icon(
-                            Icons.lock_rounded,
-                            color: Color(0xFF9AA8B4),
-                            size: 14,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'Terkunci',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF94A3B8),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                  ],
+              Icon(
+                Icons.check_circle_rounded,
+                color: Color(0xFF258B72),
+                size: 14,
+              ),
+              SizedBox(width: 4),
+              Text(
+                'Selesai',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF258B72),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(width: 8),
-              trailing,
             ],
+          )
+        : isActive && progress != null
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.auto_awesome_rounded,
+                color: Color(0xFFD28A24),
+                size: 14,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '${(progress * 100).toInt()}% selesai',
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF9B6B22),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          )
+        : isLocked
+        ? const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.lock_rounded, color: Color(0xFF80919C), size: 13),
+              SizedBox(width: 4),
+              Text(
+                'Terkunci',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF80919C),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          )
+        : null;
+
+    final lessonLabelColor = isLocked
+        ? const Color(0xFF70828E)
+        : isActive
+        ? const Color(0xFF9A681B)
+        : const Color(0xFF287A68);
+    final lessonLabelBackground = isLocked
+        ? const Color(0xFFE8EEF0)
+        : isActive
+        ? const Color(0xFFFFEDC5)
+        : const Color(0xFFDDF2EB);
+
+    final lessonNode = SizedBox(
+      width: 210,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(28),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 11,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: lessonLabelBackground,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Text(
+                    'Pelajaran $unitNum',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: lessonLabelColor,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                node,
+                const SizedBox(height: 9),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.2,
+                    fontWeight: FontWeight.w800,
+                    color: isLocked
+                        ? const Color(0xFF80919C)
+                        : const Color(0xFF263F47),
+                  ),
+                ),
+                if (statusLabel != null) ...[
+                  const SizedBox(height: 5),
+                  statusLabel,
+                ],
+              ],
+            ),
           ),
         ),
       ),
     );
 
     return SizedBox(
-      height: 142,
+      height: 220,
       child: Stack(
         children: [
           Positioned.fill(
             child: CustomPaint(painter: _LessonTrailPainter(reverse: reverse)),
           ),
-          Center(
-            child: Row(
-              children: [
-                if (!reverse) ...[leadingIcon, const SizedBox(width: 10)],
-                Expanded(child: card),
-                if (reverse) ...[const SizedBox(width: 10), leadingIcon],
-              ],
+          Positioned.fill(
+            child: Align(
+              alignment: reverse ? Alignment.centerRight : Alignment.centerLeft,
+              child: lessonNode,
             ),
           ),
         ],
@@ -807,11 +765,11 @@ class _LessonTrailPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final nodeX = reverse ? size.width - 41 : 41.0;
-    final otherX = reverse ? 41.0 : size.width - 41;
+    final nodeX = reverse ? size.width * 0.70 : size.width * 0.30;
+    final otherX = reverse ? size.width * 0.30 : size.width * 0.70;
     final path = Path()
       ..moveTo(otherX, 0)
-      ..cubicTo(otherX, 35, nodeX, 36, nodeX, size.height / 2)
+      ..cubicTo(otherX, 42, nodeX, 42, nodeX, size.height * 0.43)
       ..cubicTo(
         nodeX,
         size.height - 36,
@@ -821,14 +779,18 @@ class _LessonTrailPainter extends CustomPainter {
         size.height,
       );
     final outline = Paint()
-      ..color = const Color(0xFFD9F5E2)
+      ..color = const Color(0xFFE5F0E8)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 22
+      ..strokeWidth = 18
       ..strokeCap = StrokeCap.round;
     final trail = Paint()
-      ..color = const Color(0xFFB7EBC7)
+      ..shader = const LinearGradient(
+        colors: [Color(0xFFB6DFC2), Color(0xFF9ED9C7), Color(0xFFB8D7E4)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ).createShader(Offset.zero & size)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 14
+      ..strokeWidth = 11
       ..strokeCap = StrokeCap.round;
     canvas.drawPath(path, outline);
     canvas.drawPath(path, trail);
