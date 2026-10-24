@@ -12,6 +12,7 @@ class AppNotificationEntry {
   final String title;
   final String body;
   final DateTime? receivedAt;
+  final DateTime? scheduledAt;
   final bool isActive;
 
   const AppNotificationEntry({
@@ -19,6 +20,7 @@ class AppNotificationEntry {
     required this.title,
     required this.body,
     this.receivedAt,
+    this.scheduledAt,
     this.isActive = false,
   });
 
@@ -28,6 +30,7 @@ class AppNotificationEntry {
       title: json['title'] as String,
       body: json['body'] as String,
       receivedAt: DateTime.tryParse(json['received_at'] as String? ?? ''),
+      scheduledAt: DateTime.tryParse(json['scheduled_at'] as String? ?? ''),
     );
   }
 
@@ -36,6 +39,7 @@ class AppNotificationEntry {
     'title': title,
     'body': body,
     'received_at': receivedAt?.toIso8601String(),
+    'scheduled_at': scheduledAt?.toIso8601String(),
   };
 }
 
@@ -69,7 +73,10 @@ class NotificationService {
         android: initAndroid,
       );
 
-      await _notificationsPlugin.initialize(settings: initSettings);
+      await _notificationsPlugin.initialize(
+        settings: initSettings,
+        onDidReceiveNotificationResponse: _handleNotificationResponse,
+      );
 
       // Buat Notification Channels secara eksplisit agar Android OS tidak mendrop notif
       final androidPlugin = _notificationsPlugin
@@ -106,6 +113,12 @@ class NotificationService {
       }
 
       _isInitialized = true;
+      final launchDetails = await _notificationsPlugin
+          .getNotificationAppLaunchDetails();
+      if (launchDetails?.didNotificationLaunchApp ?? false) {
+        final response = launchDetails?.notificationResponse;
+        if (response != null) _handleNotificationResponse(response);
+      }
       debugPrint(
         '[NotificationService] Notifikasi lokal berhasil diinisialisasi.',
       );
@@ -160,28 +173,74 @@ class NotificationService {
       android: androidDetails,
     );
 
+    final notificationId = 'instant-${DateTime.now().microsecondsSinceEpoch}';
+    await recordInAppNotification(id: notificationId, title: title, body: body);
     await _notificationsPlugin.show(
       id: 0,
       title: title,
       body: body,
       notificationDetails: details,
+      payload: _notificationPayload(title, body, notificationId),
     );
-    await recordInAppNotification(title: title, body: body);
+  }
+
+  String _notificationPayload(String title, String body, String id) =>
+      jsonEncode({'id': id, 'title': title, 'body': body});
+
+  void _handleNotificationResponse(NotificationResponse response) {
+    final payload = response.payload;
+    if (payload == null) return;
+
+    try {
+      final data = jsonDecode(payload) as Map<String, dynamic>;
+      final title = data['title'] as String?;
+      final body = data['body'] as String?;
+      final id = data['id'] as String?;
+      if (title == null || body == null) return;
+      recordInAppNotification(id: id, title: title, body: body).catchError((
+        Object error,
+      ) {
+        debugPrint(
+          '[NotificationService] Gagal menyimpan notifikasi yang dibuka: $error',
+        );
+      });
+    } on FormatException catch (error) {
+      debugPrint(
+        '[NotificationService] Payload notifikasi tidak valid: $error',
+      );
+    } on TypeError catch (error) {
+      debugPrint(
+        '[NotificationService] Format payload notifikasi tidak valid: $error',
+      );
+    }
   }
 
   Future<void> recordInAppNotification({
+    String? id,
     required String title,
     required String body,
+    DateTime? scheduledAt,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final history = prefs.getStringList(_historyKey) ?? [];
     final now = DateTime.now();
+    final entryId = id ?? '${now.microsecondsSinceEpoch}';
     final entry = AppNotificationEntry(
-      id: '${now.microsecondsSinceEpoch}',
+      id: entryId,
       title: title,
       body: body,
-      receivedAt: now,
+      receivedAt: scheduledAt == null ? now : null,
+      scheduledAt: scheduledAt,
     );
+    history.removeWhere((value) {
+      try {
+        return (jsonDecode(value) as Map<String, dynamic>)['id'] == entryId;
+      } on FormatException {
+        return false;
+      } on TypeError {
+        return false;
+      }
+    });
     history.insert(0, jsonEncode(entry.toJson()));
     await prefs.setStringList(_historyKey, history);
   }
@@ -239,12 +298,36 @@ class NotificationService {
     }
 
     history.sort((a, b) {
-      if (a.receivedAt == null && b.receivedAt == null) return 0;
-      if (a.receivedAt == null) return 1;
-      if (b.receivedAt == null) return -1;
-      return b.receivedAt!.compareTo(a.receivedAt!);
+      final aDate = a.receivedAt ?? a.scheduledAt;
+      final bDate = b.receivedAt ?? b.scheduledAt;
+      if (aDate == null && bDate == null) return 0;
+      if (aDate == null) return 1;
+      if (bDate == null) return -1;
+      return bDate.compareTo(aDate);
     });
     return history;
+  }
+
+  Future<void> restoreDailyReminder() async {
+    if (!_isInitialized) await initialize();
+
+    final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool('reminder_enabled') ?? true)) return;
+
+    final permissionGranted = await requestPermission();
+    if (!permissionGranted) {
+      await prefs.setBool('reminder_enabled', false);
+      debugPrint(
+        '[NotificationService] Pengingat tidak dijadwalkan karena izin ditolak.',
+      );
+      return;
+    }
+
+    await scheduleDailyReminder(
+      hour: prefs.getInt('reminder_hour') ?? 19,
+      minute: prefs.getInt('reminder_minute') ?? 0,
+      requestPermissions: false,
+    );
   }
 
   // ─── Kalkulasi Jadwal Waktu Berikutnya ────────────────────────────────────────
@@ -269,14 +352,17 @@ class NotificationService {
 
   // ─── Jadwal Pengingat Harian (Out-of-App) ────────────────────────────────────
 
-  Future<void> scheduleDailyReminder({int hour = 19, int minute = 0}) async {
+  Future<void> scheduleDailyReminder({
+    int hour = 19,
+    int minute = 0,
+    bool requestPermissions = true,
+  }) async {
     if (!_isInitialized) await initialize();
-    await requestPermission();
+    if (requestPermissions && !await requestPermission()) {
+      throw StateError('Izin notifikasi belum diberikan.');
+    }
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('reminder_enabled', true);
-    await prefs.setInt('reminder_hour', hour);
-    await prefs.setInt('reminder_minute', minute);
 
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
@@ -297,14 +383,19 @@ class NotificationService {
     );
 
     final scheduled = _nextInstanceOfTime(hour, minute);
+    const notificationId = 'daily-reminder';
+    const title = '⏰ Waktunya Belajar Mandarin!';
+    const body =
+        'Luangkan 5 menit hari ini untuk melatih kosakata HSK dan pertahankan streak belajarmu! 🚀';
 
     try {
       await _notificationsPlugin.zonedSchedule(
         id: 1001,
-        title: '⏰ Waktunya Belajar Mandarin!',
-        body: 'Luangkan 5 menit hari ini untuk melatih kosakata HSK dan pertahankan streak belajarmu! 🚀',
+        title: title,
+        body: body,
         scheduledDate: scheduled,
         notificationDetails: details,
+        payload: _notificationPayload(title, body, notificationId),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
       );
@@ -316,10 +407,11 @@ class NotificationService {
       try {
         await _notificationsPlugin.zonedSchedule(
           id: 1001,
-          title: '⏰ Waktunya Belajar Mandarin!',
-          body: 'Luangkan 5 menit hari ini untuk melatih kosakata HSK dan pertahankan streak belajarmu! 🚀',
+          title: title,
+          body: body,
           scheduledDate: scheduled,
           notificationDetails: details,
+          payload: _notificationPayload(title, body, notificationId),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           matchDateTimeComponents: DateTimeComponents.time,
         );
@@ -327,8 +419,18 @@ class NotificationService {
         debugPrint(
           '[NotificationService] Gagal menjadwalkan notif harian: $e2',
         );
+        Error.throwWithStackTrace(e2, StackTrace.current);
       }
     }
+    await recordInAppNotification(
+      id: notificationId,
+      title: title,
+      body: body,
+      scheduledAt: scheduled.toLocal(),
+    );
+    await prefs.setBool('reminder_enabled', true);
+    await prefs.setInt('reminder_hour', hour);
+    await prefs.setInt('reminder_minute', minute);
   }
 
   // ─── Uji Notifikasi Keluar Aplikasi (Beberapa Detik ke Depan) ────────────────
@@ -339,7 +441,9 @@ class NotificationService {
     String body = 'Hebat! Pengingat belajar berhasil masuk meski aplikasi di luar/tertutup! 🎯',
   }) async {
     if (!_isInitialized) await initialize();
-    await requestPermission();
+    if (!await requestPermission()) {
+      throw StateError('Izin notifikasi belum diberikan.');
+    }
 
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
@@ -361,6 +465,7 @@ class NotificationService {
 
     final scheduled = tz.TZDateTime.now(tz.local)
         .add(Duration(seconds: seconds));
+    final notificationId = 'test-reminder-${scheduled.millisecondsSinceEpoch}';
 
     try {
       await _notificationsPlugin.zonedSchedule(
@@ -369,6 +474,7 @@ class NotificationService {
         body: body,
         scheduledDate: scheduled,
         notificationDetails: details,
+        payload: _notificationPayload(title, body, notificationId),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       );
       debugPrint(
@@ -383,12 +489,20 @@ class NotificationService {
           body: body,
           scheduledDate: scheduled,
           notificationDetails: details,
+          payload: _notificationPayload(title, body, notificationId),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         );
       } catch (e2) {
         debugPrint('[NotificationService] Uji fallback timer: $e2');
+        Error.throwWithStackTrace(e2, StackTrace.current);
       }
     }
+    await recordInAppNotification(
+      id: notificationId,
+      title: title,
+      body: body,
+      scheduledAt: scheduled.toLocal(),
+    );
   }
 
   // ─── Batalkan Pengingat ───────────────────────────────────────────────────────
@@ -401,7 +515,33 @@ class NotificationService {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('reminder_enabled', false);
+    await _removeHistoryEntry('daily-reminder');
+    await _removeHistoryEntries('test-reminder-');
     debugPrint('[NotificationService] Pengingat harian dimatikan.');
+  }
+
+  Future<void> _removeHistoryEntry(String id) =>
+      _removeHistoryEntries(id, exactMatch: true);
+
+  Future<void> _removeHistoryEntries(
+    String id, {
+    bool exactMatch = false,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final history = prefs.getStringList(_historyKey) ?? [];
+    history.removeWhere((value) {
+      try {
+        final entryId = (jsonDecode(value) as Map<String, dynamic>)['id'];
+        return exactMatch
+            ? entryId == id
+            : entryId is String && entryId.startsWith(id);
+      } on FormatException {
+        return false;
+      } on TypeError {
+        return false;
+      }
+    });
+    await prefs.setStringList(_historyKey, history);
   }
 
   // ─── Cek Status Pengingat ─────────────────────────────────────────────────────

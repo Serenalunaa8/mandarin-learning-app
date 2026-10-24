@@ -1,0 +1,7182 @@
+{
+  "爱": [
+    {
+      "hanzi": "我爱我的家人。",
+      "pinyin": "Wǒ ài wǒ de jiārén.",
+      "arti": "Saya menyayangi keluarga saya."
+    },
+    {
+      "hanzi": "他很爱看书。",
+      "pinyin": "Tā hěn ài kàn shū.",
+      "arti": "Dia sangat suka membaca buku."
+    }
+  ],
+  "八": [
+    {
+      "hanzi": "我家有八个人。",
+      "pinyin": "Wǒ jiā yǒu bā ge rén.",
+      "arti": "Keluarga saya ada delapan orang."
+    },
+    {
+      "hanzi": "现在是八点。",
+      "pinyin": "Xiànzài shì bā diǎn.",
+      "arti": "Sekarang pukul delapan."
+    }
+  ],
+  "爸爸": [
+    {
+      "hanzi": "我爸爸是医生。",
+      "pinyin": "Wǒ bàba shì yīshēng.",
+      "arti": "Ayah saya adalah dokter."
+    },
+    {
+      "hanzi": "爸爸在家看电视。",
+      "pinyin": "Bàba zài jiā kàn diànshì.",
+      "arti": "Ayah menonton televisi di rumah."
+    }
+  ],
+  "杯子": [
+    {
+      "hanzi": "桌子上有一个杯子。",
+      "pinyin": "Zhuōzi shàng yǒu yí ge bēizi.",
+      "arti": "Di atas meja ada sebuah gelas."
+    },
+    {
+      "hanzi": "这个杯子很漂亮。",
+      "pinyin": "Zhège bēizi hěn piàoliang.",
+      "arti": "Gelas ini sangat cantik."
+    }
+  ],
+  "北京": [
+    {
+      "hanzi": "他在北京工作。",
+      "pinyin": "Tā zài Běijīng gōngzuò.",
+      "arti": "Dia bekerja di Beijing."
+    },
+    {
+      "hanzi": "我想去北京。",
+      "pinyin": "Wǒ xiǎng qù Běijīng.",
+      "arti": "Saya ingin pergi ke Beijing."
+    }
+  ],
+  "本": [
+    {
+      "hanzi": "我有三本书。",
+      "pinyin": "Wǒ yǒu sān běn shū.",
+      "arti": "Saya punya tiga buah buku."
+    },
+    {
+      "hanzi": "这本书很好看。",
+      "pinyin": "Zhè běn shū hěn hǎokàn.",
+      "arti": "Buku ini sangat bagus."
+    }
+  ],
+  "不客气": [
+    {
+      "hanzi": "谢谢你!不客气。",
+      "pinyin": "Xièxie nǐ! Bú kèqi.",
+      "arti": "Terima kasih! Sama-sama."
+    },
+    {
+      "hanzi": "他笑着说:不客气。",
+      "pinyin": "Tā xiàozhe shuō: Bú kèqi.",
+      "arti": "Dia tersenyum sambil berkata: sama-sama."
+    }
+  ],
+  "不": [
+    {
+      "hanzi": "我不喝咖啡。",
+      "pinyin": "Wǒ bù hē kāfēi.",
+      "arti": "Saya tidak minum kopi."
+    },
+    {
+      "hanzi": "今天他不去学校。",
+      "pinyin": "Jīntiān tā bú qù xuéxiào.",
+      "arti": "Hari ini dia tidak pergi ke sekolah."
+    }
+  ],
+  "菜": [
+    {
+      "hanzi": "妈妈做的菜很好吃。",
+      "pinyin": "Māma zuò de cài hěn hǎochī.",
+      "arti": "Masakan buatan ibu sangat enak."
+    },
+    {
+      "hanzi": "我想吃中国菜。",
+      "pinyin": "Wǒ xiǎng chī Zhōngguó cài.",
+      "arti": "Saya ingin makan masakan Tiongkok."
+    }
+  ],
+  "茶": [
+    {
+      "hanzi": "我喜欢喝茶。",
+      "pinyin": "Wǒ xǐhuan hē chá.",
+      "arti": "Saya suka minum teh."
+    },
+    {
+      "hanzi": "请喝茶。",
+      "pinyin": "Qǐng hē chá.",
+      "arti": "Silakan minum teh."
+    }
+  ],
+  "吃": [
+    {
+      "hanzi": "你想吃什么?",
+      "pinyin": "Nǐ xiǎng chī shénme?",
+      "arti": "Kamu ingin makan apa?"
+    },
+    {
+      "hanzi": "我们在家吃饭。",
+      "pinyin": "Wǒmen zài jiā chīfàn.",
+      "arti": "Kami makan di rumah."
+    }
+  ],
+  "出租车": [
+    {
+      "hanzi": "我坐出租车去机场。",
+      "pinyin": "Wǒ zuò chūzūchē qù jīchǎng.",
+      "arti": "Saya naik taksi ke bandara."
+    },
+    {
+      "hanzi": "前面有一辆出租车。",
+      "pinyin": "Qiánmiàn yǒu yí liàng chūzūchē.",
+      "arti": "Di depan ada sebuah taksi."
+    }
+  ],
+  "打电话": [
+    {
+      "hanzi": "我给妈妈打电话。",
+      "pinyin": "Wǒ gěi māma dǎ diànhuà.",
+      "arti": "Saya menelepon ibu."
+    },
+    {
+      "hanzi": "他在打电话。",
+      "pinyin": "Tā zài dǎ diànhuà.",
+      "arti": "Dia sedang menelepon."
+    }
+  ],
+  "大": [
+    {
+      "hanzi": "这个苹果很大。",
+      "pinyin": "Zhège píngguǒ hěn dà.",
+      "arti": "Apel ini sangat besar."
+    },
+    {
+      "hanzi": "他家很大。",
+      "pinyin": "Tā jiā hěn dà.",
+      "arti": "Rumahnya besar."
+    }
+  ],
+  "的": [
+    {
+      "hanzi": "这是我的书。",
+      "pinyin": "Zhè shì wǒ de shū.",
+      "arti": "Ini adalah buku saya."
+    },
+    {
+      "hanzi": "她是我的朋友。",
+      "pinyin": "Tā shì wǒ de péngyou.",
+      "arti": "Dia adalah teman saya."
+    }
+  ],
+  "点": [
+    {
+      "hanzi": "现在三点。",
+      "pinyin": "Xiànzài sān diǎn.",
+      "arti": "Sekarang pukul tiga."
+    },
+    {
+      "hanzi": "我八点去学校。",
+      "pinyin": "Wǒ bā diǎn qù xuéxiào.",
+      "arti": "Saya pergi ke sekolah pukul delapan."
+    }
+  ],
+  "电脑": [
+    {
+      "hanzi": "我的电脑在桌子上。",
+      "pinyin": "Wǒ de diànnǎo zài zhuōzi shàng.",
+      "arti": "Komputer saya ada di atas meja."
+    },
+    {
+      "hanzi": "我想买一台电脑。",
+      "pinyin": "Wǒ xiǎng mǎi yì tái diànnǎo.",
+      "arti": "Saya ingin membeli sebuah komputer."
+    }
+  ],
+  "电视": [
+    {
+      "hanzi": "爸爸在看电视。",
+      "pinyin": "Bàba zài kàn diànshì.",
+      "arti": "Ayah sedang menonton televisi."
+    },
+    {
+      "hanzi": "这个电视很大。",
+      "pinyin": "Zhège diànshì hěn dà.",
+      "arti": "Televisi ini sangat besar."
+    }
+  ],
+  "电影": [
+    {
+      "hanzi": "我们去看电影吧。",
+      "pinyin": "Wǒmen qù kàn diànyǐng ba.",
+      "arti": "Ayo kita pergi menonton film."
+    },
+    {
+      "hanzi": "这个电影很好看。",
+      "pinyin": "Zhège diànyǐng hěn hǎokàn.",
+      "arti": "Film ini bagus sekali."
+    }
+  ],
+  "东西": [
+    {
+      "hanzi": "我想买东西。",
+      "pinyin": "Wǒ xiǎng mǎi dōngxi.",
+      "arti": "Saya ingin membeli barang."
+    },
+    {
+      "hanzi": "桌子上有很多东西。",
+      "pinyin": "Zhuōzi shàng yǒu hěn duō dōngxi.",
+      "arti": "Di atas meja ada banyak barang."
+    }
+  ],
+  "都": [
+    {
+      "hanzi": "我们都是学生。",
+      "pinyin": "Wǒmen dōu shì xuésheng.",
+      "arti": "Kami semua adalah pelajar."
+    },
+    {
+      "hanzi": "他们都喜欢吃苹果。",
+      "pinyin": "Tāmen dōu xǐhuan chī píngguǒ.",
+      "arti": "Mereka semua suka makan apel."
+    }
+  ],
+  "读": [
+    {
+      "hanzi": "请读这个字。",
+      "pinyin": "Qǐng dú zhège zì.",
+      "arti": "Silakan baca aksara ini."
+    },
+    {
+      "hanzi": "他在读书。",
+      "pinyin": "Tā zài dúshū.",
+      "arti": "Dia sedang membaca buku."
+    }
+  ],
+  "对不起": [
+    {
+      "hanzi": "对不起,我来晚了。",
+      "pinyin": "Duìbuqǐ, wǒ lái wǎn le.",
+      "arti": "Maaf, saya datang terlambat."
+    },
+    {
+      "hanzi": "对不起,我不知道。",
+      "pinyin": "Duìbuqǐ, wǒ bù zhīdào.",
+      "arti": "Maaf, saya tidak tahu."
+    }
+  ],
+  "多": [
+    {
+      "hanzi": "商店里人很多。",
+      "pinyin": "Shāngdiàn lǐ rén hěn duō.",
+      "arti": "Di toko banyak orang."
+    },
+    {
+      "hanzi": "他有很多朋友。",
+      "pinyin": "Tā yǒu hěn duō péngyou.",
+      "arti": "Dia punya banyak teman."
+    }
+  ],
+  "多少": [
+    {
+      "hanzi": "这本书多少钱?",
+      "pinyin": "Zhè běn shū duōshao qián?",
+      "arti": "Berapa harga buku ini?"
+    },
+    {
+      "hanzi": "你们学校有多少学生?",
+      "pinyin": "Nǐmen xuéxiào yǒu duōshao xuésheng?",
+      "arti": "Berapa banyak siswa di sekolah kalian?"
+    }
+  ],
+  "儿子": [
+    {
+      "hanzi": "他有一个儿子。",
+      "pinyin": "Tā yǒu yí ge érzi.",
+      "arti": "Dia punya seorang anak laki-laki."
+    },
+    {
+      "hanzi": "我的儿子五岁了。",
+      "pinyin": "Wǒ de érzi wǔ suì le.",
+      "arti": "Anak laki-laki saya berusia lima tahun."
+    }
+  ],
+  "二": [
+    {
+      "hanzi": "今天是二月二日。",
+      "pinyin": "Jīntiān shì èr yuè èr rì.",
+      "arti": "Hari ini tanggal dua Februari."
+    },
+    {
+      "hanzi": "我二十岁。",
+      "pinyin": "Wǒ èrshí suì.",
+      "arti": "Usia saya dua puluh tahun."
+    }
+  ],
+  "饭馆": [
+    {
+      "hanzi": "这个饭馆很大。",
+      "pinyin": "Zhège fànguǎn hěn dà.",
+      "arti": "Restoran ini sangat besar."
+    },
+    {
+      "hanzi": "我们去饭馆吃饭吧。",
+      "pinyin": "Wǒmen qù fànguǎn chīfàn ba.",
+      "arti": "Ayo kita makan di restoran."
+    }
+  ],
+  "飞机": [
+    {
+      "hanzi": "他坐飞机去北京。",
+      "pinyin": "Tā zuò fēijī qù Běijīng.",
+      "arti": "Dia naik pesawat ke Beijing."
+    },
+    {
+      "hanzi": "这个飞机很大。",
+      "pinyin": "Zhège fēijī hěn dà.",
+      "arti": "Pesawat ini sangat besar."
+    }
+  ],
+  "分钟": [
+    {
+      "hanzi": "走路去学校要十分钟。",
+      "pinyin": "Zǒulù qù xuéxiào yào shí fēnzhōng.",
+      "arti": "Berjalan kaki ke sekolah butuh sepuluh menit."
+    },
+    {
+      "hanzi": "请等我五分钟。",
+      "pinyin": "Qǐng děng wǒ wǔ fēnzhōng.",
+      "arti": "Tolong tunggu saya lima menit."
+    }
+  ],
+  "高兴": [
+    {
+      "hanzi": "认识你很高兴。",
+      "pinyin": "Rènshi nǐ hěn gāoxìng.",
+      "arti": "Senang berkenalan denganmu."
+    },
+    {
+      "hanzi": "他今天很高兴。",
+      "pinyin": "Tā jīntiān hěn gāoxìng.",
+      "arti": "Dia sangat senang hari ini."
+    }
+  ],
+  "个": [
+    {
+      "hanzi": "我有一个哥哥。",
+      "pinyin": "Wǒ yǒu yí ge gēge.",
+      "arti": "Saya punya seorang kakak laki-laki."
+    },
+    {
+      "hanzi": "桌子上有三个苹果。",
+      "pinyin": "Zhuōzi shàng yǒu sān ge píngguǒ.",
+      "arti": "Di atas meja ada tiga buah apel."
+    }
+  ],
+  "工作": [
+    {
+      "hanzi": "我爸爸在医院工作。",
+      "pinyin": "Wǒ bàba zài yīyuàn gōngzuò.",
+      "arti": "Ayah saya bekerja di rumah sakit."
+    },
+    {
+      "hanzi": "你的工作忙吗?",
+      "pinyin": "Nǐ de gōngzuò máng ma?",
+      "arti": "Apakah pekerjaanmu sibuk?"
+    }
+  ],
+  "狗": [
+    {
+      "hanzi": "我家有一只狗。",
+      "pinyin": "Wǒ jiā yǒu yì zhī gǒu.",
+      "arti": "Di rumah saya ada seekor anjing."
+    },
+    {
+      "hanzi": "这只狗很可爱。",
+      "pinyin": "Zhè zhī gǒu hěn kě'ài.",
+      "arti": "Anjing ini sangat lucu."
+    }
+  ],
+  "汉语": [
+    {
+      "hanzi": "我在学习汉语。",
+      "pinyin": "Wǒ zài xuéxí Hànyǔ.",
+      "arti": "Saya sedang belajar bahasa Mandarin."
+    },
+    {
+      "hanzi": "他会说汉语。",
+      "pinyin": "Tā huì shuō Hànyǔ.",
+      "arti": "Dia bisa berbicara bahasa Mandarin."
+    }
+  ],
+  "好": [
+    {
+      "hanzi": "你好!",
+      "pinyin": "Nǐ hǎo!",
+      "arti": "Halo!"
+    },
+    {
+      "hanzi": "这本书很好。",
+      "pinyin": "Zhè běn shū hěn hǎo.",
+      "arti": "Buku ini sangat bagus."
+    }
+  ],
+  "喝": [
+    {
+      "hanzi": "我想喝水。",
+      "pinyin": "Wǒ xiǎng hē shuǐ.",
+      "arti": "Saya ingin minum air."
+    },
+    {
+      "hanzi": "他每天喝茶。",
+      "pinyin": "Tā měitiān hē chá.",
+      "arti": "Dia minum teh setiap hari."
+    }
+  ],
+  "和": [
+    {
+      "hanzi": "我和朋友去看电影。",
+      "pinyin": "Wǒ hé péngyou qù kàn diànyǐng.",
+      "arti": "Saya pergi menonton film bersama teman."
+    },
+    {
+      "hanzi": "桌子上有苹果和水。",
+      "pinyin": "Zhuōzi shàng yǒu píngguǒ hé shuǐ.",
+      "arti": "Di atas meja ada apel dan air."
+    }
+  ],
+  "很": [
+    {
+      "hanzi": "今天很冷。",
+      "pinyin": "Jīntiān hěn lěng.",
+      "arti": "Hari ini sangat dingin."
+    },
+    {
+      "hanzi": "她很高兴。",
+      "pinyin": "Tā hěn gāoxìng.",
+      "arti": "Dia sangat senang."
+    }
+  ],
+  "后面": [
+    {
+      "hanzi": "商店在学校后面。",
+      "pinyin": "Shāngdiàn zài xuéxiào hòumiàn.",
+      "arti": "Toko ada di belakang sekolah."
+    },
+    {
+      "hanzi": "他在我后面。",
+      "pinyin": "Tā zài wǒ hòumiàn.",
+      "arti": "Dia ada di belakang saya."
+    }
+  ],
+  "回": [
+    {
+      "hanzi": "我下午回家。",
+      "pinyin": "Wǒ xiàwǔ huí jiā.",
+      "arti": "Saya pulang ke rumah sore hari."
+    },
+    {
+      "hanzi": "他明天回学校。",
+      "pinyin": "Tā míngtiān huí xuéxiào.",
+      "arti": "Besok dia kembali ke sekolah."
+    }
+  ],
+  "会": [
+    {
+      "hanzi": "我会说汉语。",
+      "pinyin": "Wǒ huì shuō Hànyǔ.",
+      "arti": "Saya bisa berbicara bahasa Mandarin."
+    },
+    {
+      "hanzi": "她不会游泳。",
+      "pinyin": "Tā bú huì yóuyǒng.",
+      "arti": "Dia tidak bisa berenang."
+    }
+  ],
+  "火车站": [
+    {
+      "hanzi": "火车站在哪儿?",
+      "pinyin": "Huǒchēzhàn zài nǎr?",
+      "arti": "Di mana stasiun kereta api?"
+    },
+    {
+      "hanzi": "我们在火车站见面。",
+      "pinyin": "Wǒmen zài huǒchēzhàn jiànmiàn.",
+      "arti": "Kami bertemu di stasiun kereta api."
+    }
+  ],
+  "几": [
+    {
+      "hanzi": "你家有几个人?",
+      "pinyin": "Nǐ jiā yǒu jǐ ge rén?",
+      "arti": "Ada berapa orang di keluargamu?"
+    },
+    {
+      "hanzi": "现在几点?",
+      "pinyin": "Xiànzài jǐ diǎn?",
+      "arti": "Sekarang pukul berapa?"
+    }
+  ],
+  "家": [
+    {
+      "hanzi": "我家在北京。",
+      "pinyin": "Wǒ jiā zài Běijīng.",
+      "arti": "Rumah saya ada di Beijing."
+    },
+    {
+      "hanzi": "他回家了。",
+      "pinyin": "Tā huí jiā le.",
+      "arti": "Dia sudah pulang ke rumah."
+    }
+  ],
+  "叫": [
+    {
+      "hanzi": "我叫小明。",
+      "pinyin": "Wǒ jiào Xiǎomíng.",
+      "arti": "Nama saya Xiaoming."
+    },
+    {
+      "hanzi": "你叫什么名字?",
+      "pinyin": "Nǐ jiào shénme míngzi?",
+      "arti": "Siapa namamu?"
+    }
+  ],
+  "今天": [
+    {
+      "hanzi": "今天是星期三。",
+      "pinyin": "Jīntiān shì xīngqīsān.",
+      "arti": "Hari ini hari Rabu."
+    },
+    {
+      "hanzi": "今天天气很热。",
+      "pinyin": "Jīntiān tiānqì hěn rè.",
+      "arti": "Cuaca hari ini sangat panas."
+    }
+  ],
+  "九": [
+    {
+      "hanzi": "我弟弟九岁。",
+      "pinyin": "Wǒ dìdi jiǔ suì.",
+      "arti": "Adik laki-laki saya berusia sembilan tahun."
+    },
+    {
+      "hanzi": "现在是九点。",
+      "pinyin": "Xiànzài shì jiǔ diǎn.",
+      "arti": "Sekarang pukul sembilan."
+    }
+  ],
+  "开": [
+    {
+      "hanzi": "请开门。",
+      "pinyin": "Qǐng kāi mén.",
+      "arti": "Tolong buka pintu."
+    },
+    {
+      "hanzi": "他开车去学校。",
+      "pinyin": "Tā kāi chē qù xuéxiào.",
+      "arti": "Dia mengendarai mobil ke sekolah."
+    }
+  ],
+  "看": [
+    {
+      "hanzi": "我在看书。",
+      "pinyin": "Wǒ zài kàn shū.",
+      "arti": "Saya sedang membaca buku."
+    },
+    {
+      "hanzi": "我们一起看电影吧。",
+      "pinyin": "Wǒmen yìqǐ kàn diànyǐng ba.",
+      "arti": "Ayo kita menonton film bersama."
+    }
+  ],
+  "看见": [
+    {
+      "hanzi": "我看见一只猫。",
+      "pinyin": "Wǒ kànjiàn yì zhī māo.",
+      "arti": "Saya melihat seekor kucing."
+    },
+    {
+      "hanzi": "你看见我的书了吗?",
+      "pinyin": "Nǐ kànjiàn wǒ de shū le ma?",
+      "arti": "Apakah kamu melihat buku saya?"
+    }
+  ],
+  "块": [
+    {
+      "hanzi": "这个苹果三块钱。",
+      "pinyin": "Zhège píngguǒ sān kuài qián.",
+      "arti": "Apel ini harganya tiga yuan."
+    },
+    {
+      "hanzi": "我想吃一块西瓜。",
+      "pinyin": "Wǒ xiǎng chī yí kuài xīguā.",
+      "arti": "Saya ingin makan sepotong semangka."
+    }
+  ],
+  "来": [
+    {
+      "hanzi": "你明天来我家吧。",
+      "pinyin": "Nǐ míngtiān lái wǒ jiā ba.",
+      "arti": "Datanglah ke rumahku besok."
+    },
+    {
+      "hanzi": "他从北京来。",
+      "pinyin": "Tā cóng Běijīng lái.",
+      "arti": "Dia datang dari Beijing."
+    }
+  ],
+  "老师": [
+    {
+      "hanzi": "我的老师很好。",
+      "pinyin": "Wǒ de lǎoshī hěn hǎo.",
+      "arti": "Guru saya sangat baik."
+    },
+    {
+      "hanzi": "老师在教室里。",
+      "pinyin": "Lǎoshī zài jiàoshì lǐ.",
+      "arti": "Guru ada di dalam ruang kelas."
+    }
+  ],
+  "了": [
+    {
+      "hanzi": "我吃了苹果。",
+      "pinyin": "Wǒ chī le píngguǒ.",
+      "arti": "Saya sudah makan apel."
+    },
+    {
+      "hanzi": "天冷了。",
+      "pinyin": "Tiān lěng le.",
+      "arti": "Cuaca menjadi dingin."
+    }
+  ],
+  "冷": [
+    {
+      "hanzi": "外面很冷。",
+      "pinyin": "Wàimiàn hěn lěng.",
+      "arti": "Di luar sangat dingin."
+    },
+    {
+      "hanzi": "我不喜欢冷水。",
+      "pinyin": "Wǒ bù xǐhuan lěng shuǐ.",
+      "arti": "Saya tidak suka air dingin."
+    }
+  ],
+  "里": [
+    {
+      "hanzi": "他在房间里。",
+      "pinyin": "Tā zài fángjiān lǐ.",
+      "arti": "Dia ada di dalam kamar."
+    },
+    {
+      "hanzi": "杯子里有茶。",
+      "pinyin": "Bēizi lǐ yǒu chá.",
+      "arti": "Di dalam gelas ada teh."
+    }
+  ],
+  "零": [
+    {
+      "hanzi": "现在是二零二六年。",
+      "pinyin": "Xiànzài shì èr líng èr liù nián.",
+      "arti": "Sekarang tahun 2026."
+    },
+    {
+      "hanzi": "今天的气温是零度。",
+      "pinyin": "Jīntiān de qìwēn shì líng dù.",
+      "arti": "Suhu hari ini nol derajat."
+    }
+  ],
+  "六": [
+    {
+      "hanzi": "我六点吃饭。",
+      "pinyin": "Wǒ liù diǎn chīfàn.",
+      "arti": "Saya makan pukul enam."
+    },
+    {
+      "hanzi": "他女儿六岁。",
+      "pinyin": "Tā nǚ'ér liù suì.",
+      "arti": "Anak perempuannya berusia enam tahun."
+    }
+  ],
+  "妈妈": [
+    {
+      "hanzi": "我妈妈在做饭。",
+      "pinyin": "Wǒ māma zài zuòfàn.",
+      "arti": "Ibu saya sedang memasak."
+    },
+    {
+      "hanzi": "妈妈喜欢喝茶。",
+      "pinyin": "Māma xǐhuan hē chá.",
+      "arti": "Ibu suka minum teh."
+    }
+  ],
+  "吗": [
+    {
+      "hanzi": "你是学生吗?",
+      "pinyin": "Nǐ shì xuésheng ma?",
+      "arti": "Apakah kamu seorang pelajar?"
+    },
+    {
+      "hanzi": "你喜欢吃苹果吗?",
+      "pinyin": "Nǐ xǐhuan chī píngguǒ ma?",
+      "arti": "Apakah kamu suka makan apel?"
+    }
+  ],
+  "买": [
+    {
+      "hanzi": "我想买一本书。",
+      "pinyin": "Wǒ xiǎng mǎi yì běn shū.",
+      "arti": "Saya ingin membeli sebuah buku."
+    },
+    {
+      "hanzi": "妈妈去商店买东西。",
+      "pinyin": "Māma qù shāngdiàn mǎi dōngxi.",
+      "arti": "Ibu pergi ke toko untuk membeli barang."
+    }
+  ],
+  "猫": [
+    {
+      "hanzi": "我有一只猫。",
+      "pinyin": "Wǒ yǒu yì zhī māo.",
+      "arti": "Saya punya seekor kucing."
+    },
+    {
+      "hanzi": "猫喜欢吃鱼。",
+      "pinyin": "Māo xǐhuan chī yú.",
+      "arti": "Kucing suka makan ikan."
+    }
+  ],
+  "没": [
+    {
+      "hanzi": "我没有钱。",
+      "pinyin": "Wǒ méiyǒu qián.",
+      "arti": "Saya tidak punya uang."
+    },
+    {
+      "hanzi": "他今天没去学校。",
+      "pinyin": "Tā jīntiān méi qù xuéxiào.",
+      "arti": "Hari ini dia tidak pergi ke sekolah."
+    }
+  ],
+  "没关系": [
+    {
+      "hanzi": "对不起!没关系。",
+      "pinyin": "Duìbuqǐ! Méi guānxi.",
+      "arti": "Maaf! Tidak apa-apa."
+    },
+    {
+      "hanzi": "没关系,明天再来。",
+      "pinyin": "Méi guānxi, míngtiān zài lái.",
+      "arti": "Tidak apa-apa, datang lagi besok."
+    }
+  ],
+  "米饭": [
+    {
+      "hanzi": "我喜欢吃米饭。",
+      "pinyin": "Wǒ xǐhuan chī mǐfàn.",
+      "arti": "Saya suka makan nasi."
+    },
+    {
+      "hanzi": "我每天都吃米饭。",
+      "pinyin": "Wǒ měitiān dōu chī mǐfàn.",
+      "arti": "Saya makan nasi setiap hari."
+    }
+  ],
+  "明天": [
+    {
+      "hanzi": "明天我去北京。",
+      "pinyin": "Míngtiān wǒ qù Běijīng.",
+      "arti": "Besok saya pergi ke Beijing."
+    },
+    {
+      "hanzi": "明天是星期六。",
+      "pinyin": "Míngtiān shì xīngqīliù.",
+      "arti": "Besok hari Sabtu."
+    }
+  ],
+  "名字": [
+    {
+      "hanzi": "你的名字是什么?",
+      "pinyin": "Nǐ de míngzi shì shénme?",
+      "arti": "Siapa namamu?"
+    },
+    {
+      "hanzi": "我的名字叫李明。",
+      "pinyin": "Wǒ de míngzi jiào Lǐ Míng.",
+      "arti": "Nama saya Li Ming."
+    }
+  ],
+  "哪": [
+    {
+      "hanzi": "你是哪国人?",
+      "pinyin": "Nǐ shì nǎ guó rén?",
+      "arti": "Kamu berasal dari negara mana?"
+    },
+    {
+      "hanzi": "你想去哪儿?",
+      "pinyin": "Nǐ xiǎng qù nǎr?",
+      "arti": "Kamu ingin pergi ke mana?"
+    }
+  ],
+  "那": [
+    {
+      "hanzi": "那是我的书。",
+      "pinyin": "Nà shì wǒ de shū.",
+      "arti": "Itu adalah buku saya."
+    },
+    {
+      "hanzi": "那个人是谁?",
+      "pinyin": "Nàge rén shì shéi?",
+      "arti": "Siapakah orang itu?"
+    }
+  ],
+  "呢": [
+    {
+      "hanzi": "我很好,你呢?",
+      "pinyin": "Wǒ hěn hǎo, nǐ ne?",
+      "arti": "Saya baik-baik saja, kalau kamu?"
+    },
+    {
+      "hanzi": "我的书呢?",
+      "pinyin": "Wǒ de shū ne?",
+      "arti": "Di mana buku saya?"
+    }
+  ],
+  "能": [
+    {
+      "hanzi": "你能来吗?",
+      "pinyin": "Nǐ néng lái ma?",
+      "arti": "Bisakah kamu datang?"
+    },
+    {
+      "hanzi": "我今天不能去学校。",
+      "pinyin": "Wǒ jīntiān bù néng qù xuéxiào.",
+      "arti": "Hari ini saya tidak bisa pergi ke sekolah."
+    }
+  ],
+  "你": [
+    {
+      "hanzi": "你好吗?",
+      "pinyin": "Nǐ hǎo ma?",
+      "arti": "Apa kabar?"
+    },
+    {
+      "hanzi": "我不认识你。",
+      "pinyin": "Wǒ bú rènshi nǐ.",
+      "arti": "Saya tidak mengenalmu."
+    }
+  ],
+  "年": [
+    {
+      "hanzi": "今年是二零二六年。",
+      "pinyin": "Jīnnián shì èr líng èr liù nián.",
+      "arti": "Tahun ini adalah tahun 2026."
+    },
+    {
+      "hanzi": "我学了一年汉语。",
+      "pinyin": "Wǒ xué le yì nián Hànyǔ.",
+      "arti": "Saya sudah belajar bahasa Mandarin selama satu tahun."
+    }
+  ],
+  "女儿": [
+    {
+      "hanzi": "她有一个女儿。",
+      "pinyin": "Tā yǒu yí ge nǚ'ér.",
+      "arti": "Dia punya seorang anak perempuan."
+    },
+    {
+      "hanzi": "我女儿很喜欢猫。",
+      "pinyin": "Wǒ nǚ'ér hěn xǐhuan māo.",
+      "arti": "Anak perempuan saya sangat suka kucing."
+    }
+  ],
+  "朋友": [
+    {
+      "hanzi": "他是我的好朋友。",
+      "pinyin": "Tā shì wǒ de hǎo péngyou.",
+      "arti": "Dia adalah teman baik saya."
+    },
+    {
+      "hanzi": "我有很多朋友。",
+      "pinyin": "Wǒ yǒu hěn duō péngyou.",
+      "arti": "Saya punya banyak teman."
+    }
+  ],
+  "漂亮": [
+    {
+      "hanzi": "你女儿很漂亮。",
+      "pinyin": "Nǐ nǚ'ér hěn piàoliang.",
+      "arti": "Putrimu sangat cantik."
+    },
+    {
+      "hanzi": "你的猫真漂亮。",
+      "pinyin": "Nǐ de māo zhēn piàoliang.",
+      "arti": "Kucingmu cantik sekali."
+    }
+  ],
+  "苹果": [
+    {
+      "hanzi": "我喜欢吃苹果。",
+      "pinyin": "Wǒ xǐhuan chī píngguǒ.",
+      "arti": "Saya suka makan apel."
+    },
+    {
+      "hanzi": "我买了五个苹果。",
+      "pinyin": "Wǒ mǎi le wǔ ge píngguǒ.",
+      "arti": "Saya membeli lima buah apel."
+    }
+  ],
+  "七": [
+    {
+      "hanzi": "我七点起床。",
+      "pinyin": "Wǒ qī diǎn qǐchuáng.",
+      "arti": "Saya bangun pukul tujuh."
+    },
+    {
+      "hanzi": "他家有七个人。",
+      "pinyin": "Tā jiā yǒu qī ge rén.",
+      "arti": "Di rumahnya ada tujuh orang."
+    }
+  ],
+  "钱": [
+    {
+      "hanzi": "你有钱吗?",
+      "pinyin": "Nǐ yǒu qián ma?",
+      "arti": "Apakah kamu punya uang?"
+    },
+    {
+      "hanzi": "这个杯子多少钱?",
+      "pinyin": "Zhège bēizi duōshao qián?",
+      "arti": "Berapa harga gelas ini?"
+    }
+  ],
+  "前面": [
+    {
+      "hanzi": "医院在学校前面。",
+      "pinyin": "Yīyuàn zài xuéxiào qiánmiàn.",
+      "arti": "Rumah sakit ada di depan sekolah."
+    },
+    {
+      "hanzi": "前面有一个商店。",
+      "pinyin": "Qiánmiàn yǒu yí ge shāngdiàn.",
+      "arti": "Di depan ada sebuah toko."
+    }
+  ],
+  "请": [
+    {
+      "hanzi": "请坐。",
+      "pinyin": "Qǐng zuò.",
+      "arti": "Silakan duduk."
+    },
+    {
+      "hanzi": "请问,你叫什么名字?",
+      "pinyin": "Qǐngwèn, nǐ jiào shénme míngzi?",
+      "arti": "Permisi, siapa namamu?"
+    }
+  ],
+  "去": [
+    {
+      "hanzi": "我想去商店。",
+      "pinyin": "Wǒ xiǎng qù shāngdiàn.",
+      "arti": "Saya ingin pergi ke toko."
+    },
+    {
+      "hanzi": "你去哪儿?",
+      "pinyin": "Nǐ qù nǎr?",
+      "arti": "Kamu pergi ke mana?"
+    }
+  ],
+  "热": [
+    {
+      "hanzi": "我很热。",
+      "pinyin": "Wǒ hěn rè.",
+      "arti": "Saya kepanasan."
+    },
+    {
+      "hanzi": "请给我一杯热茶。",
+      "pinyin": "Qǐng gěi wǒ yì bēi rè chá.",
+      "arti": "Tolong beri saya secangkir teh panas."
+    }
+  ],
+  "人": [
+    {
+      "hanzi": "这里有很多人。",
+      "pinyin": "Zhèlǐ yǒu hěn duō rén.",
+      "arti": "Di sini ada banyak orang."
+    },
+    {
+      "hanzi": "他是中国人。",
+      "pinyin": "Tā shì Zhōngguó rén.",
+      "arti": "Dia adalah orang Tiongkok."
+    }
+  ],
+  "认识": [
+    {
+      "hanzi": "我认识他。",
+      "pinyin": "Wǒ rènshi tā.",
+      "arti": "Saya mengenal dia."
+    },
+    {
+      "hanzi": "你认识这个字吗?",
+      "pinyin": "Nǐ rènshi zhège zì ma?",
+      "arti": "Apakah kamu mengenal aksara ini?"
+    }
+  ],
+  "日": [
+    {
+      "hanzi": "今天是五月三日。",
+      "pinyin": "Jīntiān shì wǔ yuè sān rì.",
+      "arti": "Hari ini tanggal tiga Mei."
+    },
+    {
+      "hanzi": "明天是几月几日?",
+      "pinyin": "Míngtiān shì jǐ yuè jǐ rì?",
+      "arti": "Besok tanggal berapa?"
+    }
+  ],
+  "三": [
+    {
+      "hanzi": "我有三个朋友。",
+      "pinyin": "Wǒ yǒu sān ge péngyou.",
+      "arti": "Saya punya tiga teman."
+    },
+    {
+      "hanzi": "我家有三只猫。",
+      "pinyin": "Wǒ jiā yǒu sān zhī māo.",
+      "arti": "Di rumah saya ada tiga ekor kucing."
+    }
+  ],
+  "商店": [
+    {
+      "hanzi": "商店里有很多东西。",
+      "pinyin": "Shāngdiàn lǐ yǒu hěn duō dōngxi.",
+      "arti": "Di toko ada banyak barang."
+    },
+    {
+      "hanzi": "我去商店买水果。",
+      "pinyin": "Wǒ qù shāngdiàn mǎi shuǐguǒ.",
+      "arti": "Saya pergi ke toko untuk membeli buah."
+    }
+  ],
+  "上": [
+    {
+      "hanzi": "书在桌子上。",
+      "pinyin": "Shū zài zhuōzi shàng.",
+      "arti": "Buku ada di atas meja."
+    },
+    {
+      "hanzi": "上星期我在家。",
+      "pinyin": "Shàng xīngqī wǒ zài jiā.",
+      "arti": "Minggu lalu saya ada di rumah."
+    }
+  ],
+  "上午": [
+    {
+      "hanzi": "我上午在学校。",
+      "pinyin": "Wǒ shàngwǔ zài xuéxiào.",
+      "arti": "Pagi hari saya ada di sekolah."
+    },
+    {
+      "hanzi": "他上午九点来。",
+      "pinyin": "Tā shàngwǔ jiǔ diǎn lái.",
+      "arti": "Dia datang pukul sembilan pagi."
+    }
+  ],
+  "少": [
+    {
+      "hanzi": "这里的人很少。",
+      "pinyin": "Zhèlǐ de rén hěn shǎo.",
+      "arti": "Orang di sini sangat sedikit."
+    },
+    {
+      "hanzi": "我的钱太少了。",
+      "pinyin": "Wǒ de qián tài shǎo le.",
+      "arti": "Uang saya terlalu sedikit."
+    }
+  ],
+  "谁": [
+    {
+      "hanzi": "他是谁?",
+      "pinyin": "Tā shì shéi?",
+      "arti": "Siapa dia?"
+    },
+    {
+      "hanzi": "谁在家?",
+      "pinyin": "Shéi zài jiā?",
+      "arti": "Siapa yang ada di rumah?"
+    }
+  ],
+  "什么": [
+    {
+      "hanzi": "你喝什么?",
+      "pinyin": "Nǐ hē shénme?",
+      "arti": "Kamu minum apa?"
+    },
+    {
+      "hanzi": "这是什么?",
+      "pinyin": "Zhè shì shénme?",
+      "arti": "Apa ini?"
+    }
+  ],
+  "十": [
+    {
+      "hanzi": "我有十个苹果。",
+      "pinyin": "Wǒ yǒu shí ge píngguǒ.",
+      "arti": "Saya punya sepuluh buah apel."
+    },
+    {
+      "hanzi": "这本书十块钱。",
+      "pinyin": "Zhè běn shū shí kuài qián.",
+      "arti": "Buku ini sepuluh yuan."
+    }
+  ],
+  "时候": [
+    {
+      "hanzi": "你什么时候来?",
+      "pinyin": "Nǐ shénme shíhou lái?",
+      "arti": "Kapan kamu datang?"
+    },
+    {
+      "hanzi": "我吃饭的时候看电视。",
+      "pinyin": "Wǒ chīfàn de shíhou kàn diànshì.",
+      "arti": "Saat makan saya menonton televisi."
+    }
+  ],
+  "是": [
+    {
+      "hanzi": "他是医生。",
+      "pinyin": "Tā shì yīshēng.",
+      "arti": "Dia adalah dokter."
+    },
+    {
+      "hanzi": "这是我的家。",
+      "pinyin": "Zhè shì wǒ de jiā.",
+      "arti": "Ini adalah rumah saya."
+    }
+  ],
+  "书": [
+    {
+      "hanzi": "我喜欢看书。",
+      "pinyin": "Wǒ xǐhuan kàn shū.",
+      "arti": "Saya suka membaca buku."
+    },
+    {
+      "hanzi": "桌子上有两本书。",
+      "pinyin": "Zhuōzi shàng yǒu liǎng běn shū.",
+      "arti": "Di atas meja ada dua buku."
+    }
+  ],
+  "水": [
+    {
+      "hanzi": "请给我一杯水。",
+      "pinyin": "Qǐng gěi wǒ yì bēi shuǐ.",
+      "arti": "Tolong beri saya segelas air."
+    },
+    {
+      "hanzi": "我每天喝很多水。",
+      "pinyin": "Wǒ měitiān hē hěn duō shuǐ.",
+      "arti": "Saya minum banyak air setiap hari."
+    }
+  ],
+  "水果": [
+    {
+      "hanzi": "我喜欢吃水果。",
+      "pinyin": "Wǒ xǐhuan chī shuǐguǒ.",
+      "arti": "Saya suka makan buah."
+    },
+    {
+      "hanzi": "苹果是一种水果。",
+      "pinyin": "Píngguǒ shì yì zhǒng shuǐguǒ.",
+      "arti": "Apel adalah sejenis buah."
+    }
+  ],
+  "睡觉": [
+    {
+      "hanzi": "我十点睡觉。",
+      "pinyin": "Wǒ shí diǎn shuìjiào.",
+      "arti": "Saya tidur pukul sepuluh."
+    },
+    {
+      "hanzi": "猫在椅子上睡觉。",
+      "pinyin": "Māo zài yǐzi shàng shuìjiào.",
+      "arti": "Kucing tidur di atas kursi."
+    }
+  ],
+  "说话": [
+    {
+      "hanzi": "请不要说话。",
+      "pinyin": "Qǐng búyào shuōhuà.",
+      "arti": "Tolong jangan berbicara."
+    },
+    {
+      "hanzi": "他在和朋友说话。",
+      "pinyin": "Tā zài hé péngyou shuōhuà.",
+      "arti": "Dia sedang berbicara dengan temannya."
+    }
+  ],
+  "四": [
+    {
+      "hanzi": "我家有四个人。",
+      "pinyin": "Wǒ jiā yǒu sì ge rén.",
+      "arti": "Keluarga saya ada empat orang."
+    },
+    {
+      "hanzi": "现在是四月。",
+      "pinyin": "Xiànzài shì sì yuè.",
+      "arti": "Sekarang bulan April."
+    }
+  ],
+  "岁": [
+    {
+      "hanzi": "我今年二十岁。",
+      "pinyin": "Wǒ jīnnián èrshí suì.",
+      "arti": "Tahun ini saya berusia dua puluh tahun."
+    },
+    {
+      "hanzi": "你几岁了?",
+      "pinyin": "Nǐ jǐ suì le?",
+      "arti": "Berapa usiamu?"
+    }
+  ],
+  "他": [
+    {
+      "hanzi": "他是我的老师。",
+      "pinyin": "Tā shì wǒ de lǎoshī.",
+      "arti": "Dia adalah guru saya."
+    },
+    {
+      "hanzi": "他在家看书。",
+      "pinyin": "Tā zài jiā kàn shū.",
+      "arti": "Dia membaca buku di rumah."
+    }
+  ],
+  "她": [
+    {
+      "hanzi": "她是我妈妈。",
+      "pinyin": "Tā shì wǒ māma.",
+      "arti": "Dia adalah ibu saya."
+    },
+    {
+      "hanzi": "她今天不在家。",
+      "pinyin": "Tā jīntiān bú zài jiā.",
+      "arti": "Dia tidak ada di rumah hari ini."
+    }
+  ],
+  "太": [
+    {
+      "hanzi": "太好了!",
+      "pinyin": "Tài hǎo le!",
+      "arti": "Bagus sekali!"
+    },
+    {
+      "hanzi": "今天太热了。",
+      "pinyin": "Jīntiān tài rè le.",
+      "arti": "Hari ini terlalu panas."
+    }
+  ],
+  "天气": [
+    {
+      "hanzi": "今天天气很好。",
+      "pinyin": "Jīntiān tiānqì hěn hǎo.",
+      "arti": "Cuaca hari ini sangat baik."
+    },
+    {
+      "hanzi": "明天天气怎么样?",
+      "pinyin": "Míngtiān tiānqì zěnmeyàng?",
+      "arti": "Bagaimana cuaca besok?"
+    }
+  ],
+  "听": [
+    {
+      "hanzi": "我喜欢听音乐。",
+      "pinyin": "Wǒ xǐhuan tīng yīnyuè.",
+      "arti": "Saya suka mendengarkan musik."
+    },
+    {
+      "hanzi": "请听老师说。",
+      "pinyin": "Qǐng tīng lǎoshī shuō.",
+      "arti": "Tolong dengarkan guru berbicara."
+    }
+  ],
+  "同学": [
+    {
+      "hanzi": "他是我的同学。",
+      "pinyin": "Tā shì wǒ de tóngxué.",
+      "arti": "Dia adalah teman sekelas saya."
+    },
+    {
+      "hanzi": "我和同学一起学习汉语。",
+      "pinyin": "Wǒ hé tóngxué yìqǐ xuéxí Hànyǔ.",
+      "arti": "Saya belajar bahasa Mandarin bersama teman sekelas."
+    }
+  ],
+  "喂": [
+    {
+      "hanzi": "喂,你好!",
+      "pinyin": "Wèi, nǐ hǎo!",
+      "arti": "Halo, apa kabar!"
+    },
+    {
+      "hanzi": "喂,我是小明。",
+      "pinyin": "Wèi, wǒ shì Xiǎomíng.",
+      "arti": "Halo, saya Xiaoming."
+    }
+  ],
+  "我": [
+    {
+      "hanzi": "我爱学习汉语。",
+      "pinyin": "Wǒ ài xuéxí Hànyǔ.",
+      "arti": "Saya suka belajar bahasa Mandarin."
+    },
+    {
+      "hanzi": "我是印度尼西亚人。",
+      "pinyin": "Wǒ shì Yìnnìxīyà rén.",
+      "arti": "Saya orang Indonesia."
+    }
+  ],
+  "我们": [
+    {
+      "hanzi": "我们是同学。",
+      "pinyin": "Wǒmen shì tóngxué.",
+      "arti": "Kami adalah teman sekelas."
+    },
+    {
+      "hanzi": "我们明天去北京。",
+      "pinyin": "Wǒmen míngtiān qù Běijīng.",
+      "arti": "Besok kami pergi ke Beijing."
+    }
+  ],
+  "五": [
+    {
+      "hanzi": "这本书五块钱。",
+      "pinyin": "Zhè běn shū wǔ kuài qián.",
+      "arti": "Buku ini lima yuan."
+    },
+    {
+      "hanzi": "五月有三十一天。",
+      "pinyin": "Wǔ yuè yǒu sānshíyī tiān.",
+      "arti": "Bulan Mei ada tiga puluh satu hari."
+    }
+  ],
+  "喜欢": [
+    {
+      "hanzi": "我喜欢猫。",
+      "pinyin": "Wǒ xǐhuan māo.",
+      "arti": "Saya suka kucing."
+    },
+    {
+      "hanzi": "你喜欢什么?",
+      "pinyin": "Nǐ xǐhuan shénme?",
+      "arti": "Kamu suka apa?"
+    }
+  ],
+  "下": [
+    {
+      "hanzi": "书在桌子下。",
+      "pinyin": "Shū zài zhuōzi xià.",
+      "arti": "Buku ada di bawah meja."
+    },
+    {
+      "hanzi": "下星期我去北京。",
+      "pinyin": "Xià xīngqī wǒ qù Běijīng.",
+      "arti": "Minggu depan saya pergi ke Beijing."
+    }
+  ],
+  "下午": [
+    {
+      "hanzi": "我下午去商店。",
+      "pinyin": "Wǒ xiàwǔ qù shāngdiàn.",
+      "arti": "Sore hari saya pergi ke toko."
+    },
+    {
+      "hanzi": "下午三点我有汉语课。",
+      "pinyin": "Xiàwǔ sān diǎn wǒ yǒu Hànyǔ kè.",
+      "arti": "Pukul tiga sore saya ada kelas bahasa Mandarin."
+    }
+  ],
+  "下雨": [
+    {
+      "hanzi": "今天下雨了。",
+      "pinyin": "Jīntiān xiàyǔ le.",
+      "arti": "Hari ini hujan."
+    },
+    {
+      "hanzi": "下雨了,我不想出去。",
+      "pinyin": "Xiàyǔ le, wǒ bù xiǎng chūqù.",
+      "arti": "Hujan, saya tidak ingin keluar."
+    }
+  ],
+  "先生": [
+    {
+      "hanzi": "王先生是我的老师。",
+      "pinyin": "Wáng xiānsheng shì wǒ de lǎoshī.",
+      "arti": "Tuan Wang adalah guru saya."
+    },
+    {
+      "hanzi": "先生,请坐。",
+      "pinyin": "Xiānsheng, qǐng zuò.",
+      "arti": "Tuan, silakan duduk."
+    }
+  ],
+  "现在": [
+    {
+      "hanzi": "我现在在家。",
+      "pinyin": "Wǒ xiànzài zài jiā.",
+      "arti": "Sekarang saya ada di rumah."
+    },
+    {
+      "hanzi": "现在是下午两点。",
+      "pinyin": "Xiànzài shì xiàwǔ liǎng diǎn.",
+      "arti": "Sekarang pukul dua siang."
+    }
+  ],
+  "想": [
+    {
+      "hanzi": "我想喝茶。",
+      "pinyin": "Wǒ xiǎng hē chá.",
+      "arti": "Saya ingin minum teh."
+    },
+    {
+      "hanzi": "我想妈妈了。",
+      "pinyin": "Wǒ xiǎng māma le.",
+      "arti": "Saya merindukan ibu."
+    }
+  ],
+  "小": [
+    {
+      "hanzi": "我的房间很小。",
+      "pinyin": "Wǒ de fángjiān hěn xiǎo.",
+      "arti": "Kamar saya kecil."
+    },
+    {
+      "hanzi": "这个杯子太小了。",
+      "pinyin": "Zhège bēizi tài xiǎo le.",
+      "arti": "Gelas ini terlalu kecil."
+    }
+  ],
+  "小姐": [
+    {
+      "hanzi": "小姐,请问你叫什么名字?",
+      "pinyin": "Xiǎojiě, qǐngwèn nǐ jiào shénme míngzi?",
+      "arti": "Nona, boleh tahu siapa namamu?"
+    },
+    {
+      "hanzi": "李小姐是我的朋友。",
+      "pinyin": "Lǐ xiǎojiě shì wǒ de péngyou.",
+      "arti": "Nona Li adalah teman saya."
+    }
+  ],
+  "些": [
+    {
+      "hanzi": "我买了一些水果。",
+      "pinyin": "Wǒ mǎi le yìxiē shuǐguǒ.",
+      "arti": "Saya membeli beberapa buah."
+    },
+    {
+      "hanzi": "这些书是我的。",
+      "pinyin": "Zhèxiē shū shì wǒ de.",
+      "arti": "Buku-buku ini milik saya."
+    }
+  ],
+  "写": [
+    {
+      "hanzi": "请写你的名字。",
+      "pinyin": "Qǐng xiě nǐ de míngzi.",
+      "arti": "Silakan tulis namamu."
+    },
+    {
+      "hanzi": "他在写汉字。",
+      "pinyin": "Tā zài xiě Hànzì.",
+      "arti": "Dia sedang menulis aksara Mandarin."
+    }
+  ],
+  "谢谢": [
+    {
+      "hanzi": "谢谢你的帮助。",
+      "pinyin": "Xièxie nǐ de bāngzhù.",
+      "arti": "Terima kasih atas bantuanmu."
+    },
+    {
+      "hanzi": "谢谢老师!",
+      "pinyin": "Xièxie lǎoshī!",
+      "arti": "Terima kasih, Guru!"
+    }
+  ],
+  "星期": [
+    {
+      "hanzi": "今天星期几?",
+      "pinyin": "Jīntiān xīngqī jǐ?",
+      "arti": "Hari ini hari apa?"
+    },
+    {
+      "hanzi": "我每个星期去商店。",
+      "pinyin": "Wǒ měi ge xīngqī qù shāngdiàn.",
+      "arti": "Setiap minggu saya pergi ke toko."
+    }
+  ],
+  "学生": [
+    {
+      "hanzi": "学校有很多学生。",
+      "pinyin": "Xuéxiào yǒu hěn duō xuésheng.",
+      "arti": "Di sekolah ada banyak pelajar."
+    },
+    {
+      "hanzi": "她是汉语学生。",
+      "pinyin": "Tā shì Hànyǔ xuésheng.",
+      "arti": "Dia adalah pelajar bahasa Mandarin."
+    }
+  ],
+  "学习": [
+    {
+      "hanzi": "我在学校学习。",
+      "pinyin": "Wǒ zài xuéxiào xuéxí.",
+      "arti": "Saya belajar di sekolah."
+    },
+    {
+      "hanzi": "他学习很好。",
+      "pinyin": "Tā xuéxí hěn hǎo.",
+      "arti": "Dia belajar dengan baik."
+    }
+  ],
+  "学校": [
+    {
+      "hanzi": "我的学校很大。",
+      "pinyin": "Wǒ de xuéxiào hěn dà.",
+      "arti": "Sekolah saya sangat besar."
+    },
+    {
+      "hanzi": "学校在医院旁边。",
+      "pinyin": "Xuéxiào zài yīyuàn pángbiān.",
+      "arti": "Sekolah ada di sebelah rumah sakit."
+    }
+  ],
+  "一": [
+    {
+      "hanzi": "今天是一月一日。",
+      "pinyin": "Jīntiān shì yī yuè yī rì.",
+      "arti": "Hari ini tanggal satu Januari."
+    },
+    {
+      "hanzi": "我有一个问题。",
+      "pinyin": "Wǒ yǒu yí ge wèntí.",
+      "arti": "Saya punya satu pertanyaan."
+    }
+  ],
+  "衣服": [
+    {
+      "hanzi": "我想买新衣服。",
+      "pinyin": "Wǒ xiǎng mǎi xīn yīfu.",
+      "arti": "Saya ingin membeli pakaian baru."
+    },
+    {
+      "hanzi": "他的衣服很大。",
+      "pinyin": "Tā de yīfu hěn dà.",
+      "arti": "Pakaiannya sangat besar."
+    }
+  ],
+  "医生": [
+    {
+      "hanzi": "他是我的医生。",
+      "pinyin": "Tā shì wǒ de yīshēng.",
+      "arti": "Dia adalah dokter saya."
+    },
+    {
+      "hanzi": "我想去看医生。",
+      "pinyin": "Wǒ xiǎng qù kàn yīshēng.",
+      "arti": "Saya ingin pergi ke dokter."
+    }
+  ],
+  "医院": [
+    {
+      "hanzi": "医院里有很多人。",
+      "pinyin": "Yīyuàn lǐ yǒu hěn duō rén.",
+      "arti": "Di rumah sakit ada banyak orang."
+    },
+    {
+      "hanzi": "妈妈去医院了。",
+      "pinyin": "Māma qù yīyuàn le.",
+      "arti": "Ibu pergi ke rumah sakit."
+    }
+  ],
+  "椅子": [
+    {
+      "hanzi": "椅子在桌子旁边。",
+      "pinyin": "Yǐzi zài zhuōzi pángbiān.",
+      "arti": "Kursi ada di samping meja."
+    },
+    {
+      "hanzi": "请坐这把椅子。",
+      "pinyin": "Qǐng zuò zhè bǎ yǐzi.",
+      "arti": "Silakan duduk di kursi ini."
+    }
+  ],
+  "有": [
+    {
+      "hanzi": "我家有五个人。",
+      "pinyin": "Wǒ jiā yǒu wǔ ge rén.",
+      "arti": "Di rumah saya ada lima orang."
+    },
+    {
+      "hanzi": "你有没有哥哥?",
+      "pinyin": "Nǐ yǒu méiyǒu gēge?",
+      "arti": "Apakah kamu punya kakak laki-laki?"
+    }
+  ],
+  "月": [
+    {
+      "hanzi": "现在是十月。",
+      "pinyin": "Xiànzài shì shí yuè.",
+      "arti": "Sekarang bulan Oktober."
+    },
+    {
+      "hanzi": "一年有十二个月。",
+      "pinyin": "Yì nián yǒu shí'èr ge yuè.",
+      "arti": "Satu tahun ada dua belas bulan."
+    }
+  ],
+  "在": [
+    {
+      "hanzi": "他在学校。",
+      "pinyin": "Tā zài xuéxiào.",
+      "arti": "Dia ada di sekolah."
+    },
+    {
+      "hanzi": "你在哪儿?",
+      "pinyin": "Nǐ zài nǎr?",
+      "arti": "Kamu ada di mana?"
+    }
+  ],
+  "再见": [
+    {
+      "hanzi": "老师,再见!",
+      "pinyin": "Lǎoshī, zàijiàn!",
+      "arti": "Guru, sampai jumpa!"
+    },
+    {
+      "hanzi": "明天再见。",
+      "pinyin": "Míngtiān zàijiàn.",
+      "arti": "Sampai jumpa besok."
+    }
+  ],
+  "怎么": [
+    {
+      "hanzi": "这个字怎么读?",
+      "pinyin": "Zhège zì zěnme dú?",
+      "arti": "Bagaimana cara membaca aksara ini?"
+    },
+    {
+      "hanzi": "你怎么不去?",
+      "pinyin": "Nǐ zěnme bú qù?",
+      "arti": "Kenapa kamu tidak pergi?"
+    }
+  ],
+  "怎么样": [
+    {
+      "hanzi": "你的工作怎么样?",
+      "pinyin": "Nǐ de gōngzuò zěnmeyàng?",
+      "arti": "Bagaimana pekerjaanmu?"
+    },
+    {
+      "hanzi": "这个菜怎么样?",
+      "pinyin": "Zhège cài zěnmeyàng?",
+      "arti": "Bagaimana masakan ini?"
+    }
+  ],
+  "这": [
+    {
+      "hanzi": "这是我的老师。",
+      "pinyin": "Zhè shì wǒ de lǎoshī.",
+      "arti": "Ini adalah guru saya."
+    },
+    {
+      "hanzi": "这个杯子是我的。",
+      "pinyin": "Zhège bēizi shì wǒ de.",
+      "arti": "Gelas ini milik saya."
+    }
+  ],
+  "中国": [
+    {
+      "hanzi": "我想去中国学习汉语。",
+      "pinyin": "Wǒ xiǎng qù Zhōngguó xuéxí Hànyǔ.",
+      "arti": "Saya ingin pergi ke Tiongkok untuk belajar bahasa Mandarin."
+    },
+    {
+      "hanzi": "北京在中国。",
+      "pinyin": "Běijīng zài Zhōngguó.",
+      "arti": "Beijing ada di Tiongkok."
+    }
+  ],
+  "中午": [
+    {
+      "hanzi": "中午十二点我们吃饭。",
+      "pinyin": "Zhōngwǔ shí'èr diǎn wǒmen chīfàn.",
+      "arti": "Pukul dua belas siang kami makan."
+    },
+    {
+      "hanzi": "他中午不在家。",
+      "pinyin": "Tā zhōngwǔ bú zài jiā.",
+      "arti": "Siang hari dia tidak di rumah."
+    }
+  ],
+  "住": [
+    {
+      "hanzi": "我住在北京。",
+      "pinyin": "Wǒ zhù zài Běijīng.",
+      "arti": "Saya tinggal di Beijing."
+    },
+    {
+      "hanzi": "你住在哪儿?",
+      "pinyin": "Nǐ zhù zài nǎr?",
+      "arti": "Kamu tinggal di mana?"
+    }
+  ],
+  "桌子": [
+    {
+      "hanzi": "这张桌子很大。",
+      "pinyin": "Zhè zhāng zhuōzi hěn dà.",
+      "arti": "Meja ini sangat besar."
+    },
+    {
+      "hanzi": "桌子下面有一只猫。",
+      "pinyin": "Zhuōzi xiàmiàn yǒu yì zhī māo.",
+      "arti": "Di bawah meja ada seekor kucing."
+    }
+  ],
+  "字": [
+    {
+      "hanzi": "这个字很难写。",
+      "pinyin": "Zhège zì hěn nán xiě.",
+      "arti": "Aksara ini sulit ditulis."
+    },
+    {
+      "hanzi": "他的字写得很好。",
+      "pinyin": "Tā de zì xiě de hěn hǎo.",
+      "arti": "Tulisan tangannya bagus."
+    }
+  ],
+  "昨天": [
+    {
+      "hanzi": "昨天我在家。",
+      "pinyin": "Zuótiān wǒ zài jiā.",
+      "arti": "Kemarin saya ada di rumah."
+    },
+    {
+      "hanzi": "昨天是星期五。",
+      "pinyin": "Zuótiān shì xīngqīwǔ.",
+      "arti": "Kemarin hari Jumat."
+    }
+  ],
+  "坐": [
+    {
+      "hanzi": "我坐公共汽车去学校。",
+      "pinyin": "Wǒ zuò gōnggòng qìchē qù xuéxiào.",
+      "arti": "Saya naik bus ke sekolah."
+    },
+    {
+      "hanzi": "他坐在椅子上。",
+      "pinyin": "Tā zuò zài yǐzi shàng.",
+      "arti": "Dia duduk di atas kursi."
+    }
+  ],
+  "做": [
+    {
+      "hanzi": "你在做什么?",
+      "pinyin": "Nǐ zài zuò shénme?",
+      "arti": "Kamu sedang melakukan apa?"
+    },
+    {
+      "hanzi": "我今天要做很多事情。",
+      "pinyin": "Wǒ jīntiān yào zuò hěn duō shìqing.",
+      "arti": "Hari ini saya harus mengerjakan banyak hal."
+    }
+  ],
+  "吧": [
+    {
+      "hanzi": "我们走吧。",
+      "pinyin": "Wǒmen zǒu ba.",
+      "arti": "Ayo kita pergi."
+    },
+    {
+      "hanzi": "你是老师吧?",
+      "pinyin": "Nǐ shì lǎoshī ba?",
+      "arti": "Kamu guru, kan?"
+    }
+  ],
+  "白": [
+    {
+      "hanzi": "我有一只白猫。",
+      "pinyin": "Wǒ yǒu yì zhī bái māo.",
+      "arti": "Saya punya seekor kucing putih."
+    },
+    {
+      "hanzi": "她的衣服很白。",
+      "pinyin": "Tā de yīfu hěn bái.",
+      "arti": "Pakaiannya putih bersih."
+    }
+  ],
+  "百": [
+    {
+      "hanzi": "这本书一百块。",
+      "pinyin": "Zhè běn shū yì bǎi kuài.",
+      "arti": "Buku ini seratus yuan."
+    },
+    {
+      "hanzi": "学校有三百个学生。",
+      "pinyin": "Xuéxiào yǒu sān bǎi ge xuésheng.",
+      "arti": "Sekolah ini punya tiga ratus pelajar."
+    }
+  ],
+  "帮助": [
+    {
+      "hanzi": "老师帮助我学习汉语。",
+      "pinyin": "Lǎoshī bāngzhù wǒ xuéxí Hànyǔ.",
+      "arti": "Guru membantu saya belajar bahasa Mandarin."
+    },
+    {
+      "hanzi": "你可以帮助我吗?",
+      "pinyin": "Nǐ kěyǐ bāngzhù wǒ ma?",
+      "arti": "Bisakah kamu membantu saya?"
+    }
+  ],
+  "报纸": [
+    {
+      "hanzi": "爸爸每天看报纸。",
+      "pinyin": "Bàba měitiān kàn bàozhǐ.",
+      "arti": "Ayah membaca koran setiap hari."
+    },
+    {
+      "hanzi": "桌子上有一份报纸。",
+      "pinyin": "Zhuōzi shàng yǒu yí fèn bàozhǐ.",
+      "arti": "Di atas meja ada sebuah koran."
+    }
+  ],
+  "比": [
+    {
+      "hanzi": "哥哥比我高。",
+      "pinyin": "Gēge bǐ wǒ gāo.",
+      "arti": "Kakak laki-laki lebih tinggi daripada saya."
+    },
+    {
+      "hanzi": "今天比昨天冷。",
+      "pinyin": "Jīntiān bǐ zuótiān lěng.",
+      "arti": "Hari ini lebih dingin daripada kemarin."
+    }
+  ],
+  "别": [
+    {
+      "hanzi": "别说话。",
+      "pinyin": "Bié shuōhuà.",
+      "arti": "Jangan berbicara."
+    },
+    {
+      "hanzi": "别客气!",
+      "pinyin": "Bié kèqi!",
+      "arti": "Jangan sungkan!"
+    }
+  ],
+  "长": [
+    {
+      "hanzi": "这条河很长。",
+      "pinyin": "Zhè tiáo hé hěn cháng.",
+      "arti": "Sungai ini sangat panjang."
+    },
+    {
+      "hanzi": "她的头发很长。",
+      "pinyin": "Tā de tóufa hěn cháng.",
+      "arti": "Rambutnya panjang."
+    },
+    {
+      "hanzi": "我弟弟长高了。",
+      "pinyin": "Wǒ dìdi zhǎng gāo le.",
+      "arti": "Adik laki-laki saya sudah bertambah tinggi."
+    },
+    {
+      "hanzi": "他是我们的班长。",
+      "pinyin": "Tā shì wǒmen de bānzhǎng.",
+      "arti": "Dia adalah ketua kelas kami."
+    }
+  ],
+  "唱歌": [
+    {
+      "hanzi": "她喜欢唱歌。",
+      "pinyin": "Tā xǐhuan chànggē.",
+      "arti": "Dia suka bernyanyi."
+    },
+    {
+      "hanzi": "我们一起唱歌吧。",
+      "pinyin": "Wǒmen yìqǐ chànggē ba.",
+      "arti": "Ayo kita bernyanyi bersama."
+    }
+  ],
+  "出": [
+    {
+      "hanzi": "他从家里出来了。",
+      "pinyin": "Tā cóng jiālǐ chūlái le.",
+      "arti": "Dia keluar dari rumah."
+    },
+    {
+      "hanzi": "他出去了,不在家。",
+      "pinyin": "Tā chūqù le, bú zài jiā.",
+      "arti": "Dia sedang keluar, tidak ada di rumah."
+    }
+  ],
+  "穿": [
+    {
+      "hanzi": "她今天穿白衣服。",
+      "pinyin": "Tā jīntiān chuān bái yīfu.",
+      "arti": "Hari ini dia memakai pakaian putih."
+    },
+    {
+      "hanzi": "外面冷,多穿一件衣服。",
+      "pinyin": "Wàimiàn lěng, duō chuān yí jiàn yīfu.",
+      "arti": "Di luar dingin, pakailah satu baju lagi."
+    }
+  ],
+  "船": [
+    {
+      "hanzi": "河里有一条船。",
+      "pinyin": "Hé lǐ yǒu yì tiáo chuán.",
+      "arti": "Di sungai ada sebuah perahu."
+    },
+    {
+      "hanzi": "我想坐船旅游。",
+      "pinyin": "Wǒ xiǎng zuò chuán lǚyóu.",
+      "arti": "Saya ingin bepergian dengan perahu."
+    }
+  ],
+  "次": [
+    {
+      "hanzi": "我去过北京两次。",
+      "pinyin": "Wǒ qùguo Běijīng liǎng cì.",
+      "arti": "Saya sudah dua kali pergi ke Beijing."
+    },
+    {
+      "hanzi": "这是我第一次来中国。",
+      "pinyin": "Zhè shì wǒ dì yī cì lái Zhōngguó.",
+      "arti": "Ini pertama kalinya saya datang ke Tiongkok."
+    }
+  ],
+  "从": [
+    {
+      "hanzi": "我从家走到学校。",
+      "pinyin": "Wǒ cóng jiā zǒu dào xuéxiào.",
+      "arti": "Saya berjalan dari rumah ke sekolah."
+    },
+    {
+      "hanzi": "从八点到十点我有课。",
+      "pinyin": "Cóng bā diǎn dào shí diǎn wǒ yǒu kè.",
+      "arti": "Dari pukul delapan sampai sepuluh saya ada kelas."
+    }
+  ],
+  "错": [
+    {
+      "hanzi": "这个字写错了。",
+      "pinyin": "Zhège zì xiě cuò le.",
+      "arti": "Aksara ini salah tulis."
+    },
+    {
+      "hanzi": "对不起,是我的错。",
+      "pinyin": "Duìbuqǐ, shì wǒ de cuò.",
+      "arti": "Maaf, itu kesalahan saya."
+    }
+  ],
+  "打篮球": [
+    {
+      "hanzi": "弟弟喜欢打篮球。",
+      "pinyin": "Dìdi xǐhuan dǎ lánqiú.",
+      "arti": "Adik laki-laki suka bermain basket."
+    },
+    {
+      "hanzi": "我们下午去打篮球吧。",
+      "pinyin": "Wǒmen xiàwǔ qù dǎ lánqiú ba.",
+      "arti": "Ayo kita main basket sore ini."
+    }
+  ],
+  "大家": [
+    {
+      "hanzi": "大家好!",
+      "pinyin": "Dàjiā hǎo!",
+      "arti": "Halo semuanya!"
+    },
+    {
+      "hanzi": "大家都在教室里。",
+      "pinyin": "Dàjiā dōu zài jiàoshì lǐ.",
+      "arti": "Semua orang ada di ruang kelas."
+    }
+  ],
+  "但是": [
+    {
+      "hanzi": "我很想去,但是没有时间。",
+      "pinyin": "Wǒ hěn xiǎng qù, dànshì méiyǒu shíjiān.",
+      "arti": "Saya sangat ingin pergi, tetapi tidak punya waktu."
+    },
+    {
+      "hanzi": "汉语很难,但是很有意思。",
+      "pinyin": "Hànyǔ hěn nán, dànshì hěn yǒu yìsi.",
+      "arti": "Bahasa Mandarin sulit, tetapi sangat menarik."
+    }
+  ],
+  "到": [
+    {
+      "hanzi": "我八点到学校。",
+      "pinyin": "Wǒ bā diǎn dào xuéxiào.",
+      "arti": "Saya tiba di sekolah pukul delapan."
+    },
+    {
+      "hanzi": "你到家了吗?",
+      "pinyin": "Nǐ dào jiā le ma?",
+      "arti": "Apakah kamu sudah sampai di rumah?"
+    }
+  ],
+  "得": [
+    {
+      "hanzi": "他说得很好。",
+      "pinyin": "Tā shuō de hěn hǎo.",
+      "arti": "Dia berbicara dengan sangat baik."
+    },
+    {
+      "hanzi": "她唱得很好。",
+      "pinyin": "Tā chàng de hěn hǎo.",
+      "arti": "Dia bernyanyi dengan sangat baik."
+    },
+    {
+      "hanzi": "我得去医院。",
+      "pinyin": "Wǒ děi qù yīyuàn.",
+      "arti": "Saya harus pergi ke rumah sakit."
+    },
+    {
+      "hanzi": "明天有考试,今晚我得学习。",
+      "pinyin": "Míngtiān yǒu kǎoshì, jīnwǎn wǒ děi xuéxí.",
+      "arti": "Besok ada ujian, malam ini saya harus belajar."
+    }
+  ],
+  "弟弟": [
+    {
+      "hanzi": "弟弟在睡觉。",
+      "pinyin": "Dìdi zài shuìjiào.",
+      "arti": "Adik laki-laki sedang tidur."
+    },
+    {
+      "hanzi": "我有一个弟弟。",
+      "pinyin": "Wǒ yǒu yí ge dìdi.",
+      "arti": "Saya punya seorang adik laki-laki."
+    }
+  ],
+  "第一": [
+    {
+      "hanzi": "他是第一个来的。",
+      "pinyin": "Tā shì dì yī ge lái de.",
+      "arti": "Dialah yang datang pertama."
+    },
+    {
+      "hanzi": "我是第一个到教室的。",
+      "pinyin": "Wǒ shì dì yī ge dào jiàoshì de.",
+      "arti": "Saya yang pertama tiba di ruang kelas."
+    }
+  ],
+  "懂": [
+    {
+      "hanzi": "老师说的话我都懂。",
+      "pinyin": "Lǎoshī shuō de huà wǒ dōu dǒng.",
+      "arti": "Saya mengerti semua yang guru katakan."
+    },
+    {
+      "hanzi": "你懂我的意思吗?",
+      "pinyin": "Nǐ dǒng wǒ de yìsi ma?",
+      "arti": "Apakah kamu mengerti maksud saya?"
+    }
+  ],
+  "房间": [
+    {
+      "hanzi": "这个房间很大。",
+      "pinyin": "Zhège fángjiān hěn dà.",
+      "arti": "Kamar ini sangat besar."
+    },
+    {
+      "hanzi": "他在房间里看书。",
+      "pinyin": "Tā zài fángjiān lǐ kàn shū.",
+      "arti": "Dia membaca buku di dalam kamar."
+    }
+  ],
+  "非常": [
+    {
+      "hanzi": "今天非常热。",
+      "pinyin": "Jīntiān fēicháng rè.",
+      "arti": "Hari ini sangat panas."
+    },
+    {
+      "hanzi": "这个菜非常好吃。",
+      "pinyin": "Zhège cài fēicháng hǎochī.",
+      "arti": "Masakan ini enak sekali."
+    }
+  ],
+  "服务员": [
+    {
+      "hanzi": "服务员,请给我一杯茶。",
+      "pinyin": "Fúwùyuán, qǐng gěi wǒ yì bēi chá.",
+      "arti": "Pelayan, tolong beri saya secangkir teh."
+    },
+    {
+      "hanzi": "这个饭馆的服务员很好。",
+      "pinyin": "Zhège fànguǎn de fúwùyuán hěn hǎo.",
+      "arti": "Pelayan restoran ini sangat baik."
+    }
+  ],
+  "高": [
+    {
+      "hanzi": "我哥哥很高。",
+      "pinyin": "Wǒ gēge hěn gāo.",
+      "arti": "Kakak laki-laki saya tinggi."
+    },
+    {
+      "hanzi": "你有多高?",
+      "pinyin": "Nǐ yǒu duō gāo?",
+      "arti": "Tinggimu berapa?"
+    }
+  ],
+  "告诉": [
+    {
+      "hanzi": "请告诉我你的名字。",
+      "pinyin": "Qǐng gàosu wǒ nǐ de míngzi.",
+      "arti": "Tolong beri tahu saya namamu."
+    },
+    {
+      "hanzi": "他告诉我明天不上课。",
+      "pinyin": "Tā gàosu wǒ míngtiān bú shàngkè.",
+      "arti": "Dia memberi tahu saya besok tidak ada kelas."
+    }
+  ],
+  "哥哥": [
+    {
+      "hanzi": "我哥哥是老师。",
+      "pinyin": "Wǒ gēge shì lǎoshī.",
+      "arti": "Kakak laki-laki saya adalah guru."
+    },
+    {
+      "hanzi": "哥哥在北京工作。",
+      "pinyin": "Gēge zài Běijīng gōngzuò.",
+      "arti": "Kakak laki-laki bekerja di Beijing."
+    }
+  ],
+  "给": [
+    {
+      "hanzi": "我给朋友买了一本书。",
+      "pinyin": "Wǒ gěi péngyou mǎi le yì běn shū.",
+      "arti": "Saya membelikan teman sebuah buku."
+    },
+    {
+      "hanzi": "妈妈给我钱。",
+      "pinyin": "Māma gěi wǒ qián.",
+      "arti": "Ibu memberi saya uang."
+    }
+  ],
+  "公共汽车": [
+    {
+      "hanzi": "公共汽车来了。",
+      "pinyin": "Gōnggòng qìchē lái le.",
+      "arti": "Bus sudah datang."
+    },
+    {
+      "hanzi": "我每天坐公共汽车上班。",
+      "pinyin": "Wǒ měitiān zuò gōnggòng qìchē shàngbān.",
+      "arti": "Saya naik bus ke tempat kerja setiap hari."
+    }
+  ],
+  "公斤": [
+    {
+      "hanzi": "我买了两公斤苹果。",
+      "pinyin": "Wǒ mǎi le liǎng gōngjīn píngguǒ.",
+      "arti": "Saya membeli dua kilogram apel."
+    },
+    {
+      "hanzi": "这个西瓜有五公斤。",
+      "pinyin": "Zhège xīguā yǒu wǔ gōngjīn.",
+      "arti": "Semangka ini beratnya lima kilogram."
+    }
+  ],
+  "公司": [
+    {
+      "hanzi": "他在一家公司工作。",
+      "pinyin": "Tā zài yì jiā gōngsī gōngzuò.",
+      "arti": "Dia bekerja di sebuah perusahaan."
+    },
+    {
+      "hanzi": "我们公司离这儿很近。",
+      "pinyin": "Wǒmen gōngsī lí zhèr hěn jìn.",
+      "arti": "Perusahaan kami dekat dari sini."
+    }
+  ],
+  "贵": [
+    {
+      "hanzi": "这件衣服太贵了。",
+      "pinyin": "Zhè jiàn yīfu tài guì le.",
+      "arti": "Pakaian ini terlalu mahal."
+    },
+    {
+      "hanzi": "北京的东西贵不贵?",
+      "pinyin": "Běijīng de dōngxi guì bu guì?",
+      "arti": "Apakah barang-barang di Beijing mahal?"
+    }
+  ],
+  "还": [
+    {
+      "hanzi": "你还在家吗?",
+      "pinyin": "Nǐ hái zài jiā ma?",
+      "arti": "Apakah kamu masih di rumah?"
+    },
+    {
+      "hanzi": "我还想再吃一个。",
+      "pinyin": "Wǒ hái xiǎng zài chī yí ge.",
+      "arti": "Saya masih ingin makan satu lagi."
+    },
+    {
+      "hanzi": "我明天还你书。",
+      "pinyin": "Wǒ míngtiān huán nǐ shū.",
+      "arti": "Besok saya kembalikan bukumu."
+    },
+    {
+      "hanzi": "他已经还钱了。",
+      "pinyin": "Tā yǐjīng huán qián le.",
+      "arti": "Dia sudah membayar kembali uangnya."
+    }
+  ],
+  "孩子": [
+    {
+      "hanzi": "他们有两个孩子。",
+      "pinyin": "Tāmen yǒu liǎng ge háizi.",
+      "arti": "Mereka punya dua anak."
+    },
+    {
+      "hanzi": "孩子们在玩。",
+      "pinyin": "Háizimen zài wán.",
+      "arti": "Anak-anak sedang bermain."
+    }
+  ],
+  "好吃": [
+    {
+      "hanzi": "妈妈做的饭很好吃。",
+      "pinyin": "Māma zuò de fàn hěn hǎochī.",
+      "arti": "Masakan ibu enak."
+    },
+    {
+      "hanzi": "这个西瓜很好吃。",
+      "pinyin": "Zhège xīguā hěn hǎochī.",
+      "arti": "Semangka ini enak."
+    }
+  ],
+  "号": [
+    {
+      "hanzi": "今天几号?",
+      "pinyin": "Jīntiān jǐ hào?",
+      "arti": "Hari ini tanggal berapa?"
+    },
+    {
+      "hanzi": "明天是十五号。",
+      "pinyin": "Míngtiān shì shíwǔ hào.",
+      "arti": "Besok tanggal lima belas."
+    }
+  ],
+  "黑": [
+    {
+      "hanzi": "外面很黑。",
+      "pinyin": "Wàimiàn hěn hēi.",
+      "arti": "Di luar sangat gelap."
+    },
+    {
+      "hanzi": "他穿黑衣服。",
+      "pinyin": "Tā chuān hēi yīfu.",
+      "arti": "Dia memakai pakaian hitam."
+    }
+  ],
+  "红": [
+    {
+      "hanzi": "她喜欢红衣服。",
+      "pinyin": "Tā xǐhuan hóng yīfu.",
+      "arti": "Dia suka pakaian merah."
+    },
+    {
+      "hanzi": "这个苹果很红。",
+      "pinyin": "Zhège píngguǒ hěn hóng.",
+      "arti": "Apel ini merah sekali."
+    }
+  ],
+  "欢迎": [
+    {
+      "hanzi": "欢迎你来我家。",
+      "pinyin": "Huānyíng nǐ lái wǒ jiā.",
+      "arti": "Selamat datang di rumahku."
+    },
+    {
+      "hanzi": "欢迎来到中国!",
+      "pinyin": "Huānyíng láidào Zhōngguó!",
+      "arti": "Selamat datang di Tiongkok!"
+    }
+  ],
+  "回答": [
+    {
+      "hanzi": "请回答我的问题。",
+      "pinyin": "Qǐng huídá wǒ de wèntí.",
+      "arti": "Tolong jawab pertanyaan saya."
+    },
+    {
+      "hanzi": "他回答得很好。",
+      "pinyin": "Tā huídá de hěn hǎo.",
+      "arti": "Dia menjawab dengan baik."
+    }
+  ],
+  "机场": [
+    {
+      "hanzi": "机场离这儿很远。",
+      "pinyin": "Jīchǎng lí zhèr hěn yuǎn.",
+      "arti": "Bandara jauh dari sini."
+    },
+    {
+      "hanzi": "我们在机场见面。",
+      "pinyin": "Wǒmen zài jīchǎng jiànmiàn.",
+      "arti": "Kami bertemu di bandara."
+    }
+  ],
+  "鸡蛋": [
+    {
+      "hanzi": "我早上吃两个鸡蛋。",
+      "pinyin": "Wǒ zǎoshang chī liǎng ge jīdàn.",
+      "arti": "Pagi hari saya makan dua butir telur."
+    },
+    {
+      "hanzi": "请给我五个鸡蛋。",
+      "pinyin": "Qǐng gěi wǒ wǔ ge jīdàn.",
+      "arti": "Tolong beri saya lima butir telur."
+    }
+  ],
+  "件": [
+    {
+      "hanzi": "我买了一件新衣服。",
+      "pinyin": "Wǒ mǎi le yí jiàn xīn yīfu.",
+      "arti": "Saya membeli sebuah pakaian baru."
+    },
+    {
+      "hanzi": "这件事我不知道。",
+      "pinyin": "Zhè jiàn shì wǒ bù zhīdào.",
+      "arti": "Saya tidak tahu hal ini."
+    }
+  ],
+  "教室": [
+    {
+      "hanzi": "教室里有很多学生。",
+      "pinyin": "Jiàoshì lǐ yǒu hěn duō xuésheng.",
+      "arti": "Di ruang kelas ada banyak pelajar."
+    },
+    {
+      "hanzi": "老师在教室外面。",
+      "pinyin": "Lǎoshī zài jiàoshì wàimiàn.",
+      "arti": "Guru ada di luar ruang kelas."
+    }
+  ],
+  "姐姐": [
+    {
+      "hanzi": "我姐姐在北京学习。",
+      "pinyin": "Wǒ jiějie zài Běijīng xuéxí.",
+      "arti": "Kakak perempuan saya belajar di Beijing."
+    },
+    {
+      "hanzi": "姐姐比我大三岁。",
+      "pinyin": "Jiějie bǐ wǒ dà sān suì.",
+      "arti": "Kakak perempuan tiga tahun lebih tua dari saya."
+    }
+  ],
+  "介绍": [
+    {
+      "hanzi": "请介绍一下你自己。",
+      "pinyin": "Qǐng jièshào yíxià nǐ zìjǐ.",
+      "arti": "Tolong perkenalkan dirimu."
+    },
+    {
+      "hanzi": "我来介绍一下,这是我的朋友。",
+      "pinyin": "Wǒ lái jièshào yíxià, zhè shì wǒ de péngyou.",
+      "arti": "Biar saya perkenalkan, ini teman saya."
+    }
+  ],
+  "进": [
+    {
+      "hanzi": "请进!",
+      "pinyin": "Qǐng jìn!",
+      "arti": "Silakan masuk!"
+    },
+    {
+      "hanzi": "他进了教室。",
+      "pinyin": "Tā jìn le jiàoshì.",
+      "arti": "Dia masuk ke ruang kelas."
+    }
+  ],
+  "近": [
+    {
+      "hanzi": "我家离学校很近。",
+      "pinyin": "Wǒ jiā lí xuéxiào hěn jìn.",
+      "arti": "Rumah saya dekat dari sekolah."
+    },
+    {
+      "hanzi": "医院离这儿不近。",
+      "pinyin": "Yīyuàn lí zhèr bú jìn.",
+      "arti": "Rumah sakit tidak dekat dari sini."
+    }
+  ],
+  "就": [
+    {
+      "hanzi": "我就住在学校旁边。",
+      "pinyin": "Wǒ jiù zhù zài xuéxiào pángbiān.",
+      "arti": "Saya tinggal tepat di sebelah sekolah."
+    },
+    {
+      "hanzi": "他七点就起床了。",
+      "pinyin": "Tā qī diǎn jiù qǐchuáng le.",
+      "arti": "Dia sudah bangun pukul tujuh."
+    }
+  ],
+  "觉得": [
+    {
+      "hanzi": "我觉得汉语很有意思。",
+      "pinyin": "Wǒ juéde Hànyǔ hěn yǒu yìsi.",
+      "arti": "Saya rasa bahasa Mandarin menarik."
+    },
+    {
+      "hanzi": "你觉得这件衣服怎么样?",
+      "pinyin": "Nǐ juéde zhè jiàn yīfu zěnmeyàng?",
+      "arti": "Menurutmu bagaimana pakaian ini?"
+    }
+  ],
+  "咖啡": [
+    {
+      "hanzi": "我早上喝咖啡。",
+      "pinyin": "Wǒ zǎoshang hē kāfēi.",
+      "arti": "Pagi hari saya minum kopi."
+    },
+    {
+      "hanzi": "这杯咖啡太热了。",
+      "pinyin": "Zhè bēi kāfēi tài rè le.",
+      "arti": "Kopi ini terlalu panas."
+    }
+  ],
+  "开始": [
+    {
+      "hanzi": "现在开始上课。",
+      "pinyin": "Xiànzài kāishǐ shàngkè.",
+      "arti": "Sekarang kelas dimulai."
+    },
+    {
+      "hanzi": "电影几点开始?",
+      "pinyin": "Diànyǐng jǐ diǎn kāishǐ?",
+      "arti": "Pukul berapa film dimulai?"
+    }
+  ],
+  "考试": [
+    {
+      "hanzi": "明天我有汉语考试。",
+      "pinyin": "Míngtiān wǒ yǒu Hànyǔ kǎoshì.",
+      "arti": "Besok saya ada ujian bahasa Mandarin."
+    },
+    {
+      "hanzi": "这次考试很难。",
+      "pinyin": "Zhè cì kǎoshì hěn nán.",
+      "arti": "Ujian kali ini sulit."
+    }
+  ],
+  "可能": [
+    {
+      "hanzi": "明天可能下雨。",
+      "pinyin": "Míngtiān kěnéng xiàyǔ.",
+      "arti": "Besok mungkin hujan."
+    },
+    {
+      "hanzi": "他可能不在家。",
+      "pinyin": "Tā kěnéng bú zài jiā.",
+      "arti": "Dia mungkin tidak di rumah."
+    }
+  ],
+  "可以": [
+    {
+      "hanzi": "我可以进来吗?",
+      "pinyin": "Wǒ kěyǐ jìnlái ma?",
+      "arti": "Bolehkah saya masuk?"
+    },
+    {
+      "hanzi": "这里可以坐。",
+      "pinyin": "Zhèlǐ kěyǐ zuò.",
+      "arti": "Di sini boleh duduk."
+    }
+  ],
+  "课": [
+    {
+      "hanzi": "我今天有三节课。",
+      "pinyin": "Wǒ jīntiān yǒu sān jié kè.",
+      "arti": "Hari ini saya ada tiga jam pelajaran."
+    },
+    {
+      "hanzi": "我喜欢汉语课。",
+      "pinyin": "Wǒ xǐhuan Hànyǔ kè.",
+      "arti": "Saya suka pelajaran bahasa Mandarin."
+    }
+  ],
+  "快": [
+    {
+      "hanzi": "他跑得很快。",
+      "pinyin": "Tā pǎo de hěn kuài.",
+      "arti": "Dia berlari sangat cepat."
+    },
+    {
+      "hanzi": "请快一点!",
+      "pinyin": "Qǐng kuài yìdiǎn!",
+      "arti": "Tolong lebih cepat!"
+    }
+  ],
+  "快乐": [
+    {
+      "hanzi": "祝你生日快乐!",
+      "pinyin": "Zhù nǐ shēngrì kuàilè!",
+      "arti": "Selamat ulang tahun!"
+    },
+    {
+      "hanzi": "祝你新年快乐!",
+      "pinyin": "Zhù nǐ xīnnián kuàilè!",
+      "arti": "Selamat Tahun Baru!"
+    }
+  ],
+  "累": [
+    {
+      "hanzi": "我今天很累。",
+      "pinyin": "Wǒ jīntiān hěn lèi.",
+      "arti": "Hari ini saya sangat lelah."
+    },
+    {
+      "hanzi": "你累了就休息吧。",
+      "pinyin": "Nǐ lèi le jiù xiūxi ba.",
+      "arti": "Kalau lelah, istirahatlah."
+    }
+  ],
+  "离": [
+    {
+      "hanzi": "学校离医院不远。",
+      "pinyin": "Xuéxiào lí yīyuàn bù yuǎn.",
+      "arti": "Sekolah tidak jauh dari rumah sakit."
+    },
+    {
+      "hanzi": "你家离这儿有多远?",
+      "pinyin": "Nǐ jiā lí zhèr yǒu duō yuǎn?",
+      "arti": "Seberapa jauh rumahmu dari sini?"
+    }
+  ],
+  "两": [
+    {
+      "hanzi": "我有两个哥哥。",
+      "pinyin": "Wǒ yǒu liǎng ge gēge.",
+      "arti": "Saya punya dua kakak laki-laki."
+    },
+    {
+      "hanzi": "现在两点。",
+      "pinyin": "Xiànzài liǎng diǎn.",
+      "arti": "Sekarang pukul dua."
+    }
+  ],
+  "路": [
+    {
+      "hanzi": "你知道去机场的路吗?",
+      "pinyin": "Nǐ zhīdào qù jīchǎng de lù ma?",
+      "arti": "Apakah kamu tahu jalan ke bandara?"
+    },
+    {
+      "hanzi": "路上人很多。",
+      "pinyin": "Lùshang rén hěn duō.",
+      "arti": "Di jalan banyak orang."
+    }
+  ],
+  "旅游": [
+    {
+      "hanzi": "我想去中国旅游。",
+      "pinyin": "Wǒ xiǎng qù Zhōngguó lǚyóu.",
+      "arti": "Saya ingin pergi berwisata ke Tiongkok."
+    },
+    {
+      "hanzi": "他喜欢旅游。",
+      "pinyin": "Tā xǐhuan lǚyóu.",
+      "arti": "Dia suka berwisata."
+    }
+  ],
+  "卖": [
+    {
+      "hanzi": "这个商店卖水果。",
+      "pinyin": "Zhège shāngdiàn mài shuǐguǒ.",
+      "arti": "Toko ini menjual buah."
+    },
+    {
+      "hanzi": "他在卖衣服。",
+      "pinyin": "Tā zài mài yīfu.",
+      "arti": "Dia sedang menjual pakaian."
+    }
+  ],
+  "慢": [
+    {
+      "hanzi": "请说慢一点。",
+      "pinyin": "Qǐng shuō màn yìdiǎn.",
+      "arti": "Tolong bicara lebih pelan."
+    },
+    {
+      "hanzi": "他走得很慢。",
+      "pinyin": "Tā zǒu de hěn màn.",
+      "arti": "Dia berjalan sangat lambat."
+    }
+  ],
+  "忙": [
+    {
+      "hanzi": "我最近很忙。",
+      "pinyin": "Wǒ zuìjìn hěn máng.",
+      "arti": "Belakangan ini saya sangat sibuk."
+    },
+    {
+      "hanzi": "你忙不忙?",
+      "pinyin": "Nǐ máng bu máng?",
+      "arti": "Apakah kamu sibuk?"
+    }
+  ],
+  "每": [
+    {
+      "hanzi": "每个人都有一本书。",
+      "pinyin": "Měi ge rén dōu yǒu yì běn shū.",
+      "arti": "Setiap orang punya sebuah buku."
+    },
+    {
+      "hanzi": "他每年去北京。",
+      "pinyin": "Tā měi nián qù Běijīng.",
+      "arti": "Dia pergi ke Beijing setiap tahun."
+    }
+  ],
+  "妹妹": [
+    {
+      "hanzi": "我妹妹十岁。",
+      "pinyin": "Wǒ mèimei shí suì.",
+      "arti": "Adik perempuan saya berusia sepuluh tahun."
+    },
+    {
+      "hanzi": "妹妹喜欢唱歌。",
+      "pinyin": "Mèimei xǐhuan chànggē.",
+      "arti": "Adik perempuan suka bernyanyi."
+    }
+  ],
+  "门": [
+    {
+      "hanzi": "门在你后面。",
+      "pinyin": "Mén zài nǐ hòumiàn.",
+      "arti": "Pintu ada di belakangmu."
+    },
+    {
+      "hanzi": "学校的门很大。",
+      "pinyin": "Xuéxiào de mén hěn dà.",
+      "arti": "Gerbang sekolah sangat besar."
+    }
+  ],
+  "男人": [
+    {
+      "hanzi": "那个男人是我的老师。",
+      "pinyin": "Nàge nánrén shì wǒ de lǎoshī.",
+      "arti": "Pria itu adalah guru saya."
+    },
+    {
+      "hanzi": "这个男人在医院工作。",
+      "pinyin": "Zhège nánrén zài yīyuàn gōngzuò.",
+      "arti": "Pria ini bekerja di rumah sakit."
+    }
+  ],
+  "您": [
+    {
+      "hanzi": "您好!",
+      "pinyin": "Nín hǎo!",
+      "arti": "Halo, apa kabar! (bentuk sopan)"
+    },
+    {
+      "hanzi": "老师,您喝茶吗?",
+      "pinyin": "Lǎoshī, nín hē chá ma?",
+      "arti": "Guru, apakah Anda mau minum teh?"
+    }
+  ],
+  "牛奶": [
+    {
+      "hanzi": "我早上喝牛奶。",
+      "pinyin": "Wǒ zǎoshang hē niúnǎi.",
+      "arti": "Pagi hari saya minum susu."
+    },
+    {
+      "hanzi": "弟弟每天喝一杯牛奶。",
+      "pinyin": "Dìdi měitiān hē yì bēi niúnǎi.",
+      "arti": "Adik laki-laki minum segelas susu setiap hari."
+    }
+  ],
+  "女人": [
+    {
+      "hanzi": "那个女人是医生。",
+      "pinyin": "Nàge nǚrén shì yīshēng.",
+      "arti": "Wanita itu adalah dokter."
+    },
+    {
+      "hanzi": "商店里有两个女人。",
+      "pinyin": "Shāngdiàn lǐ yǒu liǎng ge nǚrén.",
+      "arti": "Di toko ada dua orang wanita."
+    }
+  ],
+  "旁边": [
+    {
+      "hanzi": "我家旁边有一个商店。",
+      "pinyin": "Wǒ jiā pángbiān yǒu yí ge shāngdiàn.",
+      "arti": "Di samping rumah saya ada sebuah toko."
+    },
+    {
+      "hanzi": "请坐在我旁边。",
+      "pinyin": "Qǐng zuò zài wǒ pángbiān.",
+      "arti": "Silakan duduk di sebelah saya."
+    }
+  ],
+  "跑步": [
+    {
+      "hanzi": "我每天早上跑步。",
+      "pinyin": "Wǒ měitiān zǎoshang pǎobù.",
+      "arti": "Saya berlari setiap pagi."
+    },
+    {
+      "hanzi": "你喜欢跑步吗?",
+      "pinyin": "Nǐ xǐhuan pǎobù ma?",
+      "arti": "Apakah kamu suka berlari?"
+    }
+  ],
+  "便宜": [
+    {
+      "hanzi": "这件衣服很便宜。",
+      "pinyin": "Zhè jiàn yīfu hěn piányi.",
+      "arti": "Pakaian ini murah."
+    },
+    {
+      "hanzi": "能不能便宜一点?",
+      "pinyin": "Néng bu néng piányi yìdiǎn?",
+      "arti": "Bisakah lebih murah sedikit?"
+    }
+  ],
+  "票": [
+    {
+      "hanzi": "我想买两张票。",
+      "pinyin": "Wǒ xiǎng mǎi liǎng zhāng piào.",
+      "arti": "Saya ingin membeli dua tiket."
+    },
+    {
+      "hanzi": "电影票多少钱?",
+      "pinyin": "Diànyǐng piào duōshao qián?",
+      "arti": "Berapa harga tiket film?"
+    }
+  ],
+  "妻子": [
+    {
+      "hanzi": "他的妻子是老师。",
+      "pinyin": "Tā de qīzi shì lǎoshī.",
+      "arti": "Istrinya adalah guru."
+    },
+    {
+      "hanzi": "他和妻子住在北京。",
+      "pinyin": "Tā hé qīzi zhù zài Běijīng.",
+      "arti": "Dia tinggal bersama istrinya di Beijing."
+    }
+  ],
+  "起床": [
+    {
+      "hanzi": "我每天六点起床。",
+      "pinyin": "Wǒ měitiān liù diǎn qǐchuáng.",
+      "arti": "Saya bangun pukul enam setiap hari."
+    },
+    {
+      "hanzi": "弟弟还没起床。",
+      "pinyin": "Dìdi hái méi qǐchuáng.",
+      "arti": "Adik laki-laki belum bangun."
+    }
+  ],
+  "千": [
+    {
+      "hanzi": "这个手机三千块。",
+      "pinyin": "Zhège shǒujī sān qiān kuài.",
+      "arti": "Ponsel ini tiga ribu yuan."
+    },
+    {
+      "hanzi": "一千块钱不少。",
+      "pinyin": "Yì qiān kuài qián bù shǎo.",
+      "arti": "Seribu yuan itu tidak sedikit."
+    }
+  ],
+  "晴": [
+    {
+      "hanzi": "今天是晴天。",
+      "pinyin": "Jīntiān shì qíngtiān.",
+      "arti": "Hari ini cerah."
+    },
+    {
+      "hanzi": "天晴了,不下雨了。",
+      "pinyin": "Tiān qíng le, bú xiàyǔ le.",
+      "arti": "Cuaca sudah cerah, hujan berhenti."
+    }
+  ],
+  "去年": [
+    {
+      "hanzi": "我去年去了北京。",
+      "pinyin": "Wǒ qùnián qù le Běijīng.",
+      "arti": "Tahun lalu saya pergi ke Beijing."
+    },
+    {
+      "hanzi": "他去年二十岁。",
+      "pinyin": "Tā qùnián èrshí suì.",
+      "arti": "Tahun lalu dia berusia dua puluh tahun."
+    }
+  ],
+  "让": [
+    {
+      "hanzi": "妈妈让我早点睡觉。",
+      "pinyin": "Māma ràng wǒ zǎodiǎn shuìjiào.",
+      "arti": "Ibu menyuruh saya tidur lebih awal."
+    },
+    {
+      "hanzi": "请让我看看。",
+      "pinyin": "Qǐng ràng wǒ kànkan.",
+      "arti": "Tolong biarkan saya melihat."
+    }
+  ],
+  "上班": [
+    {
+      "hanzi": "爸爸八点上班。",
+      "pinyin": "Bàba bā diǎn shàngbān.",
+      "arti": "Ayah mulai bekerja pukul delapan."
+    },
+    {
+      "hanzi": "你几点上班?",
+      "pinyin": "Nǐ jǐ diǎn shàngbān?",
+      "arti": "Pukul berapa kamu mulai bekerja?"
+    }
+  ],
+  "身体": [
+    {
+      "hanzi": "你身体好吗?",
+      "pinyin": "Nǐ shēntǐ hǎo ma?",
+      "arti": "Apakah kamu sehat?"
+    },
+    {
+      "hanzi": "多运动对身体好。",
+      "pinyin": "Duō yùndòng duì shēntǐ hǎo.",
+      "arti": "Banyak berolahraga baik untuk tubuh."
+    }
+  ],
+  "生病": [
+    {
+      "hanzi": "他生病了,不能来。",
+      "pinyin": "Tā shēngbìng le, bù néng lái.",
+      "arti": "Dia sakit, tidak bisa datang."
+    },
+    {
+      "hanzi": "妹妹生病了,在医院。",
+      "pinyin": "Mèimei shēngbìng le, zài yīyuàn.",
+      "arti": "Adik perempuan sedang sakit, ada di rumah sakit."
+    }
+  ],
+  "生日": [
+    {
+      "hanzi": "今天是我的生日。",
+      "pinyin": "Jīntiān shì wǒ de shēngrì.",
+      "arti": "Hari ini adalah ulang tahun saya."
+    },
+    {
+      "hanzi": "你的生日是几月几号?",
+      "pinyin": "Nǐ de shēngrì shì jǐ yuè jǐ hào?",
+      "arti": "Kapan ulang tahunmu?"
+    }
+  ],
+  "时间": [
+    {
+      "hanzi": "我没有时间。",
+      "pinyin": "Wǒ méiyǒu shíjiān.",
+      "arti": "Saya tidak punya waktu."
+    },
+    {
+      "hanzi": "现在是休息时间。",
+      "pinyin": "Xiànzài shì xiūxi shíjiān.",
+      "arti": "Sekarang waktu istirahat."
+    }
+  ],
+  "事情": [
+    {
+      "hanzi": "我有很多事情要做。",
+      "pinyin": "Wǒ yǒu hěn duō shìqing yào zuò.",
+      "arti": "Saya punya banyak hal yang harus dikerjakan."
+    },
+    {
+      "hanzi": "你在忙什么事情?",
+      "pinyin": "Nǐ zài máng shénme shìqing?",
+      "arti": "Kamu sedang sibuk mengurus apa?"
+    }
+  ],
+  "手表": [
+    {
+      "hanzi": "我的手表很贵。",
+      "pinyin": "Wǒ de shǒubiǎo hěn guì.",
+      "arti": "Jam tangan saya mahal."
+    },
+    {
+      "hanzi": "他送了我一块手表。",
+      "pinyin": "Tā sòng le wǒ yí kuài shǒubiǎo.",
+      "arti": "Dia memberi saya sebuah jam tangan."
+    }
+  ],
+  "手机": [
+    {
+      "hanzi": "我的手机在桌子上。",
+      "pinyin": "Wǒ de shǒujī zài zhuōzi shàng.",
+      "arti": "Ponsel saya ada di atas meja."
+    },
+    {
+      "hanzi": "妈妈给我买了一个新手机。",
+      "pinyin": "Māma gěi wǒ mǎi le yí ge xīn shǒujī.",
+      "arti": "Ibu membelikan saya sebuah ponsel baru."
+    }
+  ],
+  "送": [
+    {
+      "hanzi": "我送你回家。",
+      "pinyin": "Wǒ sòng nǐ huíjiā.",
+      "arti": "Saya antar kamu pulang."
+    },
+    {
+      "hanzi": "朋友送了我一本书。",
+      "pinyin": "Péngyou sòng le wǒ yì běn shū.",
+      "arti": "Teman memberi saya sebuah buku."
+    }
+  ],
+  "所以": [
+    {
+      "hanzi": "我今天很累,所以想早点睡觉。",
+      "pinyin": "Wǒ jīntiān hěn lèi, suǒyǐ xiǎng zǎodiǎn shuìjiào.",
+      "arti": "Hari ini saya lelah, jadi ingin tidur lebih awal."
+    },
+    {
+      "hanzi": "天气很冷,所以我穿了很多衣服。",
+      "pinyin": "Tiānqì hěn lěng, suǒyǐ wǒ chuān le hěn duō yīfu.",
+      "arti": "Cuaca sangat dingin, jadi saya memakai banyak pakaian."
+    }
+  ],
+  "它": [
+    {
+      "hanzi": "这是我的猫,它很小。",
+      "pinyin": "Zhè shì wǒ de māo, tā hěn xiǎo.",
+      "arti": "Ini kucing saya, dia kecil."
+    },
+    {
+      "hanzi": "我有一只狗,它叫小黑。",
+      "pinyin": "Wǒ yǒu yì zhī gǒu, tā jiào Xiǎohēi.",
+      "arti": "Saya punya seekor anjing, namanya Xiaohei."
+    }
+  ],
+  "踢": [
+    {
+      "hanzi": "他喜欢踢足球。",
+      "pinyin": "Tā xǐhuan tī zúqiú.",
+      "arti": "Dia suka bermain sepak bola."
+    },
+    {
+      "hanzi": "我们明天去踢足球吧。",
+      "pinyin": "Wǒmen míngtiān qù tī zúqiú ba.",
+      "arti": "Ayo kita main sepak bola besok."
+    }
+  ],
+  "题": [
+    {
+      "hanzi": "这道题很难。",
+      "pinyin": "Zhè dào tí hěn nán.",
+      "arti": "Soal ini sulit."
+    },
+    {
+      "hanzi": "老师给我们三道题。",
+      "pinyin": "Lǎoshī gěi wǒmen sān dào tí.",
+      "arti": "Guru memberi kami tiga soal."
+    }
+  ],
+  "跳舞": [
+    {
+      "hanzi": "她喜欢跳舞。",
+      "pinyin": "Tā xǐhuan tiàowǔ.",
+      "arti": "Dia suka menari."
+    },
+    {
+      "hanzi": "我们一起跳舞吧。",
+      "pinyin": "Wǒmen yìqǐ tiàowǔ ba.",
+      "arti": "Ayo kita menari bersama."
+    }
+  ],
+  "外": [
+    {
+      "hanzi": "他在国外学习。",
+      "pinyin": "Tā zài guówài xuéxí.",
+      "arti": "Dia belajar di luar negeri."
+    },
+    {
+      "hanzi": "门外有一个人。",
+      "pinyin": "Ménwài yǒu yí ge rén.",
+      "arti": "Di luar pintu ada seseorang."
+    }
+  ],
+  "完": [
+    {
+      "hanzi": "我写完了。",
+      "pinyin": "Wǒ xiě wán le.",
+      "arti": "Saya sudah selesai menulis."
+    },
+    {
+      "hanzi": "你吃完饭了吗?",
+      "pinyin": "Nǐ chīwán fàn le ma?",
+      "arti": "Apakah kamu sudah selesai makan?"
+    }
+  ],
+  "玩": [
+    {
+      "hanzi": "我们去公园玩吧。",
+      "pinyin": "Wǒmen qù gōngyuán wán ba.",
+      "arti": "Ayo kita bermain di taman."
+    },
+    {
+      "hanzi": "周末你想去哪儿玩?",
+      "pinyin": "Zhōumò nǐ xiǎng qù nǎr wán?",
+      "arti": "Akhir pekan ini kamu ingin bermain ke mana?"
+    }
+  ],
+  "晚上": [
+    {
+      "hanzi": "我晚上八点吃饭。",
+      "pinyin": "Wǒ wǎnshang bā diǎn chīfàn.",
+      "arti": "Saya makan malam pukul delapan."
+    },
+    {
+      "hanzi": "今天晚上我在家看电影。",
+      "pinyin": "Jīntiān wǎnshang wǒ zài jiā kàn diànyǐng.",
+      "arti": "Malam ini saya menonton film di rumah."
+    }
+  ],
+  "为": [
+    {
+      "hanzi": "为什么你不去?",
+      "pinyin": "Wèishénme nǐ bú qù?",
+      "arti": "Mengapa kamu tidak pergi?"
+    },
+    {
+      "hanzi": "我为你高兴。",
+      "pinyin": "Wǒ wèi nǐ gāoxìng.",
+      "arti": "Saya ikut senang untukmu."
+    }
+  ],
+  "问": [
+    {
+      "hanzi": "我想问你一个问题。",
+      "pinyin": "Wǒ xiǎng wèn nǐ yí ge wèntí.",
+      "arti": "Saya ingin bertanya satu hal padamu."
+    },
+    {
+      "hanzi": "请问,火车站怎么走?",
+      "pinyin": "Qǐngwèn, huǒchēzhàn zěnme zǒu?",
+      "arti": "Permisi, bagaimana cara ke stasiun kereta api?"
+    }
+  ],
+  "问题": [
+    {
+      "hanzi": "你有什么问题?",
+      "pinyin": "Nǐ yǒu shénme wèntí?",
+      "arti": "Apa pertanyaanmu?"
+    },
+    {
+      "hanzi": "这个问题很难回答。",
+      "pinyin": "Zhège wèntí hěn nán huídá.",
+      "arti": "Pertanyaan ini sulit dijawab."
+    }
+  ],
+  "西瓜": [
+    {
+      "hanzi": "夏天我喜欢吃西瓜。",
+      "pinyin": "Xiàtiān wǒ xǐhuan chī xīguā.",
+      "arti": "Di musim panas saya suka makan semangka."
+    },
+    {
+      "hanzi": "西瓜多少钱一公斤?",
+      "pinyin": "Xīguā duōshao qián yì gōngjīn?",
+      "arti": "Berapa harga semangka per kilogram?"
+    }
+  ],
+  "希望": [
+    {
+      "hanzi": "我希望你快乐。",
+      "pinyin": "Wǒ xīwàng nǐ kuàilè.",
+      "arti": "Saya berharap kamu bahagia."
+    },
+    {
+      "hanzi": "我希望明天不下雨。",
+      "pinyin": "Wǒ xīwàng míngtiān bú xiàyǔ.",
+      "arti": "Saya berharap besok tidak hujan."
+    }
+  ],
+  "洗": [
+    {
+      "hanzi": "我在洗衣服。",
+      "pinyin": "Wǒ zài xǐ yīfu.",
+      "arti": "Saya sedang mencuci pakaian."
+    },
+    {
+      "hanzi": "吃饭前要洗手。",
+      "pinyin": "Chīfàn qián yào xǐ shǒu.",
+      "arti": "Sebelum makan harus mencuci tangan."
+    }
+  ],
+  "向": [
+    {
+      "hanzi": "请向前走。",
+      "pinyin": "Qǐng xiàng qián zǒu.",
+      "arti": "Silakan jalan ke depan."
+    },
+    {
+      "hanzi": "他向我笑了笑。",
+      "pinyin": "Tā xiàng wǒ xiào le xiào.",
+      "arti": "Dia tersenyum kepada saya."
+    }
+  ],
+  "小时": [
+    {
+      "hanzi": "我学习两个小时。",
+      "pinyin": "Wǒ xuéxí liǎng ge xiǎoshí.",
+      "arti": "Saya belajar selama dua jam."
+    },
+    {
+      "hanzi": "飞机要飞三个小时。",
+      "pinyin": "Fēijī yào fēi sān ge xiǎoshí.",
+      "arti": "Pesawat butuh terbang tiga jam."
+    }
+  ],
+  "笑": [
+    {
+      "hanzi": "他喜欢笑。",
+      "pinyin": "Tā xǐhuan xiào.",
+      "arti": "Dia suka tertawa."
+    },
+    {
+      "hanzi": "孩子们都笑了。",
+      "pinyin": "Háizimen dōu xiào le.",
+      "arti": "Anak-anak semua tertawa."
+    }
+  ],
+  "新": [
+    {
+      "hanzi": "我有一个新朋友。",
+      "pinyin": "Wǒ yǒu yí ge xīn péngyou.",
+      "arti": "Saya punya seorang teman baru."
+    },
+    {
+      "hanzi": "这本书是新的。",
+      "pinyin": "Zhè běn shū shì xīn de.",
+      "arti": "Buku ini baru."
+    }
+  ],
+  "姓": [
+    {
+      "hanzi": "我姓王。",
+      "pinyin": "Wǒ xìng Wáng.",
+      "arti": "Nama keluarga saya Wang."
+    },
+    {
+      "hanzi": "你姓什么?",
+      "pinyin": "Nǐ xìng shénme?",
+      "arti": "Siapa nama keluargamu?"
+    }
+  ],
+  "休息": [
+    {
+      "hanzi": "我们休息一下吧。",
+      "pinyin": "Wǒmen xiūxi yíxià ba.",
+      "arti": "Ayo kita istirahat sebentar."
+    },
+    {
+      "hanzi": "他在房间里休息。",
+      "pinyin": "Tā zài fángjiān lǐ xiūxi.",
+      "arti": "Dia beristirahat di kamar."
+    }
+  ],
+  "雪": [
+    {
+      "hanzi": "北京的冬天会下雪。",
+      "pinyin": "Běijīng de dōngtiān huì xiàxuě.",
+      "arti": "Di musim dingin Beijing turun salju."
+    },
+    {
+      "hanzi": "外面下雪了。",
+      "pinyin": "Wàimiàn xiàxuě le.",
+      "arti": "Di luar turun salju."
+    }
+  ],
+  "颜色": [
+    {
+      "hanzi": "你喜欢什么颜色?",
+      "pinyin": "Nǐ xǐhuan shénme yánsè?",
+      "arti": "Kamu suka warna apa?"
+    },
+    {
+      "hanzi": "这件衣服的颜色很漂亮。",
+      "pinyin": "Zhè jiàn yīfu de yánsè hěn piàoliang.",
+      "arti": "Warna pakaian ini sangat bagus."
+    }
+  ],
+  "眼睛": [
+    {
+      "hanzi": "她的眼睛很大。",
+      "pinyin": "Tā de yǎnjing hěn dà.",
+      "arti": "Matanya besar."
+    },
+    {
+      "hanzi": "我的眼睛有点累。",
+      "pinyin": "Wǒ de yǎnjing yǒudiǎn lèi.",
+      "arti": "Mata saya agak lelah."
+    }
+  ],
+  "羊肉": [
+    {
+      "hanzi": "我喜欢吃羊肉。",
+      "pinyin": "Wǒ xǐhuan chī yángròu.",
+      "arti": "Saya suka makan daging kambing."
+    },
+    {
+      "hanzi": "这个饭馆的羊肉很好吃。",
+      "pinyin": "Zhège fànguǎn de yángròu hěn hǎochī.",
+      "arti": "Daging kambing di restoran ini enak."
+    }
+  ],
+  "药": [
+    {
+      "hanzi": "我要买药。",
+      "pinyin": "Wǒ yào mǎi yào.",
+      "arti": "Saya perlu membeli obat."
+    },
+    {
+      "hanzi": "生病了要吃药。",
+      "pinyin": "Shēngbìng le yào chī yào.",
+      "arti": "Kalau sakit harus minum obat."
+    }
+  ],
+  "要": [
+    {
+      "hanzi": "我要一杯茶。",
+      "pinyin": "Wǒ yào yì bēi chá.",
+      "arti": "Saya mau secangkir teh."
+    },
+    {
+      "hanzi": "明天要下雨。",
+      "pinyin": "Míngtiān yào xiàyǔ.",
+      "arti": "Besok akan hujan."
+    }
+  ],
+  "也": [
+    {
+      "hanzi": "我也喜欢猫。",
+      "pinyin": "Wǒ yě xǐhuan māo.",
+      "arti": "Saya juga suka kucing."
+    },
+    {
+      "hanzi": "他是学生,我也是学生。",
+      "pinyin": "Tā shì xuésheng, wǒ yě shì xuésheng.",
+      "arti": "Dia pelajar, saya juga pelajar."
+    }
+  ],
+  "已经": [
+    {
+      "hanzi": "我已经吃饭了。",
+      "pinyin": "Wǒ yǐjīng chīfàn le.",
+      "arti": "Saya sudah makan."
+    },
+    {
+      "hanzi": "现在已经十点了。",
+      "pinyin": "Xiànzài yǐjīng shí diǎn le.",
+      "arti": "Sekarang sudah pukul sepuluh."
+    }
+  ],
+  "一起": [
+    {
+      "hanzi": "我们一起去吧。",
+      "pinyin": "Wǒmen yìqǐ qù ba.",
+      "arti": "Ayo kita pergi bersama."
+    },
+    {
+      "hanzi": "我和朋友一起学习。",
+      "pinyin": "Wǒ hé péngyou yìqǐ xuéxí.",
+      "arti": "Saya belajar bersama teman."
+    }
+  ],
+  "意思": [
+    {
+      "hanzi": "这个字是什么意思?",
+      "pinyin": "Zhège zì shì shénme yìsi?",
+      "arti": "Apa arti aksara ini?"
+    },
+    {
+      "hanzi": "这个电影很有意思。",
+      "pinyin": "Zhège diànyǐng hěn yǒu yìsi.",
+      "arti": "Film ini sangat menarik."
+    }
+  ],
+  "阴": [
+    {
+      "hanzi": "今天是阴天。",
+      "pinyin": "Jīntiān shì yīntiān.",
+      "arti": "Hari ini mendung."
+    },
+    {
+      "hanzi": "天阴了,可能要下雨。",
+      "pinyin": "Tiān yīn le, kěnéng yào xiàyǔ.",
+      "arti": "Langit mendung, mungkin akan hujan."
+    }
+  ],
+  "因为": [
+    {
+      "hanzi": "因为下雨,所以我没去。",
+      "pinyin": "Yīnwèi xiàyǔ, suǒyǐ wǒ méi qù.",
+      "arti": "Karena hujan, saya tidak pergi."
+    },
+    {
+      "hanzi": "我喜欢汉语,因为很有意思。",
+      "pinyin": "Wǒ xǐhuan Hànyǔ, yīnwèi hěn yǒu yìsi.",
+      "arti": "Saya suka bahasa Mandarin karena menarik."
+    }
+  ],
+  "游泳": [
+    {
+      "hanzi": "我会游泳。",
+      "pinyin": "Wǒ huì yóuyǒng.",
+      "arti": "Saya bisa berenang."
+    },
+    {
+      "hanzi": "夏天我常常去游泳。",
+      "pinyin": "Xiàtiān wǒ chángcháng qù yóuyǒng.",
+      "arti": "Di musim panas saya sering berenang."
+    }
+  ],
+  "右边": [
+    {
+      "hanzi": "医院在学校右边。",
+      "pinyin": "Yīyuàn zài xuéxiào yòubian.",
+      "arti": "Rumah sakit ada di sebelah kanan sekolah."
+    },
+    {
+      "hanzi": "请往右边走。",
+      "pinyin": "Qǐng wǎng yòubian zǒu.",
+      "arti": "Silakan jalan ke arah kanan."
+    }
+  ],
+  "鱼": [
+    {
+      "hanzi": "我不吃鱼。",
+      "pinyin": "Wǒ bù chī yú.",
+      "arti": "Saya tidak makan ikan."
+    },
+    {
+      "hanzi": "我想买一条鱼。",
+      "pinyin": "Wǒ xiǎng mǎi yì tiáo yú.",
+      "arti": "Saya ingin membeli seekor ikan."
+    }
+  ],
+  "元": [
+    {
+      "hanzi": "这本书二十元。",
+      "pinyin": "Zhè běn shū èrshí yuán.",
+      "arti": "Buku ini dua puluh yuan."
+    },
+    {
+      "hanzi": "一杯咖啡十五元。",
+      "pinyin": "Yì bēi kāfēi shíwǔ yuán.",
+      "arti": "Secangkir kopi lima belas yuan."
+    }
+  ],
+  "远": [
+    {
+      "hanzi": "学校离这儿很远。",
+      "pinyin": "Xuéxiào lí zhèr hěn yuǎn.",
+      "arti": "Sekolah jauh dari sini."
+    },
+    {
+      "hanzi": "你家远不远?",
+      "pinyin": "Nǐ jiā yuǎn bu yuǎn?",
+      "arti": "Apakah rumahmu jauh?"
+    }
+  ],
+  "运动": [
+    {
+      "hanzi": "我喜欢运动。",
+      "pinyin": "Wǒ xǐhuan yùndòng.",
+      "arti": "Saya suka berolahraga."
+    },
+    {
+      "hanzi": "你每天运动吗?",
+      "pinyin": "Nǐ měitiān yùndòng ma?",
+      "arti": "Apakah kamu berolahraga setiap hari?"
+    }
+  ],
+  "再": [
+    {
+      "hanzi": "请再说一次。",
+      "pinyin": "Qǐng zài shuō yí cì.",
+      "arti": "Tolong katakan sekali lagi."
+    },
+    {
+      "hanzi": "你再等一下。",
+      "pinyin": "Nǐ zài děng yíxià.",
+      "arti": "Tunggu sebentar lagi."
+    }
+  ],
+  "早上": [
+    {
+      "hanzi": "早上好!",
+      "pinyin": "Zǎoshang hǎo!",
+      "arti": "Selamat pagi!"
+    },
+    {
+      "hanzi": "他早上去跑步。",
+      "pinyin": "Tā zǎoshang qù pǎobù.",
+      "arti": "Pagi hari dia pergi berlari."
+    }
+  ],
+  "张": [
+    {
+      "hanzi": "我有一张电影票。",
+      "pinyin": "Wǒ yǒu yì zhāng diànyǐng piào.",
+      "arti": "Saya punya selembar tiket film."
+    },
+    {
+      "hanzi": "我买了三张火车票。",
+      "pinyin": "Wǒ mǎi le sān zhāng huǒchē piào.",
+      "arti": "Saya membeli tiga tiket kereta api."
+    }
+  ],
+  "丈夫": [
+    {
+      "hanzi": "她的丈夫是医生。",
+      "pinyin": "Tā de zhàngfu shì yīshēng.",
+      "arti": "Suaminya adalah dokter."
+    },
+    {
+      "hanzi": "她和丈夫去旅游了。",
+      "pinyin": "Tā hé zhàngfu qù lǚyóu le.",
+      "arti": "Dia pergi berwisata bersama suaminya."
+    }
+  ],
+  "找": [
+    {
+      "hanzi": "我在找我的手机。",
+      "pinyin": "Wǒ zài zhǎo wǒ de shǒujī.",
+      "arti": "Saya sedang mencari ponsel saya."
+    },
+    {
+      "hanzi": "他来找你了。",
+      "pinyin": "Tā lái zhǎo nǐ le.",
+      "arti": "Dia datang mencarimu."
+    }
+  ],
+  "着": [
+    {
+      "hanzi": "门开着。",
+      "pinyin": "Mén kāizhe.",
+      "arti": "Pintunya terbuka."
+    },
+    {
+      "hanzi": "他坐着看书。",
+      "pinyin": "Tā zuòzhe kàn shū.",
+      "arti": "Dia membaca buku sambil duduk."
+    }
+  ],
+  "真": [
+    {
+      "hanzi": "这个菜真好吃。",
+      "pinyin": "Zhège cài zhēn hǎochī.",
+      "arti": "Masakan ini enak sekali."
+    },
+    {
+      "hanzi": "你真高!",
+      "pinyin": "Nǐ zhēn gāo!",
+      "arti": "Kamu tinggi sekali!"
+    }
+  ],
+  "正在": [
+    {
+      "hanzi": "我正在学习。",
+      "pinyin": "Wǒ zhèngzài xuéxí.",
+      "arti": "Saya sedang belajar."
+    },
+    {
+      "hanzi": "他正在打电话。",
+      "pinyin": "Tā zhèngzài dǎ diànhuà.",
+      "arti": "Dia sedang menelepon."
+    }
+  ],
+  "知道": [
+    {
+      "hanzi": "我知道他的名字。",
+      "pinyin": "Wǒ zhīdào tā de míngzi.",
+      "arti": "Saya tahu namanya."
+    },
+    {
+      "hanzi": "你知道火车站在哪儿吗?",
+      "pinyin": "Nǐ zhīdào huǒchēzhàn zài nǎr ma?",
+      "arti": "Apakah kamu tahu di mana stasiun kereta api?"
+    }
+  ],
+  "准备": [
+    {
+      "hanzi": "我在准备考试。",
+      "pinyin": "Wǒ zài zhǔnbèi kǎoshì.",
+      "arti": "Saya sedang mempersiapkan ujian."
+    },
+    {
+      "hanzi": "妈妈在准备晚饭。",
+      "pinyin": "Māma zài zhǔnbèi wǎnfàn.",
+      "arti": "Ibu sedang menyiapkan makan malam."
+    }
+  ],
+  "自行车": [
+    {
+      "hanzi": "我骑自行车去学校。",
+      "pinyin": "Wǒ qí zìxíngchē qù xuéxiào.",
+      "arti": "Saya naik sepeda ke sekolah."
+    },
+    {
+      "hanzi": "他买了一辆新自行车。",
+      "pinyin": "Tā mǎi le yí liàng xīn zìxíngchē.",
+      "arti": "Dia membeli sebuah sepeda baru."
+    }
+  ],
+  "走": [
+    {
+      "hanzi": "他已经走了。",
+      "pinyin": "Tā yǐjīng zǒu le.",
+      "arti": "Dia sudah pergi."
+    },
+    {
+      "hanzi": "从这儿往前走五分钟就到了。",
+      "pinyin": "Cóng zhèr wǎng qián zǒu wǔ fēnzhōng jiù dào le.",
+      "arti": "Dari sini jalan lurus lima menit sudah sampai."
+    }
+  ],
+  "最": [
+    {
+      "hanzi": "我最喜欢吃苹果。",
+      "pinyin": "Wǒ zuì xǐhuan chī píngguǒ.",
+      "arti": "Saya paling suka makan apel."
+    },
+    {
+      "hanzi": "他是我最好的朋友。",
+      "pinyin": "Tā shì wǒ zuì hǎo de péngyou.",
+      "arti": "Dia adalah teman terbaik saya."
+    }
+  ],
+  "左边": [
+    {
+      "hanzi": "商店在学校左边。",
+      "pinyin": "Shāngdiàn zài xuéxiào zuǒbian.",
+      "arti": "Toko ada di sebelah kiri sekolah."
+    },
+    {
+      "hanzi": "你的左边有一把椅子。",
+      "pinyin": "Nǐ de zuǒbian yǒu yì bǎ yǐzi.",
+      "arti": "Di sebelah kirimu ada sebuah kursi."
+    }
+  ],
+  "阿姨": [
+    {
+      "hanzi": "阿姨在厨房做饭。",
+      "pinyin": "Āyí zài chúfáng zuòfàn.",
+      "arti": "Bibi sedang memasak di dapur."
+    },
+    {
+      "hanzi": "请问,阿姨,图书馆在哪儿?",
+      "pinyin": "Qǐngwèn, āyí, túshūguǎn zài nǎr?",
+      "arti": "Permisi, Bu, di mana perpustakaan?"
+    }
+  ],
+  "啊": [
+    {
+      "hanzi": "你也来了啊!",
+      "pinyin": "Nǐ yě lái le a!",
+      "arti": "Kamu juga datang, ya!"
+    },
+    {
+      "hanzi": "这个菜真好吃啊!",
+      "pinyin": "Zhège cài zhēn hǎochī a!",
+      "arti": "Masakan ini enak sekali!"
+    }
+  ],
+  "矮": [
+    {
+      "hanzi": "他比我矮。",
+      "pinyin": "Tā bǐ wǒ ǎi.",
+      "arti": "Dia lebih pendek dariku."
+    },
+    {
+      "hanzi": "这张桌子太矮了。",
+      "pinyin": "Zhè zhāng zhuōzi tài ǎi le.",
+      "arti": "Meja ini terlalu rendah."
+    }
+  ],
+  "爱好": [
+    {
+      "hanzi": "我的爱好是看电影。",
+      "pinyin": "Wǒ de àihào shì kàn diànyǐng.",
+      "arti": "Hobi saya menonton film."
+    },
+    {
+      "hanzi": "你有什么爱好?",
+      "pinyin": "Nǐ yǒu shénme àihào?",
+      "arti": "Apa hobimu?"
+    }
+  ],
+  "安静": [
+    {
+      "hanzi": "图书馆里很安静。",
+      "pinyin": "Túshūguǎn lǐ hěn ānjìng.",
+      "arti": "Perpustakaan sangat tenang."
+    },
+    {
+      "hanzi": "请安静一点。",
+      "pinyin": "Qǐng ānjìng yìdiǎn.",
+      "arti": "Tolong tenang sedikit."
+    }
+  ],
+  "把": [
+    {
+      "hanzi": "请把门关上。",
+      "pinyin": "Qǐng bǎ mén guānshang.",
+      "arti": "Tolong tutup pintunya."
+    },
+    {
+      "hanzi": "我把书放在桌子上了。",
+      "pinyin": "Wǒ bǎ shū fàng zài zhuōzi shàng le.",
+      "arti": "Saya sudah meletakkan buku di atas meja."
+    }
+  ],
+  "搬": [
+    {
+      "hanzi": "我们下个月搬家。",
+      "pinyin": "Wǒmen xià ge yuè bānjiā.",
+      "arti": "Bulan depan kami pindah rumah."
+    },
+    {
+      "hanzi": "请帮我搬这个箱子。",
+      "pinyin": "Qǐng bāng wǒ bān zhège xiāngzi.",
+      "arti": "Tolong bantu saya mengangkat kotak ini."
+    }
+  ],
+  "班": [
+    {
+      "hanzi": "我们班有三十个学生。",
+      "pinyin": "Wǒmen bān yǒu sānshí ge xuésheng.",
+      "arti": "Di kelas kami ada tiga puluh pelajar."
+    },
+    {
+      "hanzi": "我和他在同一个班。",
+      "pinyin": "Wǒ hé tā zài tóng yí ge bān.",
+      "arti": "Saya dan dia sekelas."
+    }
+  ],
+  "半": [
+    {
+      "hanzi": "现在是三点半。",
+      "pinyin": "Xiànzài shì sān diǎn bàn.",
+      "arti": "Sekarang pukul setengah empat."
+    },
+    {
+      "hanzi": "我学了半年汉语。",
+      "pinyin": "Wǒ xué le bàn nián Hànyǔ.",
+      "arti": "Saya sudah belajar bahasa Mandarin setengah tahun."
+    }
+  ],
+  "办法": [
+    {
+      "hanzi": "我有一个好办法。",
+      "pinyin": "Wǒ yǒu yí ge hǎo bànfǎ.",
+      "arti": "Saya punya cara yang bagus."
+    },
+    {
+      "hanzi": "这个问题没有办法解决。",
+      "pinyin": "Zhège wèntí méiyǒu bànfǎ jiějué.",
+      "arti": "Masalah ini tidak ada jalan keluarnya."
+    }
+  ],
+  "办公室": [
+    {
+      "hanzi": "老师在办公室。",
+      "pinyin": "Lǎoshī zài bàngōngshì.",
+      "arti": "Guru ada di kantor."
+    },
+    {
+      "hanzi": "我的办公室在三楼。",
+      "pinyin": "Wǒ de bàngōngshì zài sān lóu.",
+      "arti": "Kantor saya ada di lantai tiga."
+    }
+  ],
+  "帮忙": [
+    {
+      "hanzi": "你能帮忙吗?",
+      "pinyin": "Nǐ néng bāngmáng ma?",
+      "arti": "Bisakah kamu membantu?"
+    },
+    {
+      "hanzi": "谢谢你帮忙。",
+      "pinyin": "Xièxie nǐ bāngmáng.",
+      "arti": "Terima kasih sudah membantu."
+    }
+  ],
+  "包": [
+    {
+      "hanzi": "我想买一个新书包。",
+      "pinyin": "Wǒ xiǎng mǎi yí ge xīn shūbāo.",
+      "arti": "Saya ingin membeli tas sekolah baru."
+    },
+    {
+      "hanzi": "他的包里有一本书。",
+      "pinyin": "Tā de bāo lǐ yǒu yì běn shū.",
+      "arti": "Di dalam tasnya ada sebuah buku."
+    }
+  ],
+  "饱": [
+    {
+      "hanzi": "我吃饱了。",
+      "pinyin": "Wǒ chī bǎo le.",
+      "arti": "Saya sudah kenyang."
+    },
+    {
+      "hanzi": "你饱了吗?",
+      "pinyin": "Nǐ bǎo le ma?",
+      "arti": "Apakah kamu sudah kenyang?"
+    }
+  ],
+  "北方": [
+    {
+      "hanzi": "他住在中国北方。",
+      "pinyin": "Tā zhù zài Zhōngguó běifāng.",
+      "arti": "Dia tinggal di Tiongkok bagian utara."
+    },
+    {
+      "hanzi": "北方的冬天很冷。",
+      "pinyin": "Běifāng de dōngtiān hěn lěng.",
+      "arti": "Musim dingin di utara sangat dingin."
+    }
+  ],
+  "被": [
+    {
+      "hanzi": "我的书被朋友借走了。",
+      "pinyin": "Wǒ de shū bèi péngyou jiè zǒu le.",
+      "arti": "Buku saya dipinjam teman."
+    },
+    {
+      "hanzi": "苹果被弟弟吃了。",
+      "pinyin": "Píngguǒ bèi dìdi chī le.",
+      "arti": "Apelnya dimakan adik laki-laki."
+    }
+  ],
+  "鼻子": [
+    {
+      "hanzi": "他的鼻子很高。",
+      "pinyin": "Tā de bízi hěn gāo.",
+      "arti": "Hidungnya mancung."
+    },
+    {
+      "hanzi": "小狗的鼻子很黑。",
+      "pinyin": "Xiǎo gǒu de bízi hěn hēi.",
+      "arti": "Hidung anak anjing itu hitam."
+    }
+  ],
+  "比较": [
+    {
+      "hanzi": "这个比较便宜。",
+      "pinyin": "Zhège bǐjiào piányi.",
+      "arti": "Yang ini relatif murah."
+    },
+    {
+      "hanzi": "北京比较冷。",
+      "pinyin": "Běijīng bǐjiào lěng.",
+      "arti": "Beijing relatif dingin."
+    }
+  ],
+  "比赛": [
+    {
+      "hanzi": "明天有足球比赛。",
+      "pinyin": "Míngtiān yǒu zúqiú bǐsài.",
+      "arti": "Besok ada pertandingan sepak bola."
+    },
+    {
+      "hanzi": "他参加了汉语比赛。",
+      "pinyin": "Tā cānjiā le Hànyǔ bǐsài.",
+      "arti": "Dia ikut lomba bahasa Mandarin."
+    }
+  ],
+  "必须": [
+    {
+      "hanzi": "上课必须带书。",
+      "pinyin": "Shàngkè bìxū dài shū.",
+      "arti": "Saat kelas harus membawa buku."
+    },
+    {
+      "hanzi": "明天考试,你必须早点来。",
+      "pinyin": "Míngtiān kǎoshì, nǐ bìxū zǎodiǎn lái.",
+      "arti": "Besok ujian, kamu harus datang lebih awal."
+    }
+  ],
+  "变化": [
+    {
+      "hanzi": "北京的变化很大。",
+      "pinyin": "Běijīng de biànhuà hěn dà.",
+      "arti": "Perubahan di Beijing sangat besar."
+    },
+    {
+      "hanzi": "天气有变化。",
+      "pinyin": "Tiānqì yǒu biànhuà.",
+      "arti": "Cuaca berubah."
+    }
+  ],
+  "表示": [
+    {
+      "hanzi": "他点头表示同意。",
+      "pinyin": "Tā diǎntóu biǎoshì tóngyì.",
+      "arti": "Dia mengangguk tanda setuju."
+    },
+    {
+      "hanzi": "这个字表示什么意思?",
+      "pinyin": "Zhège zì biǎoshì shénme yìsi?",
+      "arti": "Aksara ini menyatakan arti apa?"
+    }
+  ],
+  "表演": [
+    {
+      "hanzi": "孩子们在表演唱歌。",
+      "pinyin": "Háizimen zài biǎoyǎn chànggē.",
+      "arti": "Anak-anak sedang tampil bernyanyi."
+    },
+    {
+      "hanzi": "今天晚上有表演。",
+      "pinyin": "Jīntiān wǎnshang yǒu biǎoyǎn.",
+      "arti": "Malam ini ada pertunjukan."
+    }
+  ],
+  "别人": [
+    {
+      "hanzi": "别人都走了。",
+      "pinyin": "Biérén dōu zǒu le.",
+      "arti": "Orang lain sudah pergi semua."
+    },
+    {
+      "hanzi": "要帮助别人。",
+      "pinyin": "Yào bāngzhù biérén.",
+      "arti": "Harus membantu orang lain."
+    }
+  ],
+  "宾馆": [
+    {
+      "hanzi": "我住在一个小宾馆。",
+      "pinyin": "Wǒ zhù zài yí ge xiǎo bīnguǎn.",
+      "arti": "Saya menginap di sebuah penginapan kecil."
+    },
+    {
+      "hanzi": "这个宾馆离机场很近。",
+      "pinyin": "Zhège bīnguǎn lí jīchǎng hěn jìn.",
+      "arti": "Penginapan ini dekat dari bandara."
+    }
+  ],
+  "冰箱": [
+    {
+      "hanzi": "牛奶在冰箱里。",
+      "pinyin": "Niúnǎi zài bīngxiāng lǐ.",
+      "arti": "Susu ada di dalam kulkas."
+    },
+    {
+      "hanzi": "我家的冰箱很大。",
+      "pinyin": "Wǒ jiā de bīngxiāng hěn dà.",
+      "arti": "Kulkas di rumah saya besar."
+    }
+  ],
+  "才": [
+    {
+      "hanzi": "他十点才起床。",
+      "pinyin": "Tā shí diǎn cái qǐchuáng.",
+      "arti": "Dia baru bangun pukul sepuluh."
+    },
+    {
+      "hanzi": "我才二十岁。",
+      "pinyin": "Wǒ cái èrshí suì.",
+      "arti": "Saya baru dua puluh tahun."
+    }
+  ],
+  "菜单": [
+    {
+      "hanzi": "请给我菜单。",
+      "pinyin": "Qǐng gěi wǒ càidān.",
+      "arti": "Tolong beri saya menunya."
+    },
+    {
+      "hanzi": "这个菜单上有很多菜。",
+      "pinyin": "Zhège càidān shàng yǒu hěn duō cài.",
+      "arti": "Di menu ini ada banyak hidangan."
+    }
+  ],
+  "参加": [
+    {
+      "hanzi": "我想参加这个比赛。",
+      "pinyin": "Wǒ xiǎng cānjiā zhège bǐsài.",
+      "arti": "Saya ingin ikut perlombaan ini."
+    },
+    {
+      "hanzi": "明天你参加会议吗?",
+      "pinyin": "Míngtiān nǐ cānjiā huìyì ma?",
+      "arti": "Apakah besok kamu ikut rapat?"
+    }
+  ],
+  "草": [
+    {
+      "hanzi": "公园里有很多草。",
+      "pinyin": "Gōngyuán lǐ yǒu hěn duō cǎo.",
+      "arti": "Di taman ada banyak rumput."
+    },
+    {
+      "hanzi": "小狗在草上玩。",
+      "pinyin": "Xiǎo gǒu zài cǎo shàng wán.",
+      "arti": "Anak anjing bermain di atas rumput."
+    }
+  ],
+  "层": [
+    {
+      "hanzi": "我家住在八层。",
+      "pinyin": "Wǒ jiā zhù zài bā céng.",
+      "arti": "Rumah saya di lantai delapan."
+    },
+    {
+      "hanzi": "这个楼有十层。",
+      "pinyin": "Zhège lóu yǒu shí céng.",
+      "arti": "Gedung ini ada sepuluh lantai."
+    }
+  ],
+  "差": [
+    {
+      "hanzi": "他的汉语不差。",
+      "pinyin": "Tā de Hànyǔ bú chà.",
+      "arti": "Bahasa Mandarinnya tidak buruk."
+    },
+    {
+      "hanzi": "现在差五分三点。",
+      "pinyin": "Xiànzài chà wǔ fēn sān diǎn.",
+      "arti": "Sekarang kurang lima menit pukul tiga."
+    }
+  ],
+  "超市": [
+    {
+      "hanzi": "我去超市买水果。",
+      "pinyin": "Wǒ qù chāoshì mǎi shuǐguǒ.",
+      "arti": "Saya pergi ke supermarket membeli buah."
+    },
+    {
+      "hanzi": "超市离我家很近。",
+      "pinyin": "Chāoshì lí wǒ jiā hěn jìn.",
+      "arti": "Supermarket dekat dari rumah saya."
+    }
+  ],
+  "衬衫": [
+    {
+      "hanzi": "他穿一件白衬衫。",
+      "pinyin": "Tā chuān yí jiàn bái chènshān.",
+      "arti": "Dia memakai kemeja putih."
+    },
+    {
+      "hanzi": "这件衬衫很便宜。",
+      "pinyin": "Zhè jiàn chènshān hěn piányi.",
+      "arti": "Kemeja ini murah."
+    }
+  ],
+  "成绩": [
+    {
+      "hanzi": "他的成绩很好。",
+      "pinyin": "Tā de chéngjì hěn hǎo.",
+      "arti": "Nilainya sangat bagus."
+    },
+    {
+      "hanzi": "考试成绩出来了。",
+      "pinyin": "Kǎoshì chéngjì chūlái le.",
+      "arti": "Hasil ujian sudah keluar."
+    }
+  ],
+  "城市": [
+    {
+      "hanzi": "北京是一个大城市。",
+      "pinyin": "Běijīng shì yí ge dà chéngshì.",
+      "arti": "Beijing adalah kota besar."
+    },
+    {
+      "hanzi": "我喜欢这个城市。",
+      "pinyin": "Wǒ xǐhuan zhège chéngshì.",
+      "arti": "Saya suka kota ini."
+    }
+  ],
+  "迟到": [
+    {
+      "hanzi": "对不起,我迟到了。",
+      "pinyin": "Duìbuqǐ, wǒ chídào le.",
+      "arti": "Maaf, saya terlambat."
+    },
+    {
+      "hanzi": "明天别迟到。",
+      "pinyin": "Míngtiān bié chídào.",
+      "arti": "Besok jangan terlambat."
+    }
+  ],
+  "出现": [
+    {
+      "hanzi": "太阳出现了。",
+      "pinyin": "Tàiyáng chūxiàn le.",
+      "arti": "Matahari muncul."
+    },
+    {
+      "hanzi": "这个问题又出现了。",
+      "pinyin": "Zhège wèntí yòu chūxiàn le.",
+      "arti": "Masalah ini muncul lagi."
+    }
+  ],
+  "除了": [
+    {
+      "hanzi": "除了苹果,我还买了香蕉。",
+      "pinyin": "Chúle píngguǒ, wǒ hái mǎi le xiāngjiāo.",
+      "arti": "Selain apel, saya juga membeli pisang."
+    },
+    {
+      "hanzi": "除了他,大家都来了。",
+      "pinyin": "Chúle tā, dàjiā dōu lái le.",
+      "arti": "Kecuali dia, semuanya sudah datang."
+    }
+  ],
+  "厨房": [
+    {
+      "hanzi": "妈妈在厨房。",
+      "pinyin": "Māma zài chúfáng.",
+      "arti": "Ibu ada di dapur."
+    },
+    {
+      "hanzi": "厨房很干净。",
+      "pinyin": "Chúfáng hěn gānjìng.",
+      "arti": "Dapurnya bersih."
+    }
+  ],
+  "春": [
+    {
+      "hanzi": "春天来了。",
+      "pinyin": "Chūntiān lái le.",
+      "arti": "Musim semi sudah tiba."
+    },
+    {
+      "hanzi": "我喜欢春天。",
+      "pinyin": "Wǒ xǐhuan chūntiān.",
+      "arti": "Saya suka musim semi."
+    }
+  ],
+  "词语": [
+    {
+      "hanzi": "这个词语是什么意思?",
+      "pinyin": "Zhège cíyǔ shì shénme yìsi?",
+      "arti": "Apa arti kata ini?"
+    },
+    {
+      "hanzi": "我每天学十个新词语。",
+      "pinyin": "Wǒ měitiān xué shí ge xīn cíyǔ.",
+      "arti": "Setiap hari saya mempelajari sepuluh kata baru."
+    }
+  ],
+  "聪明": [
+    {
+      "hanzi": "他很聪明。",
+      "pinyin": "Tā hěn cōngming.",
+      "arti": "Dia sangat cerdas."
+    },
+    {
+      "hanzi": "这只狗很聪明。",
+      "pinyin": "Zhè zhī gǒu hěn cōngming.",
+      "arti": "Anjing ini sangat pintar."
+    }
+  ],
+  "打扫": [
+    {
+      "hanzi": "我在打扫房间。",
+      "pinyin": "Wǒ zài dǎsǎo fángjiān.",
+      "arti": "Saya sedang membersihkan kamar."
+    },
+    {
+      "hanzi": "周末我们一起打扫。",
+      "pinyin": "Zhōumò wǒmen yìqǐ dǎsǎo.",
+      "arti": "Akhir pekan kami membersihkan bersama."
+    }
+  ],
+  "打算": [
+    {
+      "hanzi": "你周末打算做什么?",
+      "pinyin": "Nǐ zhōumò dǎsuàn zuò shénme?",
+      "arti": "Apa rencanamu akhir pekan?"
+    },
+    {
+      "hanzi": "我打算去北京旅游。",
+      "pinyin": "Wǒ dǎsuàn qù Běijīng lǚyóu.",
+      "arti": "Saya berencana berwisata ke Beijing."
+    }
+  ],
+  "带": [
+    {
+      "hanzi": "请带你的护照。",
+      "pinyin": "Qǐng dài nǐ de hùzhào.",
+      "arti": "Tolong bawa paspormu."
+    },
+    {
+      "hanzi": "我忘了带手机。",
+      "pinyin": "Wǒ wàng le dài shǒujī.",
+      "arti": "Saya lupa membawa ponsel."
+    }
+  ],
+  "担心": [
+    {
+      "hanzi": "别担心。",
+      "pinyin": "Bié dānxīn.",
+      "arti": "Jangan khawatir."
+    },
+    {
+      "hanzi": "妈妈很担心我。",
+      "pinyin": "Māma hěn dānxīn wǒ.",
+      "arti": "Ibu sangat mengkhawatirkan saya."
+    }
+  ],
+  "蛋糕": [
+    {
+      "hanzi": "今天我们吃蛋糕。",
+      "pinyin": "Jīntiān wǒmen chī dàngāo.",
+      "arti": "Hari ini kami makan kue."
+    },
+    {
+      "hanzi": "这个蛋糕很甜。",
+      "pinyin": "Zhège dàngāo hěn tián.",
+      "arti": "Kue ini manis."
+    }
+  ],
+  "当然": [
+    {
+      "hanzi": "当然可以!",
+      "pinyin": "Dāngrán kěyǐ!",
+      "arti": "Tentu boleh!"
+    },
+    {
+      "hanzi": "他当然会来。",
+      "pinyin": "Tā dāngrán huì lái.",
+      "arti": "Tentu saja dia akan datang."
+    }
+  ],
+  "地": [
+    {
+      "hanzi": "他高兴地说。",
+      "pinyin": "Tā gāoxìng de shuō.",
+      "arti": "Dia berkata dengan gembira."
+    },
+    {
+      "hanzi": "请慢慢地走。",
+      "pinyin": "Qǐng mànmàn de zǒu.",
+      "arti": "Silakan berjalan pelan-pelan."
+    }
+  ],
+  "灯": [
+    {
+      "hanzi": "请开灯。",
+      "pinyin": "Qǐng kāi dēng.",
+      "arti": "Tolong nyalakan lampu."
+    },
+    {
+      "hanzi": "桌子上有一个小灯。",
+      "pinyin": "Zhuōzi shàng yǒu yí ge xiǎo dēng.",
+      "arti": "Di atas meja ada sebuah lampu kecil."
+    }
+  ],
+  "低": [
+    {
+      "hanzi": "今天的温度很低。",
+      "pinyin": "Jīntiān de wēndù hěn dī.",
+      "arti": "Suhu hari ini rendah."
+    },
+    {
+      "hanzi": "他的声音很低。",
+      "pinyin": "Tā de shēngyīn hěn dī.",
+      "arti": "Suaranya rendah."
+    }
+  ],
+  "地方": [
+    {
+      "hanzi": "这是一个好地方。",
+      "pinyin": "Zhè shì yí ge hǎo dìfang.",
+      "arti": "Ini tempat yang bagus."
+    },
+    {
+      "hanzi": "你去过什么地方?",
+      "pinyin": "Nǐ qùguo shénme dìfang?",
+      "arti": "Tempat mana saja yang pernah kamu kunjungi?"
+    }
+  ],
+  "地铁": [
+    {
+      "hanzi": "我坐地铁上班。",
+      "pinyin": "Wǒ zuò dìtiě shàngbān.",
+      "arti": "Saya naik kereta bawah tanah ke tempat kerja."
+    },
+    {
+      "hanzi": "地铁站在前面。",
+      "pinyin": "Dìtiě zhàn zài qiánmiàn.",
+      "arti": "Stasiun kereta bawah tanah ada di depan."
+    }
+  ],
+  "地图": [
+    {
+      "hanzi": "我有一张北京地图。",
+      "pinyin": "Wǒ yǒu yì zhāng Běijīng dìtú.",
+      "arti": "Saya punya peta Beijing."
+    },
+    {
+      "hanzi": "你看地图吧。",
+      "pinyin": "Nǐ kàn dìtú ba.",
+      "arti": "Lihat saja petanya."
+    }
+  ],
+  "电梯": [
+    {
+      "hanzi": "电梯在左边。",
+      "pinyin": "Diàntī zài zuǒbian.",
+      "arti": "Lift ada di sebelah kiri."
+    },
+    {
+      "hanzi": "我们坐电梯上去吧。",
+      "pinyin": "Wǒmen zuò diàntī shàngqù ba.",
+      "arti": "Ayo kita naik lift."
+    }
+  ],
+  "电子": [
+    {
+      "hanzi": "我喜欢电子游戏。",
+      "pinyin": "Wǒ xǐhuan diànzǐ yóuxì.",
+      "arti": "Saya suka permainan elektronik."
+    },
+    {
+      "hanzi": "这是一本电子书。",
+      "pinyin": "Zhè shì yì běn diànzǐ shū.",
+      "arti": "Ini adalah buku elektronik."
+    }
+  ],
+  "冬": [
+    {
+      "hanzi": "冬天很冷。",
+      "pinyin": "Dōngtiān hěn lěng.",
+      "arti": "Musim dingin sangat dingin."
+    },
+    {
+      "hanzi": "冬天我喜欢喝热茶。",
+      "pinyin": "Dōngtiān wǒ xǐhuan hē rè chá.",
+      "arti": "Di musim dingin saya suka minum teh panas."
+    }
+  ],
+  "东": [
+    {
+      "hanzi": "太阳从东边出来。",
+      "pinyin": "Tàiyáng cóng dōngbian chūlái.",
+      "arti": "Matahari terbit dari timur."
+    },
+    {
+      "hanzi": "火车站在学校东边。",
+      "pinyin": "Huǒchēzhàn zài xuéxiào dōngbian.",
+      "arti": "Stasiun kereta ada di sebelah timur sekolah."
+    }
+  ],
+  "动物": [
+    {
+      "hanzi": "我喜欢动物。",
+      "pinyin": "Wǒ xǐhuan dòngwù.",
+      "arti": "Saya suka hewan."
+    },
+    {
+      "hanzi": "公园里有很多动物。",
+      "pinyin": "Gōngyuán lǐ yǒu hěn duō dòngwù.",
+      "arti": "Di taman ada banyak hewan."
+    }
+  ],
+  "短": [
+    {
+      "hanzi": "她的头发很短。",
+      "pinyin": "Tā de tóufa hěn duǎn.",
+      "arti": "Rambutnya pendek."
+    },
+    {
+      "hanzi": "这条裤子太短了。",
+      "pinyin": "Zhè tiáo kùzi tài duǎn le.",
+      "arti": "Celana ini terlalu pendek."
+    }
+  ],
+  "段": [
+    {
+      "hanzi": "这段路很长。",
+      "pinyin": "Zhè duàn lù hěn cháng.",
+      "arti": "Ruas jalan ini panjang."
+    },
+    {
+      "hanzi": "我喜欢这一段音乐。",
+      "pinyin": "Wǒ xǐhuan zhè yí duàn yīnyuè.",
+      "arti": "Saya suka bagian musik ini."
+    }
+  ],
+  "锻炼": [
+    {
+      "hanzi": "我每天早上锻炼。",
+      "pinyin": "Wǒ měitiān zǎoshang duànliàn.",
+      "arti": "Setiap pagi saya berolahraga."
+    },
+    {
+      "hanzi": "锻炼身体很重要。",
+      "pinyin": "Duànliàn shēntǐ hěn zhòngyào.",
+      "arti": "Berolahraga itu penting."
+    }
+  ],
+  "多么": [
+    {
+      "hanzi": "今天天气多么好啊!",
+      "pinyin": "Jīntiān tiānqì duōme hǎo a!",
+      "arti": "Betapa baiknya cuaca hari ini!"
+    },
+    {
+      "hanzi": "她多么漂亮啊!",
+      "pinyin": "Tā duōme piàoliang a!",
+      "arti": "Betapa cantiknya dia!"
+    }
+  ],
+  "饿": [
+    {
+      "hanzi": "我饿了。",
+      "pinyin": "Wǒ è le.",
+      "arti": "Saya lapar."
+    },
+    {
+      "hanzi": "你饿不饿?",
+      "pinyin": "Nǐ è bu è?",
+      "arti": "Apakah kamu lapar?"
+    }
+  ],
+  "而且": [
+    {
+      "hanzi": "这个菜好吃,而且便宜。",
+      "pinyin": "Zhège cài hǎochī, érqiě piányi.",
+      "arti": "Masakan ini enak dan juga murah."
+    },
+    {
+      "hanzi": "他会说汉语,而且说得很好。",
+      "pinyin": "Tā huì shuō Hànyǔ, érqiě shuō de hěn hǎo.",
+      "arti": "Dia bisa bahasa Mandarin dan bicaranya bagus."
+    }
+  ],
+  "耳朵": [
+    {
+      "hanzi": "小狗的耳朵很大。",
+      "pinyin": "Xiǎo gǒu de ěrduo hěn dà.",
+      "arti": "Telinga anak anjing itu besar."
+    },
+    {
+      "hanzi": "猫的耳朵很小。",
+      "pinyin": "Māo de ěrduo hěn xiǎo.",
+      "arti": "Telinga kucing itu kecil."
+    }
+  ],
+  "发烧": [
+    {
+      "hanzi": "他发烧了。",
+      "pinyin": "Tā fāshāo le.",
+      "arti": "Dia demam."
+    },
+    {
+      "hanzi": "我发烧了,今天不能去学校。",
+      "pinyin": "Wǒ fāshāo le, jīntiān bù néng qù xuéxiào.",
+      "arti": "Saya demam, hari ini tidak bisa ke sekolah."
+    }
+  ],
+  "发现": [
+    {
+      "hanzi": "我发现手机不见了。",
+      "pinyin": "Wǒ fāxiàn shǒujī bú jiàn le.",
+      "arti": "Saya menyadari ponsel saya hilang."
+    },
+    {
+      "hanzi": "他发现了一个问题。",
+      "pinyin": "Tā fāxiàn le yí ge wèntí.",
+      "arti": "Dia menemukan sebuah masalah."
+    }
+  ],
+  "方便": [
+    {
+      "hanzi": "这里坐地铁很方便。",
+      "pinyin": "Zhèlǐ zuò dìtiě hěn fāngbiàn.",
+      "arti": "Naik kereta bawah tanah di sini praktis."
+    },
+    {
+      "hanzi": "你什么时候方便?",
+      "pinyin": "Nǐ shénme shíhou fāngbiàn?",
+      "arti": "Kapan kamu ada waktu luang?"
+    }
+  ],
+  "放": [
+    {
+      "hanzi": "我把手机放在包里。",
+      "pinyin": "Wǒ bǎ shǒujī fàng zài bāo lǐ.",
+      "arti": "Saya menaruh ponsel di dalam tas."
+    },
+    {
+      "hanzi": "你的书放哪儿了?",
+      "pinyin": "Nǐ de shū fàng nǎr le?",
+      "arti": "Kamu menaruh bukumu di mana?"
+    }
+  ],
+  "放心": [
+    {
+      "hanzi": "你放心吧。",
+      "pinyin": "Nǐ fàngxīn ba.",
+      "arti": "Tenang saja."
+    },
+    {
+      "hanzi": "你一个人去,我不放心。",
+      "pinyin": "Nǐ yí ge rén qù, wǒ bú fàngxīn.",
+      "arti": "Kamu pergi sendirian, saya tidak tenang."
+    }
+  ],
+  "分": [
+    {
+      "hanzi": "他考了九十分。",
+      "pinyin": "Tā kǎo le jiǔshí fēn.",
+      "arti": "Dia mendapat nilai sembilan puluh."
+    },
+    {
+      "hanzi": "请把蛋糕分给大家。",
+      "pinyin": "Qǐng bǎ dàngāo fēn gěi dàjiā.",
+      "arti": "Tolong bagikan kue kepada semua orang."
+    }
+  ],
+  "附近": [
+    {
+      "hanzi": "我家附近有一个公园。",
+      "pinyin": "Wǒ jiā fùjìn yǒu yí ge gōngyuán.",
+      "arti": "Dekat rumah saya ada taman."
+    },
+    {
+      "hanzi": "这附近有超市吗?",
+      "pinyin": "Zhè fùjìn yǒu chāoshì ma?",
+      "arti": "Apakah di dekat sini ada supermarket?"
+    }
+  ],
+  "复习": [
+    {
+      "hanzi": "明天考试,我在复习。",
+      "pinyin": "Míngtiān kǎoshì, wǒ zài fùxí.",
+      "arti": "Besok ujian, saya sedang mengulang pelajaran."
+    },
+    {
+      "hanzi": "请复习第一课。",
+      "pinyin": "Qǐng fùxí dì yī kè.",
+      "arti": "Silakan ulang pelajaran pertama."
+    }
+  ],
+  "干净": [
+    {
+      "hanzi": "房间很干净。",
+      "pinyin": "Fángjiān hěn gānjìng.",
+      "arti": "Kamar bersih."
+    },
+    {
+      "hanzi": "请把手洗干净。",
+      "pinyin": "Qǐng bǎ shǒu xǐ gānjìng.",
+      "arti": "Tolong cuci tangan sampai bersih."
+    }
+  ],
+  "敢": [
+    {
+      "hanzi": "我不敢一个人去。",
+      "pinyin": "Wǒ bù gǎn yí ge rén qù.",
+      "arti": "Saya tidak berani pergi sendiri."
+    },
+    {
+      "hanzi": "你敢吃这个吗?",
+      "pinyin": "Nǐ gǎn chī zhège ma?",
+      "arti": "Beranikah kamu makan ini?"
+    }
+  ],
+  "感冒": [
+    {
+      "hanzi": "我感冒了。",
+      "pinyin": "Wǒ gǎnmào le.",
+      "arti": "Saya masuk angin."
+    },
+    {
+      "hanzi": "天气冷,别感冒。",
+      "pinyin": "Tiānqì lěng, bié gǎnmào.",
+      "arti": "Cuaca dingin, jangan sampai masuk angin."
+    }
+  ],
+  "刚才": [
+    {
+      "hanzi": "刚才谁来了?",
+      "pinyin": "Gāngcái shéi lái le?",
+      "arti": "Tadi siapa yang datang?"
+    },
+    {
+      "hanzi": "他刚才还在这儿。",
+      "pinyin": "Tā gāngcái hái zài zhèr.",
+      "arti": "Tadi dia masih ada di sini."
+    }
+  ],
+  "根据": [
+    {
+      "hanzi": "根据地图,医院在前面。",
+      "pinyin": "Gēnjù dìtú, yīyuàn zài qiánmiàn.",
+      "arti": "Berdasarkan peta, rumah sakit ada di depan."
+    },
+    {
+      "hanzi": "根据天气决定去不去。",
+      "pinyin": "Gēnjù tiānqì juédìng qù bu qù.",
+      "arti": "Memutuskan pergi atau tidak berdasarkan cuaca."
+    }
+  ],
+  "跟": [
+    {
+      "hanzi": "我跟朋友去看电影。",
+      "pinyin": "Wǒ gēn péngyou qù kàn diànyǐng.",
+      "arti": "Saya pergi menonton film dengan teman."
+    },
+    {
+      "hanzi": "请跟我读。",
+      "pinyin": "Qǐng gēn wǒ dú.",
+      "arti": "Tolong ikuti saya membaca."
+    }
+  ],
+  "更": [
+    {
+      "hanzi": "今天比昨天更冷。",
+      "pinyin": "Jīntiān bǐ zuótiān gèng lěng.",
+      "arti": "Hari ini lebih dingin lagi daripada kemarin."
+    },
+    {
+      "hanzi": "我更喜欢这个。",
+      "pinyin": "Wǒ gèng xǐhuan zhège.",
+      "arti": "Saya lebih suka yang ini."
+    }
+  ],
+  "公园": [
+    {
+      "hanzi": "公园里有很多花。",
+      "pinyin": "Gōngyuán lǐ yǒu hěn duō huā.",
+      "arti": "Di taman ada banyak bunga."
+    },
+    {
+      "hanzi": "他每天早上在公园跑步。",
+      "pinyin": "Tā měitiān zǎoshang zài gōngyuán pǎobù.",
+      "arti": "Dia berlari di taman setiap pagi."
+    }
+  ],
+  "故事": [
+    {
+      "hanzi": "奶奶给我讲故事。",
+      "pinyin": "Nǎinai gěi wǒ jiǎng gùshi.",
+      "arti": "Nenek menceritakan dongeng kepada saya."
+    },
+    {
+      "hanzi": "这个故事很有意思。",
+      "pinyin": "Zhège gùshi hěn yǒu yìsi.",
+      "arti": "Cerita ini sangat menarik."
+    }
+  ],
+  "刮": [
+    {
+      "hanzi": "今天刮大风。",
+      "pinyin": "Jīntiān guā dà fēng.",
+      "arti": "Hari ini angin bertiup kencang."
+    },
+    {
+      "hanzi": "昨天刮风又下雨。",
+      "pinyin": "Zuótiān guā fēng yòu xiàyǔ.",
+      "arti": "Kemarin berangin dan hujan."
+    }
+  ],
+  "关": [
+    {
+      "hanzi": "请关门。",
+      "pinyin": "Qǐng guān mén.",
+      "arti": "Tolong tutup pintu."
+    },
+    {
+      "hanzi": "睡觉前要关灯。",
+      "pinyin": "Shuìjiào qián yào guān dēng.",
+      "arti": "Sebelum tidur harus mematikan lampu."
+    }
+  ],
+  "关系": [
+    {
+      "hanzi": "我们是好朋友,关系很好。",
+      "pinyin": "Wǒmen shì hǎo péngyou, guānxi hěn hǎo.",
+      "arti": "Kami teman baik, hubungan kami baik."
+    },
+    {
+      "hanzi": "这和我没有关系。",
+      "pinyin": "Zhè hé wǒ méiyǒu guānxi.",
+      "arti": "Ini tidak ada hubungannya dengan saya."
+    }
+  ],
+  "关心": [
+    {
+      "hanzi": "谢谢你的关心。",
+      "pinyin": "Xièxie nǐ de guānxīn.",
+      "arti": "Terima kasih atas perhatianmu."
+    },
+    {
+      "hanzi": "老师很关心学生。",
+      "pinyin": "Lǎoshī hěn guānxīn xuésheng.",
+      "arti": "Guru sangat peduli pada murid."
+    }
+  ],
+  "关于": [
+    {
+      "hanzi": "这是一本关于中国的书。",
+      "pinyin": "Zhè shì yì běn guānyú Zhōngguó de shū.",
+      "arti": "Ini buku tentang Tiongkok."
+    },
+    {
+      "hanzi": "关于这个问题,你怎么看?",
+      "pinyin": "Guānyú zhège wèntí, nǐ zěnme kàn?",
+      "arti": "Tentang masalah ini, bagaimana pendapatmu?"
+    }
+  ],
+  "国家": [
+    {
+      "hanzi": "中国是一个大国家。",
+      "pinyin": "Zhōngguó shì yí ge dà guójiā.",
+      "arti": "Tiongkok adalah negara besar."
+    },
+    {
+      "hanzi": "你去过几个国家?",
+      "pinyin": "Nǐ qùguo jǐ ge guójiā?",
+      "arti": "Sudah berapa negara yang kamu kunjungi?"
+    }
+  ],
+  "果汁": [
+    {
+      "hanzi": "我想喝果汁。",
+      "pinyin": "Wǒ xiǎng hē guǒzhī.",
+      "arti": "Saya ingin minum jus buah."
+    },
+    {
+      "hanzi": "请给我一杯苹果汁。",
+      "pinyin": "Qǐng gěi wǒ yì bēi píngguǒ zhī.",
+      "arti": "Tolong beri saya segelas jus apel."
+    }
+  ],
+  "过去": [
+    {
+      "hanzi": "过去我住在北京。",
+      "pinyin": "Guòqù wǒ zhù zài Běijīng.",
+      "arti": "Dulu saya tinggal di Beijing."
+    },
+    {
+      "hanzi": "他过去不喜欢运动。",
+      "pinyin": "Tā guòqù bù xǐhuan yùndòng.",
+      "arti": "Dulu dia tidak suka berolahraga."
+    }
+  ],
+  "还是": [
+    {
+      "hanzi": "你喝茶还是咖啡?",
+      "pinyin": "Nǐ hē chá háishi kāfēi?",
+      "arti": "Kamu minum teh atau kopi?"
+    },
+    {
+      "hanzi": "我们坐地铁还是坐公共汽车?",
+      "pinyin": "Wǒmen zuò dìtiě háishi zuò gōnggòng qìchē?",
+      "arti": "Kita naik kereta bawah tanah atau bus?"
+    }
+  ],
+  "害怕": [
+    {
+      "hanzi": "我害怕狗。",
+      "pinyin": "Wǒ hàipà gǒu.",
+      "arti": "Saya takut anjing."
+    },
+    {
+      "hanzi": "别害怕。",
+      "pinyin": "Bié hàipà.",
+      "arti": "Jangan takut."
+    }
+  ],
+  "河": [
+    {
+      "hanzi": "河边有很多树。",
+      "pinyin": "Hébiān yǒu hěn duō shù.",
+      "arti": "Di tepi sungai ada banyak pohon."
+    },
+    {
+      "hanzi": "我家旁边有一条河。",
+      "pinyin": "Wǒ jiā pángbiān yǒu yì tiáo hé.",
+      "arti": "Di samping rumah saya ada sebuah sungai."
+    }
+  ],
+  "黑板": [
+    {
+      "hanzi": "老师在黑板上写字。",
+      "pinyin": "Lǎoshī zài hēibǎn shàng xiě zì.",
+      "arti": "Guru menulis di papan tulis."
+    },
+    {
+      "hanzi": "黑板上的字很大。",
+      "pinyin": "Hēibǎn shàng de zì hěn dà.",
+      "arti": "Tulisan di papan tulis besar."
+    }
+  ],
+  "护照": [
+    {
+      "hanzi": "请给我看你的护照。",
+      "pinyin": "Qǐng gěi wǒ kàn nǐ de hùzhào.",
+      "arti": "Tolong tunjukkan paspormu."
+    },
+    {
+      "hanzi": "我的护照在包里。",
+      "pinyin": "Wǒ de hùzhào zài bāo lǐ.",
+      "arti": "Paspor saya ada di dalam tas."
+    }
+  ],
+  "花": [
+    {
+      "hanzi": "公园里的花很漂亮。",
+      "pinyin": "Gōngyuán lǐ de huā hěn piàoliang.",
+      "arti": "Bunga di taman sangat cantik."
+    },
+    {
+      "hanzi": "春天花都开了。",
+      "pinyin": "Chūntiān huā dōu kāi le.",
+      "arti": "Di musim semi semua bunga mekar."
+    }
+  ],
+  "花园": [
+    {
+      "hanzi": "我家有一个小花园。",
+      "pinyin": "Wǒ jiā yǒu yí ge xiǎo huāyuán.",
+      "arti": "Rumah saya punya taman kecil."
+    },
+    {
+      "hanzi": "花园里有很多花。",
+      "pinyin": "Huāyuán lǐ yǒu hěn duō huā.",
+      "arti": "Di dalam taman ada banyak bunga."
+    }
+  ],
+  "画": [
+    {
+      "hanzi": "他在画画。",
+      "pinyin": "Tā zài huà huà.",
+      "arti": "Dia sedang menggambar."
+    },
+    {
+      "hanzi": "这张画很漂亮。",
+      "pinyin": "Zhè zhāng huà hěn piàoliang.",
+      "arti": "Gambar ini indah."
+    }
+  ],
+  "坏": [
+    {
+      "hanzi": "这个苹果坏了。",
+      "pinyin": "Zhège píngguǒ huài le.",
+      "arti": "Apel ini sudah busuk."
+    },
+    {
+      "hanzi": "我的电脑坏了。",
+      "pinyin": "Wǒ de diànnǎo huài le.",
+      "arti": "Komputer saya rusak."
+    }
+  ],
+  "环境": [
+    {
+      "hanzi": "这里的环境很好。",
+      "pinyin": "Zhèlǐ de huánjìng hěn hǎo.",
+      "arti": "Lingkungan di sini bagus."
+    },
+    {
+      "hanzi": "学习环境很重要。",
+      "pinyin": "Xuéxí huánjìng hěn zhòngyào.",
+      "arti": "Lingkungan belajar itu penting."
+    }
+  ],
+  "换": [
+    {
+      "hanzi": "我想换一个房间。",
+      "pinyin": "Wǒ xiǎng huàn yí ge fángjiān.",
+      "arti": "Saya ingin ganti kamar."
+    },
+    {
+      "hanzi": "在这里换地铁。",
+      "pinyin": "Zài zhèlǐ huàn dìtiě.",
+      "arti": "Ganti kereta bawah tanah di sini."
+    }
+  ],
+  "黄": [
+    {
+      "hanzi": "这个香蕉是黄的。",
+      "pinyin": "Zhège xiāngjiāo shì huáng de.",
+      "arti": "Pisang ini berwarna kuning."
+    },
+    {
+      "hanzi": "她穿一件黄衣服。",
+      "pinyin": "Tā chuān yí jiàn huáng yīfu.",
+      "arti": "Dia memakai baju kuning."
+    }
+  ],
+  "会议": [
+    {
+      "hanzi": "明天上午有会议。",
+      "pinyin": "Míngtiān shàngwǔ yǒu huìyì.",
+      "arti": "Besok pagi ada rapat."
+    },
+    {
+      "hanzi": "会议几点开始?",
+      "pinyin": "Huìyì jǐ diǎn kāishǐ?",
+      "arti": "Pukul berapa rapat dimulai?"
+    }
+  ],
+  "或者": [
+    {
+      "hanzi": "你可以喝茶或者咖啡。",
+      "pinyin": "Nǐ kěyǐ hē chá huòzhě kāfēi.",
+      "arti": "Kamu boleh minum teh atau kopi."
+    },
+    {
+      "hanzi": "周六或者周日我有时间。",
+      "pinyin": "Zhōuliù huòzhě zhōurì wǒ yǒu shíjiān.",
+      "arti": "Sabtu atau Minggu saya ada waktu."
+    }
+  ],
+  "机会": [
+    {
+      "hanzi": "这是一个好机会。",
+      "pinyin": "Zhè shì yí ge hǎo jīhuì.",
+      "arti": "Ini kesempatan bagus."
+    },
+    {
+      "hanzi": "我想有机会去中国。",
+      "pinyin": "Wǒ xiǎng yǒu jīhuì qù Zhōngguó.",
+      "arti": "Saya ingin punya kesempatan pergi ke Tiongkok."
+    }
+  ],
+  "几乎": [
+    {
+      "hanzi": "我几乎每天都跑步。",
+      "pinyin": "Wǒ jīhū měitiān dōu pǎobù.",
+      "arti": "Saya hampir setiap hari berlari."
+    },
+    {
+      "hanzi": "教室里几乎没有人。",
+      "pinyin": "Jiàoshì lǐ jīhū méiyǒu rén.",
+      "arti": "Di ruang kelas hampir tidak ada orang."
+    }
+  ],
+  "极": [
+    {
+      "hanzi": "今天热极了。",
+      "pinyin": "Jīntiān rè jí le.",
+      "arti": "Hari ini panas sekali."
+    },
+    {
+      "hanzi": "这个电影好极了。",
+      "pinyin": "Zhège diànyǐng hǎo jí le.",
+      "arti": "Film ini bagus sekali."
+    }
+  ],
+  "记得": [
+    {
+      "hanzi": "你记得我的名字吗?",
+      "pinyin": "Nǐ jìde wǒ de míngzi ma?",
+      "arti": "Apakah kamu ingat namaku?"
+    },
+    {
+      "hanzi": "我记得他住在北京。",
+      "pinyin": "Wǒ jìde tā zhù zài Běijīng.",
+      "arti": "Saya ingat dia tinggal di Beijing."
+    }
+  ],
+  "季节": [
+    {
+      "hanzi": "我最喜欢的季节是春天。",
+      "pinyin": "Wǒ zuì xǐhuan de jìjié shì chūntiān.",
+      "arti": "Musim favorit saya adalah musim semi."
+    },
+    {
+      "hanzi": "一年有四个季节。",
+      "pinyin": "Yì nián yǒu sì ge jìjié.",
+      "arti": "Setahun ada empat musim."
+    }
+  ],
+  "检查": [
+    {
+      "hanzi": "医生在检查身体。",
+      "pinyin": "Yīshēng zài jiǎnchá shēntǐ.",
+      "arti": "Dokter sedang memeriksa tubuh."
+    },
+    {
+      "hanzi": "请检查一下你的作业。",
+      "pinyin": "Qǐng jiǎnchá yíxià nǐ de zuòyè.",
+      "arti": "Tolong periksa pekerjaan rumahmu."
+    }
+  ],
+  "简单": [
+    {
+      "hanzi": "这个问题很简单。",
+      "pinyin": "Zhège wèntí hěn jiǎndān.",
+      "arti": "Pertanyaan ini sederhana."
+    },
+    {
+      "hanzi": "汉语不简单。",
+      "pinyin": "Hànyǔ bù jiǎndān.",
+      "arti": "Bahasa Mandarin tidak sederhana."
+    }
+  ],
+  "见面": [
+    {
+      "hanzi": "我们明天见面吧。",
+      "pinyin": "Wǒmen míngtiān jiànmiàn ba.",
+      "arti": "Ayo kita bertemu besok."
+    },
+    {
+      "hanzi": "很高兴和你见面。",
+      "pinyin": "Hěn gāoxìng hé nǐ jiànmiàn.",
+      "arti": "Senang bertemu denganmu."
+    }
+  ],
+  "健康": [
+    {
+      "hanzi": "身体健康最重要。",
+      "pinyin": "Shēntǐ jiànkāng zuì zhòngyào.",
+      "arti": "Tubuh yang sehat paling penting."
+    },
+    {
+      "hanzi": "祝你健康!",
+      "pinyin": "Zhù nǐ jiànkāng!",
+      "arti": "Semoga kamu sehat!"
+    }
+  ],
+  "讲": [
+    {
+      "hanzi": "老师在讲课。",
+      "pinyin": "Lǎoshī zài jiǎngkè.",
+      "arti": "Guru sedang mengajar."
+    },
+    {
+      "hanzi": "请讲慢一点。",
+      "pinyin": "Qǐng jiǎng màn yìdiǎn.",
+      "arti": "Tolong bicara lebih pelan."
+    }
+  ],
+  "教": [
+    {
+      "hanzi": "他教我们汉语。",
+      "pinyin": "Tā jiāo wǒmen Hànyǔ.",
+      "arti": "Dia mengajari kami bahasa Mandarin."
+    },
+    {
+      "hanzi": "你能教我吗?",
+      "pinyin": "Nǐ néng jiāo wǒ ma?",
+      "arti": "Bisakah kamu mengajari saya?"
+    }
+  ],
+  "脚": [
+    {
+      "hanzi": "我的脚很疼。",
+      "pinyin": "Wǒ de jiǎo hěn téng.",
+      "arti": "Kaki saya sakit."
+    },
+    {
+      "hanzi": "他的脚很大。",
+      "pinyin": "Tā de jiǎo hěn dà.",
+      "arti": "Kakinya besar."
+    }
+  ],
+  "角": [
+    {
+      "hanzi": "椅子在房间的角上。",
+      "pinyin": "Yǐzi zài fángjiān de jiǎo shàng.",
+      "arti": "Kursi ada di sudut kamar."
+    },
+    {
+      "hanzi": "我们在街角见面。",
+      "pinyin": "Wǒmen zài jiējiǎo jiànmiàn.",
+      "arti": "Kami bertemu di sudut jalan."
+    }
+  ],
+  "接": [
+    {
+      "hanzi": "我去机场接朋友。",
+      "pinyin": "Wǒ qù jīchǎng jiē péngyou.",
+      "arti": "Saya pergi ke bandara menjemput teman."
+    },
+    {
+      "hanzi": "他接了一个电话。",
+      "pinyin": "Tā jiē le yí ge diànhuà.",
+      "arti": "Dia menerima sebuah telepon."
+    }
+  ],
+  "街道": [
+    {
+      "hanzi": "这条街道很干净。",
+      "pinyin": "Zhè tiáo jiēdào hěn gānjìng.",
+      "arti": "Jalan ini bersih."
+    },
+    {
+      "hanzi": "街道上人很多。",
+      "pinyin": "Jiēdào shàng rén hěn duō.",
+      "arti": "Di jalan banyak orang."
+    }
+  ],
+  "节目": [
+    {
+      "hanzi": "这个电视节目很有意思。",
+      "pinyin": "Zhège diànshì jiémù hěn yǒu yìsi.",
+      "arti": "Acara televisi ini menarik."
+    },
+    {
+      "hanzi": "今晚有什么节目?",
+      "pinyin": "Jīnwǎn yǒu shénme jiémù?",
+      "arti": "Malam ini ada acara apa?"
+    }
+  ],
+  "节日": [
+    {
+      "hanzi": "今天是一个节日。",
+      "pinyin": "Jīntiān shì yí ge jiérì.",
+      "arti": "Hari ini adalah hari raya."
+    },
+    {
+      "hanzi": "节日快乐!",
+      "pinyin": "Jiérì kuàilè!",
+      "arti": "Selamat hari raya!"
+    }
+  ],
+  "结婚": [
+    {
+      "hanzi": "他们去年结婚了。",
+      "pinyin": "Tāmen qùnián jiéhūn le.",
+      "arti": "Mereka menikah tahun lalu."
+    },
+    {
+      "hanzi": "姐姐明年要结婚。",
+      "pinyin": "Jiějie míngnián yào jiéhūn.",
+      "arti": "Kakak perempuan akan menikah tahun depan."
+    }
+  ],
+  "结束": [
+    {
+      "hanzi": "会议几点结束?",
+      "pinyin": "Huìyì jǐ diǎn jiéshù?",
+      "arti": "Pukul berapa rapat berakhir?"
+    },
+    {
+      "hanzi": "考试结束了。",
+      "pinyin": "Kǎoshì jiéshù le.",
+      "arti": "Ujian sudah selesai."
+    }
+  ],
+  "解决": [
+    {
+      "hanzi": "这个问题解决了。",
+      "pinyin": "Zhège wèntí jiějué le.",
+      "arti": "Masalah ini sudah selesai."
+    },
+    {
+      "hanzi": "我们一起想办法解决。",
+      "pinyin": "Wǒmen yìqǐ xiǎng bànfǎ jiějué.",
+      "arti": "Kita pikirkan cara menyelesaikannya bersama."
+    }
+  ],
+  "借": [
+    {
+      "hanzi": "我想借一本书。",
+      "pinyin": "Wǒ xiǎng jiè yì běn shū.",
+      "arti": "Saya ingin meminjam sebuah buku."
+    },
+    {
+      "hanzi": "你可以借我一支笔吗?",
+      "pinyin": "Nǐ kěyǐ jiè wǒ yì zhī bǐ ma?",
+      "arti": "Bolehkah saya meminjam sebuah pena?"
+    }
+  ],
+  "经常": [
+    {
+      "hanzi": "我经常去图书馆。",
+      "pinyin": "Wǒ jīngcháng qù túshūguǎn.",
+      "arti": "Saya sering pergi ke perpustakaan."
+    },
+    {
+      "hanzi": "他经常迟到。",
+      "pinyin": "Tā jīngcháng chídào.",
+      "arti": "Dia sering terlambat."
+    }
+  ],
+  "经过": [
+    {
+      "hanzi": "我每天经过这个公园。",
+      "pinyin": "Wǒ měitiān jīngguò zhège gōngyuán.",
+      "arti": "Setiap hari saya melewati taman ini."
+    },
+    {
+      "hanzi": "经过一年的学习,他会说汉语了。",
+      "pinyin": "Jīngguò yì nián de xuéxí, tā huì shuō Hànyǔ le.",
+      "arti": "Setelah belajar setahun, dia bisa berbahasa Mandarin."
+    }
+  ],
+  "经理": [
+    {
+      "hanzi": "王经理在办公室。",
+      "pinyin": "Wáng jīnglǐ zài bàngōngshì.",
+      "arti": "Manajer Wang ada di kantor."
+    },
+    {
+      "hanzi": "我们经理很热情。",
+      "pinyin": "Wǒmen jīnglǐ hěn rèqíng.",
+      "arti": "Manajer kami ramah."
+    }
+  ],
+  "久": [
+    {
+      "hanzi": "我等了很久。",
+      "pinyin": "Wǒ děng le hěn jiǔ.",
+      "arti": "Saya menunggu lama."
+    },
+    {
+      "hanzi": "好久不见!",
+      "pinyin": "Hǎojiǔ bú jiàn!",
+      "arti": "Lama tidak berjumpa!"
+    }
+  ],
+  "旧": [
+    {
+      "hanzi": "这件衣服太旧了。",
+      "pinyin": "Zhè jiàn yīfu tài jiù le.",
+      "arti": "Pakaian ini terlalu usang."
+    },
+    {
+      "hanzi": "我想买新手机,不想用旧的。",
+      "pinyin": "Wǒ xiǎng mǎi xīn shǒujī, bù xiǎng yòng jiù de.",
+      "arti": "Saya ingin beli ponsel baru, tidak mau pakai yang lama."
+    }
+  ],
+  "举行": [
+    {
+      "hanzi": "比赛在下午举行。",
+      "pinyin": "Bǐsài zài xiàwǔ jǔxíng.",
+      "arti": "Pertandingan diadakan sore hari."
+    },
+    {
+      "hanzi": "会议在明天举行。",
+      "pinyin": "Huìyì zài míngtiān jǔxíng.",
+      "arti": "Rapat diadakan besok."
+    }
+  ],
+  "句子": [
+    {
+      "hanzi": "请写一个句子。",
+      "pinyin": "Qǐng xiě yí ge jùzi.",
+      "arti": "Silakan tulis satu kalimat."
+    },
+    {
+      "hanzi": "这个句子很长。",
+      "pinyin": "Zhège jùzi hěn cháng.",
+      "arti": "Kalimat ini panjang."
+    }
+  ],
+  "决定": [
+    {
+      "hanzi": "我决定去北京。",
+      "pinyin": "Wǒ juédìng qù Běijīng.",
+      "arti": "Saya memutuskan pergi ke Beijing."
+    },
+    {
+      "hanzi": "这是他的决定。",
+      "pinyin": "Zhè shì tā de juédìng.",
+      "arti": "Ini adalah keputusannya."
+    }
+  ],
+  "渴": [
+    {
+      "hanzi": "我渴了,想喝水。",
+      "pinyin": "Wǒ kě le, xiǎng hē shuǐ.",
+      "arti": "Saya haus, ingin minum air."
+    },
+    {
+      "hanzi": "你渴不渴?",
+      "pinyin": "Nǐ kě bu kě?",
+      "arti": "Apakah kamu haus?"
+    }
+  ],
+  "可爱": [
+    {
+      "hanzi": "这只猫很可爱。",
+      "pinyin": "Zhè zhī māo hěn kě'ài.",
+      "arti": "Kucing ini lucu."
+    },
+    {
+      "hanzi": "她的女儿很可爱。",
+      "pinyin": "Tā de nǚ'ér hěn kě'ài.",
+      "arti": "Putrinya imut."
+    }
+  ],
+  "刻": [
+    {
+      "hanzi": "现在三点一刻。",
+      "pinyin": "Xiànzài sān diǎn yí kè.",
+      "arti": "Sekarang pukul tiga lewat seperempat."
+    },
+    {
+      "hanzi": "我们八点三刻见面。",
+      "pinyin": "Wǒmen bā diǎn sān kè jiànmiàn.",
+      "arti": "Kita bertemu pukul delapan lewat 45 menit."
+    }
+  ],
+  "客人": [
+    {
+      "hanzi": "家里来了客人。",
+      "pinyin": "Jiālǐ lái le kèrén.",
+      "arti": "Ada tamu datang ke rumah."
+    },
+    {
+      "hanzi": "请欢迎客人。",
+      "pinyin": "Qǐng huānyíng kèrén.",
+      "arti": "Silakan sambut para tamu."
+    }
+  ],
+  "空调": [
+    {
+      "hanzi": "请开空调。",
+      "pinyin": "Qǐng kāi kōngtiáo.",
+      "arti": "Tolong nyalakan AC."
+    },
+    {
+      "hanzi": "房间里的空调很冷。",
+      "pinyin": "Fángjiān lǐ de kōngtiáo hěn lěng.",
+      "arti": "AC di kamar sangat dingin."
+    }
+  ],
+  "口": [
+    {
+      "hanzi": "我家有五口人。",
+      "pinyin": "Wǒ jiā yǒu wǔ kǒu rén.",
+      "arti": "Keluarga saya ada lima orang."
+    },
+    {
+      "hanzi": "他吃了一口蛋糕。",
+      "pinyin": "Tā chī le yì kǒu dàngāo.",
+      "arti": "Dia memakan sesuap kue."
+    }
+  ],
+  "哭": [
+    {
+      "hanzi": "孩子哭了。",
+      "pinyin": "Háizi kū le.",
+      "arti": "Anak itu menangis."
+    },
+    {
+      "hanzi": "别哭了。",
+      "pinyin": "Bié kū le.",
+      "arti": "Jangan menangis lagi."
+    }
+  ],
+  "裤子": [
+    {
+      "hanzi": "我想买一条新裤子。",
+      "pinyin": "Wǒ xiǎng mǎi yì tiáo xīn kùzi.",
+      "arti": "Saya ingin membeli celana panjang baru."
+    },
+    {
+      "hanzi": "这条裤子太长了。",
+      "pinyin": "Zhè tiáo kùzi tài cháng le.",
+      "arti": "Celana ini terlalu panjang."
+    }
+  ],
+  "筷子": [
+    {
+      "hanzi": "你会用筷子吗?",
+      "pinyin": "Nǐ huì yòng kuàizi ma?",
+      "arti": "Apakah kamu bisa memakai sumpit?"
+    },
+    {
+      "hanzi": "桌子上有一双筷子。",
+      "pinyin": "Zhuōzi shàng yǒu yì shuāng kuàizi.",
+      "arti": "Di atas meja ada sepasang sumpit."
+    }
+  ],
+  "蓝": [
+    {
+      "hanzi": "天很蓝。",
+      "pinyin": "Tiān hěn lán.",
+      "arti": "Langit sangat biru."
+    },
+    {
+      "hanzi": "我喜欢蓝衬衫。",
+      "pinyin": "Wǒ xǐhuan lán chènshān.",
+      "arti": "Saya suka kemeja biru."
+    }
+  ],
+  "老": [
+    {
+      "hanzi": "他是我的老朋友。",
+      "pinyin": "Tā shì wǒ de lǎo péngyou.",
+      "arti": "Dia teman lama saya."
+    },
+    {
+      "hanzi": "爷爷已经很老了。",
+      "pinyin": "Yéye yǐjīng hěn lǎo le.",
+      "arti": "Kakek sudah sangat tua."
+    }
+  ],
+  "离开": [
+    {
+      "hanzi": "他八点离开家。",
+      "pinyin": "Tā bā diǎn líkāi jiā.",
+      "arti": "Dia meninggalkan rumah pukul delapan."
+    },
+    {
+      "hanzi": "我不想离开这里。",
+      "pinyin": "Wǒ bù xiǎng líkāi zhèlǐ.",
+      "arti": "Saya tidak ingin meninggalkan tempat ini."
+    }
+  ],
+  "礼物": [
+    {
+      "hanzi": "这是给你的礼物。",
+      "pinyin": "Zhè shì gěi nǐ de lǐwù.",
+      "arti": "Ini hadiah untukmu."
+    },
+    {
+      "hanzi": "生日礼物我很喜欢。",
+      "pinyin": "Shēngrì lǐwù wǒ hěn xǐhuan.",
+      "arti": "Saya sangat suka hadiah ulang tahun itu."
+    }
+  ],
+  "历史": [
+    {
+      "hanzi": "我喜欢学历史。",
+      "pinyin": "Wǒ xǐhuan xué lìshǐ.",
+      "arti": "Saya suka belajar sejarah."
+    },
+    {
+      "hanzi": "北京有很长的历史。",
+      "pinyin": "Běijīng yǒu hěn cháng de lìshǐ.",
+      "arti": "Beijing punya sejarah yang panjang."
+    }
+  ],
+  "脸": [
+    {
+      "hanzi": "她的脸很红。",
+      "pinyin": "Tā de liǎn hěn hóng.",
+      "arti": "Wajahnya merah."
+    },
+    {
+      "hanzi": "我去洗脸。",
+      "pinyin": "Wǒ qù xǐ liǎn.",
+      "arti": "Saya pergi mencuci muka."
+    }
+  ],
+  "练习": [
+    {
+      "hanzi": "我每天练习写汉字。",
+      "pinyin": "Wǒ měitiān liànxí xiě Hànzì.",
+      "arti": "Setiap hari saya berlatih menulis aksara Mandarin."
+    },
+    {
+      "hanzi": "做练习很重要。",
+      "pinyin": "Zuò liànxí hěn zhòngyào.",
+      "arti": "Mengerjakan latihan itu penting."
+    }
+  ],
+  "辆": [
+    {
+      "hanzi": "门口有一辆车。",
+      "pinyin": "Ménkǒu yǒu yí liàng chē.",
+      "arti": "Di depan pintu ada sebuah mobil."
+    },
+    {
+      "hanzi": "他有两辆自行车。",
+      "pinyin": "Tā yǒu liǎng liàng zìxíngchē.",
+      "arti": "Dia punya dua sepeda."
+    }
+  ],
+  "了解": [
+    {
+      "hanzi": "我不了解他。",
+      "pinyin": "Wǒ bù liǎojiě tā.",
+      "arti": "Saya tidak mengenal dia dengan baik."
+    },
+    {
+      "hanzi": "我想了解中国文化。",
+      "pinyin": "Wǒ xiǎng liǎojiě Zhōngguó wénhuà.",
+      "arti": "Saya ingin memahami budaya Tiongkok."
+    }
+  ],
+  "邻居": [
+    {
+      "hanzi": "我的邻居很热情。",
+      "pinyin": "Wǒ de línjū hěn rèqíng.",
+      "arti": "Tetangga saya ramah."
+    },
+    {
+      "hanzi": "邻居家有一只猫。",
+      "pinyin": "Línjū jiā yǒu yì zhī māo.",
+      "arti": "Tetangga punya seekor kucing."
+    }
+  ],
+  "楼": [
+    {
+      "hanzi": "我家在三楼。",
+      "pinyin": "Wǒ jiā zài sān lóu.",
+      "arti": "Rumah saya ada di lantai tiga."
+    },
+    {
+      "hanzi": "这个楼很高。",
+      "pinyin": "Zhège lóu hěn gāo.",
+      "arti": "Gedung ini tinggi."
+    }
+  ],
+  "绿": [
+    {
+      "hanzi": "草是绿的。",
+      "pinyin": "Cǎo shì lǜ de.",
+      "arti": "Rumput itu hijau."
+    },
+    {
+      "hanzi": "她喜欢绿衣服。",
+      "pinyin": "Tā xǐhuan lǜ yīfu.",
+      "arti": "Dia suka pakaian hijau."
+    }
+  ],
+  "马": [
+    {
+      "hanzi": "他会骑马。",
+      "pinyin": "Tā huì qí mǎ.",
+      "arti": "Dia bisa menunggang kuda."
+    },
+    {
+      "hanzi": "那匹马很大。",
+      "pinyin": "Nà pǐ mǎ hěn dà.",
+      "arti": "Kuda itu besar."
+    }
+  ],
+  "马上": [
+    {
+      "hanzi": "我马上来。",
+      "pinyin": "Wǒ mǎshàng lái.",
+      "arti": "Saya segera datang."
+    },
+    {
+      "hanzi": "电影马上开始了。",
+      "pinyin": "Diànyǐng mǎshàng kāishǐ le.",
+      "arti": "Filmnya segera dimulai."
+    }
+  ],
+  "满意": [
+    {
+      "hanzi": "我对这个房间很满意。",
+      "pinyin": "Wǒ duì zhège fángjiān hěn mǎnyì.",
+      "arti": "Saya puas dengan kamar ini."
+    },
+    {
+      "hanzi": "老师对他的成绩很满意。",
+      "pinyin": "Lǎoshī duì tā de chéngjì hěn mǎnyì.",
+      "arti": "Guru puas dengan nilainya."
+    }
+  ],
+  "帽子": [
+    {
+      "hanzi": "他戴着一顶红帽子。",
+      "pinyin": "Tā dàizhe yì dǐng hóng màozi.",
+      "arti": "Dia mengenakan topi merah."
+    },
+    {
+      "hanzi": "我的帽子在哪儿?",
+      "pinyin": "Wǒ de màozi zài nǎr?",
+      "arti": "Di mana topi saya?"
+    }
+  ],
+  "米": [
+    {
+      "hanzi": "这条路有一百米长。",
+      "pinyin": "Zhè tiáo lù yǒu yì bǎi mǐ cháng.",
+      "arti": "Jalan ini panjangnya seratus meter."
+    },
+    {
+      "hanzi": "他有一米八高。",
+      "pinyin": "Tā yǒu yì mǐ bā gāo.",
+      "arti": "Tingginya satu meter delapan puluh."
+    }
+  ],
+  "面包": [
+    {
+      "hanzi": "我早上吃面包。",
+      "pinyin": "Wǒ zǎoshang chī miànbāo.",
+      "arti": "Pagi hari saya makan roti."
+    },
+    {
+      "hanzi": "请给我两个面包。",
+      "pinyin": "Qǐng gěi wǒ liǎng ge miànbāo.",
+      "arti": "Tolong beri saya dua roti."
+    }
+  ],
+  "面条": [
+    {
+      "hanzi": "我喜欢吃面条。",
+      "pinyin": "Wǒ xǐhuan chī miàntiáo.",
+      "arti": "Saya suka makan mi."
+    },
+    {
+      "hanzi": "中午我们吃面条吧。",
+      "pinyin": "Zhōngwǔ wǒmen chī miàntiáo ba.",
+      "arti": "Siang ini kita makan mi, ya."
+    }
+  ],
+  "明白": [
+    {
+      "hanzi": "你明白了吗?",
+      "pinyin": "Nǐ míngbai le ma?",
+      "arti": "Apakah kamu sudah paham?"
+    },
+    {
+      "hanzi": "我不明白这个句子。",
+      "pinyin": "Wǒ bù míngbai zhège jùzi.",
+      "arti": "Saya tidak paham kalimat ini."
+    }
+  ],
+  "拿": [
+    {
+      "hanzi": "请拿一下这本书。",
+      "pinyin": "Qǐng ná yíxià zhè běn shū.",
+      "arti": "Tolong pegang buku ini sebentar."
+    },
+    {
+      "hanzi": "他手里拿着一杯茶。",
+      "pinyin": "Tā shǒu lǐ názhe yì bēi chá.",
+      "arti": "Di tangannya ada secangkir teh."
+    }
+  ],
+  "奶奶": [
+    {
+      "hanzi": "奶奶住在北京。",
+      "pinyin": "Nǎinai zhù zài Běijīng.",
+      "arti": "Nenek tinggal di Beijing."
+    },
+    {
+      "hanzi": "我很爱我的奶奶。",
+      "pinyin": "Wǒ hěn ài wǒ de nǎinai.",
+      "arti": "Saya sangat menyayangi nenek saya."
+    }
+  ],
+  "南": [
+    {
+      "hanzi": "学校的南边有一条河。",
+      "pinyin": "Xuéxiào de nánbian yǒu yì tiáo hé.",
+      "arti": "Di sebelah selatan sekolah ada sungai."
+    },
+    {
+      "hanzi": "我想去南方旅游。",
+      "pinyin": "Wǒ xiǎng qù nánfāng lǚyóu.",
+      "arti": "Saya ingin berwisata ke selatan."
+    }
+  ],
+  "难": [
+    {
+      "hanzi": "汉字很难写。",
+      "pinyin": "Hànzì hěn nán xiě.",
+      "arti": "Aksara Mandarin sulit ditulis."
+    },
+    {
+      "hanzi": "这个问题不难。",
+      "pinyin": "Zhège wèntí bù nán.",
+      "arti": "Pertanyaan ini tidak sulit."
+    }
+  ],
+  "难过": [
+    {
+      "hanzi": "他很难过。",
+      "pinyin": "Tā hěn nánguò.",
+      "arti": "Dia sangat sedih."
+    },
+    {
+      "hanzi": "别难过,明天会更好。",
+      "pinyin": "Bié nánguò, míngtiān huì gèng hǎo.",
+      "arti": "Jangan sedih, besok akan lebih baik."
+    }
+  ],
+  "年级": [
+    {
+      "hanzi": "我是一年级学生。",
+      "pinyin": "Wǒ shì yī niánjí xuésheng.",
+      "arti": "Saya murid kelas satu."
+    },
+    {
+      "hanzi": "你几年级了?",
+      "pinyin": "Nǐ jǐ niánjí le?",
+      "arti": "Kamu kelas berapa?"
+    }
+  ],
+  "年轻": [
+    {
+      "hanzi": "她很年轻。",
+      "pinyin": "Tā hěn niánqīng.",
+      "arti": "Dia masih muda."
+    },
+    {
+      "hanzi": "年轻人喜欢上网。",
+      "pinyin": "Niánqīngrén xǐhuan shàngwǎng.",
+      "arti": "Anak muda suka berselancar di internet."
+    }
+  ],
+  "鸟": [
+    {
+      "hanzi": "树上有一只鸟。",
+      "pinyin": "Shù shàng yǒu yì zhī niǎo.",
+      "arti": "Di pohon ada seekor burung."
+    },
+    {
+      "hanzi": "鸟在天上飞。",
+      "pinyin": "Niǎo zài tiān shàng fēi.",
+      "arti": "Burung terbang di langit."
+    }
+  ],
+  "努力": [
+    {
+      "hanzi": "他学习很努力。",
+      "pinyin": "Tā xuéxí hěn nǔlì.",
+      "arti": "Dia belajar dengan sungguh-sungguh."
+    },
+    {
+      "hanzi": "我会努力的。",
+      "pinyin": "Wǒ huì nǔlì de.",
+      "arti": "Saya akan berusaha keras."
+    }
+  ],
+  "爬山": [
+    {
+      "hanzi": "周末我们去爬山。",
+      "pinyin": "Zhōumò wǒmen qù páshān.",
+      "arti": "Akhir pekan kami pergi mendaki gunung."
+    },
+    {
+      "hanzi": "爸爸喜欢爬山。",
+      "pinyin": "Bàba xǐhuan páshān.",
+      "arti": "Ayah suka mendaki gunung."
+    }
+  ],
+  "盘子": [
+    {
+      "hanzi": "桌子上有三个盘子。",
+      "pinyin": "Zhuōzi shàng yǒu sān ge pánzi.",
+      "arti": "Di atas meja ada tiga piring."
+    },
+    {
+      "hanzi": "请把盘子洗干净。",
+      "pinyin": "Qǐng bǎ pánzi xǐ gānjìng.",
+      "arti": "Tolong cuci piringnya sampai bersih."
+    }
+  ],
+  "胖": [
+    {
+      "hanzi": "小猫很胖。",
+      "pinyin": "Xiǎo māo hěn pàng.",
+      "arti": "Anak kucing itu gemuk."
+    },
+    {
+      "hanzi": "那只狗有点胖。",
+      "pinyin": "Nà zhī gǒu yǒudiǎn pàng.",
+      "arti": "Anjing itu agak gemuk."
+    }
+  ],
+  "啤酒": [
+    {
+      "hanzi": "他喜欢喝啤酒。",
+      "pinyin": "Tā xǐhuan hē píjiǔ.",
+      "arti": "Dia suka minum bir."
+    },
+    {
+      "hanzi": "这个饭馆有啤酒。",
+      "pinyin": "Zhège fànguǎn yǒu píjiǔ.",
+      "arti": "Restoran ini menyediakan bir."
+    }
+  ],
+  "葡萄": [
+    {
+      "hanzi": "我喜欢吃葡萄。",
+      "pinyin": "Wǒ xǐhuan chī pútao.",
+      "arti": "Saya suka makan anggur."
+    },
+    {
+      "hanzi": "这些葡萄很甜。",
+      "pinyin": "Zhèxiē pútao hěn tián.",
+      "arti": "Anggur-anggur ini manis."
+    }
+  ],
+  "普通话": [
+    {
+      "hanzi": "她会说普通话。",
+      "pinyin": "Tā huì shuō pǔtōnghuà.",
+      "arti": "Dia bisa berbahasa Mandarin standar."
+    },
+    {
+      "hanzi": "我的普通话不太好。",
+      "pinyin": "Wǒ de pǔtōnghuà bú tài hǎo.",
+      "arti": "Bahasa Mandarin standar saya kurang bagus."
+    }
+  ],
+  "骑": [
+    {
+      "hanzi": "我每天骑车上班。",
+      "pinyin": "Wǒ měitiān qí chē shàngbān.",
+      "arti": "Saya naik sepeda ke tempat kerja setiap hari."
+    },
+    {
+      "hanzi": "你会骑自行车吗?",
+      "pinyin": "Nǐ huì qí zìxíngchē ma?",
+      "arti": "Apakah kamu bisa naik sepeda?"
+    }
+  ],
+  "其实": [
+    {
+      "hanzi": "其实我不饿。",
+      "pinyin": "Qíshí wǒ bú è.",
+      "arti": "Sebenarnya saya tidak lapar."
+    },
+    {
+      "hanzi": "其实汉语不太难。",
+      "pinyin": "Qíshí Hànyǔ bú tài nán.",
+      "arti": "Sebenarnya bahasa Mandarin tidak terlalu sulit."
+    }
+  ],
+  "其他": [
+    {
+      "hanzi": "其他人都走了。",
+      "pinyin": "Qítā rén dōu zǒu le.",
+      "arti": "Orang lain sudah pergi semua."
+    },
+    {
+      "hanzi": "你还有其他问题吗?",
+      "pinyin": "Nǐ hái yǒu qítā wèntí ma?",
+      "arti": "Apakah ada pertanyaan lain?"
+    }
+  ],
+  "奇怪": [
+    {
+      "hanzi": "这件事很奇怪。",
+      "pinyin": "Zhè jiàn shì hěn qíguài.",
+      "arti": "Hal ini aneh."
+    },
+    {
+      "hanzi": "他今天很奇怪。",
+      "pinyin": "Tā jīntiān hěn qíguài.",
+      "arti": "Hari ini dia aneh."
+    }
+  ],
+  "铅笔": [
+    {
+      "hanzi": "我有一支铅笔。",
+      "pinyin": "Wǒ yǒu yì zhī qiānbǐ.",
+      "arti": "Saya punya sebuah pensil."
+    },
+    {
+      "hanzi": "请用铅笔写。",
+      "pinyin": "Qǐng yòng qiānbǐ xiě.",
+      "arti": "Tolong menulis dengan pensil."
+    }
+  ],
+  "清楚": [
+    {
+      "hanzi": "我听清楚了。",
+      "pinyin": "Wǒ tīng qīngchu le.",
+      "arti": "Saya sudah mendengar dengan jelas."
+    },
+    {
+      "hanzi": "黑板上的字看不清楚。",
+      "pinyin": "Hēibǎn shàng de zì kàn bu qīngchu.",
+      "arti": "Tulisan di papan tulis tidak terlihat jelas."
+    }
+  ],
+  "秋": [
+    {
+      "hanzi": "秋天天气很好。",
+      "pinyin": "Qiūtiān tiānqì hěn hǎo.",
+      "arti": "Cuaca musim gugur sangat bagus."
+    },
+    {
+      "hanzi": "我喜欢秋天。",
+      "pinyin": "Wǒ xǐhuan qiūtiān.",
+      "arti": "Saya suka musim gugur."
+    }
+  ],
+  "裙子": [
+    {
+      "hanzi": "她买了一条新裙子。",
+      "pinyin": "Tā mǎi le yì tiáo xīn qúnzi.",
+      "arti": "Dia membeli rok baru."
+    },
+    {
+      "hanzi": "这条裙子很漂亮。",
+      "pinyin": "Zhè tiáo qúnzi hěn piàoliang.",
+      "arti": "Rok ini cantik."
+    }
+  ],
+  "然后": [
+    {
+      "hanzi": "先吃饭,然后看电影。",
+      "pinyin": "Xiān chīfàn, ránhòu kàn diànyǐng.",
+      "arti": "Makan dulu, lalu menonton film."
+    },
+    {
+      "hanzi": "我先去超市,然后回家。",
+      "pinyin": "Wǒ xiān qù chāoshì, ránhòu huí jiā.",
+      "arti": "Saya ke supermarket dulu, lalu pulang."
+    }
+  ],
+  "热情": [
+    {
+      "hanzi": "他对客人很热情。",
+      "pinyin": "Tā duì kèrén hěn rèqíng.",
+      "arti": "Dia ramah terhadap tamu."
+    },
+    {
+      "hanzi": "中国人很热情。",
+      "pinyin": "Zhōngguó rén hěn rèqíng.",
+      "arti": "Orang Tiongkok sangat ramah."
+    }
+  ],
+  "认为": [
+    {
+      "hanzi": "我认为这个办法很好。",
+      "pinyin": "Wǒ rènwéi zhège bànfǎ hěn hǎo.",
+      "arti": "Saya berpendapat cara ini bagus."
+    },
+    {
+      "hanzi": "你认为呢?",
+      "pinyin": "Nǐ rènwéi ne?",
+      "arti": "Menurutmu bagaimana?"
+    }
+  ],
+  "认真": [
+    {
+      "hanzi": "他学习很认真。",
+      "pinyin": "Tā xuéxí hěn rènzhēn.",
+      "arti": "Dia belajar dengan serius."
+    },
+    {
+      "hanzi": "请认真听老师讲。",
+      "pinyin": "Qǐng rènzhēn tīng lǎoshī jiǎng.",
+      "arti": "Tolong dengarkan penjelasan guru dengan serius."
+    }
+  ],
+  "容易": [
+    {
+      "hanzi": "这个问题很容易。",
+      "pinyin": "Zhège wèntí hěn róngyì.",
+      "arti": "Pertanyaan ini mudah."
+    },
+    {
+      "hanzi": "学汉语不容易。",
+      "pinyin": "Xué Hànyǔ bù róngyì.",
+      "arti": "Belajar bahasa Mandarin tidak mudah."
+    }
+  ],
+  "如果": [
+    {
+      "hanzi": "如果明天下雨,我就不去了。",
+      "pinyin": "Rúguǒ míngtiān xiàyǔ, wǒ jiù bú qù le.",
+      "arti": "Jika besok hujan, saya tidak jadi pergi."
+    },
+    {
+      "hanzi": "如果你有时间,我们一起去吧。",
+      "pinyin": "Rúguǒ nǐ yǒu shíjiān, wǒmen yìqǐ qù ba.",
+      "arti": "Jika kamu ada waktu, mari pergi bersama."
+    }
+  ],
+  "伞": [
+    {
+      "hanzi": "外面下雨,带伞吧。",
+      "pinyin": "Wàimiàn xiàyǔ, dài sǎn ba.",
+      "arti": "Di luar hujan, bawalah payung."
+    },
+    {
+      "hanzi": "我的伞在哪儿?",
+      "pinyin": "Wǒ de sǎn zài nǎr?",
+      "arti": "Di mana payung saya?"
+    }
+  ],
+  "上网": [
+    {
+      "hanzi": "我每天上网。",
+      "pinyin": "Wǒ měitiān shàngwǎng.",
+      "arti": "Saya berselancar di internet setiap hari."
+    },
+    {
+      "hanzi": "他在房间里上网。",
+      "pinyin": "Tā zài fángjiān lǐ shàngwǎng.",
+      "arti": "Dia berselancar di internet di kamar."
+    }
+  ],
+  "生气": [
+    {
+      "hanzi": "妈妈生气了。",
+      "pinyin": "Māma shēngqì le.",
+      "arti": "Ibu marah."
+    },
+    {
+      "hanzi": "别生气。",
+      "pinyin": "Bié shēngqì.",
+      "arti": "Jangan marah."
+    }
+  ],
+  "声音": [
+    {
+      "hanzi": "他的声音很好听。",
+      "pinyin": "Tā de shēngyīn hěn hǎotīng.",
+      "arti": "Suaranya sangat merdu."
+    },
+    {
+      "hanzi": "请把声音关小一点。",
+      "pinyin": "Qǐng bǎ shēngyīn guān xiǎo yìdiǎn.",
+      "arti": "Tolong kecilkan suaranya."
+    }
+  ],
+  "使": [
+    {
+      "hanzi": "这件事使他很高兴。",
+      "pinyin": "Zhè jiàn shì shǐ tā hěn gāoxìng.",
+      "arti": "Hal ini membuatnya sangat senang."
+    },
+    {
+      "hanzi": "音乐使我快乐。",
+      "pinyin": "Yīnyuè shǐ wǒ kuàilè.",
+      "arti": "Musik membuat saya bahagia."
+    }
+  ],
+  "世界": [
+    {
+      "hanzi": "世界很大。",
+      "pinyin": "Shìjiè hěn dà.",
+      "arti": "Dunia sangat luas."
+    },
+    {
+      "hanzi": "我想看看这个世界。",
+      "pinyin": "Wǒ xiǎng kànkan zhège shìjiè.",
+      "arti": "Saya ingin melihat dunia ini."
+    }
+  ],
+  "瘦": [
+    {
+      "hanzi": "这条裤子有点瘦。",
+      "pinyin": "Zhè tiáo kùzi yǒudiǎn shòu.",
+      "arti": "Celana ini agak ketat."
+    },
+    {
+      "hanzi": "那只猫很瘦。",
+      "pinyin": "Nà zhī māo hěn shòu.",
+      "arti": "Kucing itu kurus."
+    }
+  ],
+  "舒服": [
+    {
+      "hanzi": "这个椅子很舒服。",
+      "pinyin": "Zhège yǐzi hěn shūfu.",
+      "arti": "Kursi ini nyaman."
+    },
+    {
+      "hanzi": "我今天不太舒服。",
+      "pinyin": "Wǒ jīntiān bú tài shūfu.",
+      "arti": "Hari ini saya kurang enak badan."
+    }
+  ],
+  "叔叔": [
+    {
+      "hanzi": "叔叔是医生。",
+      "pinyin": "Shūshu shì yīshēng.",
+      "arti": "Paman adalah dokter."
+    },
+    {
+      "hanzi": "我叔叔住在北京。",
+      "pinyin": "Wǒ shūshu zhù zài Běijīng.",
+      "arti": "Paman saya tinggal di Beijing."
+    }
+  ],
+  "树": [
+    {
+      "hanzi": "公园里有很多树。",
+      "pinyin": "Gōngyuán lǐ yǒu hěn duō shù.",
+      "arti": "Di taman ada banyak pohon."
+    },
+    {
+      "hanzi": "鸟在树上唱歌。",
+      "pinyin": "Niǎo zài shù shàng chànggē.",
+      "arti": "Burung berkicau di atas pohon."
+    }
+  ],
+  "数学": [
+    {
+      "hanzi": "我喜欢数学。",
+      "pinyin": "Wǒ xǐhuan shùxué.",
+      "arti": "Saya suka matematika."
+    },
+    {
+      "hanzi": "数学老师很年轻。",
+      "pinyin": "Shùxué lǎoshī hěn niánqīng.",
+      "arti": "Guru matematikanya masih muda."
+    }
+  ],
+  "刷": [
+    {
+      "hanzi": "吃完饭要刷牙。",
+      "pinyin": "Chīwán fàn yào shuā yá.",
+      "arti": "Setelah makan harus menyikat gigi."
+    },
+    {
+      "hanzi": "他在刷鞋。",
+      "pinyin": "Tā zài shuā xié.",
+      "arti": "Dia sedang menyikat sepatu."
+    }
+  ],
+  "双": [
+    {
+      "hanzi": "我买了一双鞋。",
+      "pinyin": "Wǒ mǎi le yì shuāng xié.",
+      "arti": "Saya membeli sepasang sepatu."
+    },
+    {
+      "hanzi": "这双鞋很舒服。",
+      "pinyin": "Zhè shuāng xié hěn shūfu.",
+      "arti": "Sepasang sepatu ini nyaman."
+    }
+  ],
+  "水平": [
+    {
+      "hanzi": "他的汉语水平很高。",
+      "pinyin": "Tā de Hànyǔ shuǐpíng hěn gāo.",
+      "arti": "Tingkat bahasa Mandarinnya tinggi."
+    },
+    {
+      "hanzi": "我想提高我的水平。",
+      "pinyin": "Wǒ xiǎng tígāo wǒ de shuǐpíng.",
+      "arti": "Saya ingin meningkatkan kemampuan saya."
+    }
+  ],
+  "司机": [
+    {
+      "hanzi": "司机在车里等我们。",
+      "pinyin": "Sījī zài chē lǐ děng wǒmen.",
+      "arti": "Sopir menunggu kami di dalam mobil."
+    },
+    {
+      "hanzi": "他是出租车司机。",
+      "pinyin": "Tā shì chūzūchē sījī.",
+      "arti": "Dia sopir taksi."
+    }
+  ],
+  "虽然": [
+    {
+      "hanzi": "虽然很累,但是我很高兴。",
+      "pinyin": "Suīrán hěn lèi, dànshì wǒ hěn gāoxìng.",
+      "arti": "Meskipun lelah, saya sangat senang."
+    },
+    {
+      "hanzi": "虽然下雨,我们还是去了。",
+      "pinyin": "Suīrán xiàyǔ, wǒmen háishi qù le.",
+      "arti": "Meskipun hujan, kami tetap pergi."
+    }
+  ],
+  "太阳": [
+    {
+      "hanzi": "太阳出来了。",
+      "pinyin": "Tàiyáng chūlái le.",
+      "arti": "Matahari sudah terbit."
+    },
+    {
+      "hanzi": "今天太阳很大。",
+      "pinyin": "Jīntiān tàiyáng hěn dà.",
+      "arti": "Hari ini matahari sangat terik."
+    }
+  ],
+  "糖": [
+    {
+      "hanzi": "我不要糖。",
+      "pinyin": "Wǒ bú yào táng.",
+      "arti": "Saya tidak mau gula."
+    },
+    {
+      "hanzi": "这个蛋糕有很多糖。",
+      "pinyin": "Zhège dàngāo yǒu hěn duō táng.",
+      "arti": "Kue ini banyak gulanya."
+    }
+  ],
+  "特别": [
+    {
+      "hanzi": "今天特别冷。",
+      "pinyin": "Jīntiān tèbié lěng.",
+      "arti": "Hari ini dingin sekali."
+    },
+    {
+      "hanzi": "我特别喜欢这个地方。",
+      "pinyin": "Wǒ tèbié xǐhuan zhège dìfang.",
+      "arti": "Saya sangat menyukai tempat ini."
+    }
+  ],
+  "疼": [
+    {
+      "hanzi": "我头疼。",
+      "pinyin": "Wǒ tóu téng.",
+      "arti": "Kepala saya sakit."
+    },
+    {
+      "hanzi": "你的脚还疼吗?",
+      "pinyin": "Nǐ de jiǎo hái téng ma?",
+      "arti": "Apakah kakimu masih sakit?"
+    }
+  ],
+  "提高": [
+    {
+      "hanzi": "多练习可以提高成绩。",
+      "pinyin": "Duō liànxí kěyǐ tígāo chéngjì.",
+      "arti": "Banyak berlatih bisa meningkatkan nilai."
+    },
+    {
+      "hanzi": "他的成绩提高了很多。",
+      "pinyin": "Tā de chéngjì tígāo le hěn duō.",
+      "arti": "Nilainya naik banyak."
+    }
+  ],
+  "体育": [
+    {
+      "hanzi": "我喜欢体育课。",
+      "pinyin": "Wǒ xǐhuan tǐyù kè.",
+      "arti": "Saya suka pelajaran olahraga."
+    },
+    {
+      "hanzi": "他是体育老师。",
+      "pinyin": "Tā shì tǐyù lǎoshī.",
+      "arti": "Dia guru olahraga."
+    }
+  ],
+  "甜": [
+    {
+      "hanzi": "这个西瓜很甜。",
+      "pinyin": "Zhège xīguā hěn tián.",
+      "arti": "Semangka ini manis."
+    },
+    {
+      "hanzi": "我不喜欢太甜的东西。",
+      "pinyin": "Wǒ bù xǐhuan tài tián de dōngxi.",
+      "arti": "Saya tidak suka yang terlalu manis."
+    }
+  ],
+  "条": [
+    {
+      "hanzi": "这是一条新路。",
+      "pinyin": "Zhè shì yì tiáo xīn lù.",
+      "arti": "Ini jalan baru."
+    },
+    {
+      "hanzi": "我有两条裙子。",
+      "pinyin": "Wǒ yǒu liǎng tiáo qúnzi.",
+      "arti": "Saya punya dua rok."
+    }
+  ],
+  "同事": [
+    {
+      "hanzi": "他是我的同事。",
+      "pinyin": "Tā shì wǒ de tóngshì.",
+      "arti": "Dia adalah rekan kerja saya."
+    },
+    {
+      "hanzi": "我和同事一起吃饭。",
+      "pinyin": "Wǒ hé tóngshì yìqǐ chīfàn.",
+      "arti": "Saya makan bersama rekan kerja."
+    }
+  ],
+  "同意": [
+    {
+      "hanzi": "我同意你的办法。",
+      "pinyin": "Wǒ tóngyì nǐ de bànfǎ.",
+      "arti": "Saya setuju dengan caramu."
+    },
+    {
+      "hanzi": "老师不同意。",
+      "pinyin": "Lǎoshī bù tóngyì.",
+      "arti": "Guru tidak setuju."
+    }
+  ],
+  "头发": [
+    {
+      "hanzi": "他的头发是黑的。",
+      "pinyin": "Tā de tóufa shì hēi de.",
+      "arti": "Rambutnya hitam."
+    },
+    {
+      "hanzi": "我去洗头发。",
+      "pinyin": "Wǒ qù xǐ tóufa.",
+      "arti": "Saya pergi keramas."
+    }
+  ],
+  "突然": [
+    {
+      "hanzi": "突然下雨了。",
+      "pinyin": "Tūrán xiàyǔ le.",
+      "arti": "Tiba-tiba hujan."
+    },
+    {
+      "hanzi": "他突然不说话了。",
+      "pinyin": "Tā tūrán bù shuōhuà le.",
+      "arti": "Dia tiba-tiba berhenti berbicara."
+    }
+  ],
+  "图书馆": [
+    {
+      "hanzi": "我在图书馆看书。",
+      "pinyin": "Wǒ zài túshūguǎn kàn shū.",
+      "arti": "Saya membaca buku di perpustakaan."
+    },
+    {
+      "hanzi": "图书馆几点关门?",
+      "pinyin": "Túshūguǎn jǐ diǎn guānmén?",
+      "arti": "Pukul berapa perpustakaan tutup?"
+    }
+  ],
+  "腿": [
+    {
+      "hanzi": "我的腿有点累。",
+      "pinyin": "Wǒ de tuǐ yǒudiǎn lèi.",
+      "arti": "Kaki saya agak lelah."
+    },
+    {
+      "hanzi": "他的腿很长。",
+      "pinyin": "Tā de tuǐ hěn cháng.",
+      "arti": "Kakinya panjang."
+    }
+  ],
+  "完成": [
+    {
+      "hanzi": "我完成了作业。",
+      "pinyin": "Wǒ wánchéng le zuòyè.",
+      "arti": "Saya sudah menyelesaikan pekerjaan rumah."
+    },
+    {
+      "hanzi": "这个工作今天要完成。",
+      "pinyin": "Zhège gōngzuò jīntiān yào wánchéng.",
+      "arti": "Pekerjaan ini harus selesai hari ini."
+    }
+  ],
+  "碗": [
+    {
+      "hanzi": "我吃了一碗面条。",
+      "pinyin": "Wǒ chī le yì wǎn miàntiáo.",
+      "arti": "Saya makan semangkuk mi."
+    },
+    {
+      "hanzi": "请把碗洗干净。",
+      "pinyin": "Qǐng bǎ wǎn xǐ gānjìng.",
+      "arti": "Tolong cuci mangkuknya sampai bersih."
+    }
+  ],
+  "万": [
+    {
+      "hanzi": "这个城市有一百万人。",
+      "pinyin": "Zhège chéngshì yǒu yì bǎi wàn rén.",
+      "arti": "Kota ini berpenduduk satu juta orang."
+    },
+    {
+      "hanzi": "这辆车五万块。",
+      "pinyin": "Zhè liàng chē wǔ wàn kuài.",
+      "arti": "Mobil ini lima puluh ribu yuan."
+    }
+  ],
+  "忘记": [
+    {
+      "hanzi": "我忘记带伞了。",
+      "pinyin": "Wǒ wàngjì dài sǎn le.",
+      "arti": "Saya lupa membawa payung."
+    },
+    {
+      "hanzi": "别忘记我的话。",
+      "pinyin": "Bié wàngjì wǒ de huà.",
+      "arti": "Jangan lupakan kata-kataku."
+    }
+  ],
+  "为了": [
+    {
+      "hanzi": "为了学好汉语,他每天练习。",
+      "pinyin": "Wèile xué hǎo Hànyǔ, tā měitiān liànxí.",
+      "arti": "Demi menguasai bahasa Mandarin, dia berlatih setiap hari."
+    },
+    {
+      "hanzi": "为了健康,我每天锻炼。",
+      "pinyin": "Wèile jiànkāng, wǒ měitiān duànliàn.",
+      "arti": "Demi kesehatan, saya berolahraga setiap hari."
+    }
+  ],
+  "为什么": [
+    {
+      "hanzi": "你为什么迟到?",
+      "pinyin": "Nǐ wèishénme chídào?",
+      "arti": "Mengapa kamu terlambat?"
+    },
+    {
+      "hanzi": "为什么不去?",
+      "pinyin": "Wèishénme bú qù?",
+      "arti": "Kenapa tidak pergi?"
+    }
+  ],
+  "位": [
+    {
+      "hanzi": "请问几位?",
+      "pinyin": "Qǐngwèn jǐ wèi?",
+      "arti": "Permisi, untuk berapa orang?"
+    },
+    {
+      "hanzi": "这位是我的老师。",
+      "pinyin": "Zhè wèi shì wǒ de lǎoshī.",
+      "arti": "Beliau ini guru saya."
+    }
+  ],
+  "文化": [
+    {
+      "hanzi": "我喜欢中国文化。",
+      "pinyin": "Wǒ xǐhuan Zhōngguó wénhuà.",
+      "arti": "Saya suka budaya Tiongkok."
+    },
+    {
+      "hanzi": "每个国家都有自己的文化。",
+      "pinyin": "Měi ge guójiā dōu yǒu zìjǐ de wénhuà.",
+      "arti": "Setiap negara punya budayanya sendiri."
+    }
+  ],
+  "西": [
+    {
+      "hanzi": "太阳从西边下去。",
+      "pinyin": "Tàiyáng cóng xībian xiàqù.",
+      "arti": "Matahari terbenam di barat."
+    },
+    {
+      "hanzi": "医院在学校西边。",
+      "pinyin": "Yīyuàn zài xuéxiào xībian.",
+      "arti": "Rumah sakit ada di sebelah barat sekolah."
+    }
+  ],
+  "习惯": [
+    {
+      "hanzi": "我习惯早起。",
+      "pinyin": "Wǒ xíguàn zǎo qǐ.",
+      "arti": "Saya terbiasa bangun pagi."
+    },
+    {
+      "hanzi": "这是一个好习惯。",
+      "pinyin": "Zhè shì yí ge hǎo xíguàn.",
+      "arti": "Ini kebiasaan yang baik."
+    }
+  ],
+  "洗手间": [
+    {
+      "hanzi": "请问洗手间在哪儿?",
+      "pinyin": "Qǐngwèn xǐshǒujiān zài nǎr?",
+      "arti": "Permisi, di mana toilet?"
+    },
+    {
+      "hanzi": "洗手间在三楼。",
+      "pinyin": "Xǐshǒujiān zài sān lóu.",
+      "arti": "Toilet ada di lantai tiga."
+    }
+  ],
+  "洗澡": [
+    {
+      "hanzi": "我每天洗澡。",
+      "pinyin": "Wǒ měitiān xǐzǎo.",
+      "arti": "Saya mandi setiap hari."
+    },
+    {
+      "hanzi": "他在洗澡。",
+      "pinyin": "Tā zài xǐzǎo.",
+      "arti": "Dia sedang mandi."
+    }
+  ],
+  "夏": [
+    {
+      "hanzi": "夏天很热。",
+      "pinyin": "Xiàtiān hěn rè.",
+      "arti": "Musim panas sangat panas."
+    },
+    {
+      "hanzi": "你喜欢夏天还是冬天?",
+      "pinyin": "Nǐ xǐhuan xiàtiān háishi dōngtiān?",
+      "arti": "Kamu suka musim panas atau musim dingin?"
+    }
+  ],
+  "先": [
+    {
+      "hanzi": "你先走吧。",
+      "pinyin": "Nǐ xiān zǒu ba.",
+      "arti": "Kamu pergi duluan saja."
+    },
+    {
+      "hanzi": "请先坐一下。",
+      "pinyin": "Qǐng xiān zuò yíxià.",
+      "arti": "Silakan duduk dulu."
+    }
+  ],
+  "香蕉": [
+    {
+      "hanzi": "我喜欢吃香蕉。",
+      "pinyin": "Wǒ xǐhuan chī xiāngjiāo.",
+      "arti": "Saya suka makan pisang."
+    },
+    {
+      "hanzi": "香蕉很甜。",
+      "pinyin": "Xiāngjiāo hěn tián.",
+      "arti": "Pisang itu manis."
+    }
+  ],
+  "相同": [
+    {
+      "hanzi": "我们的爱好相同。",
+      "pinyin": "Wǒmen de àihào xiāngtóng.",
+      "arti": "Hobi kami sama."
+    },
+    {
+      "hanzi": "这两个字的意思不相同。",
+      "pinyin": "Zhè liǎng ge zì de yìsi bù xiāngtóng.",
+      "arti": "Arti dua aksara ini tidak sama."
+    }
+  ],
+  "相信": [
+    {
+      "hanzi": "我相信你。",
+      "pinyin": "Wǒ xiāngxìn nǐ.",
+      "arti": "Saya percaya padamu."
+    },
+    {
+      "hanzi": "他不相信这是真的。",
+      "pinyin": "Tā bù xiāngxìn zhè shì zhēn de.",
+      "arti": "Dia tidak percaya ini nyata."
+    }
+  ],
+  "像": [
+    {
+      "hanzi": "你像你妈妈。",
+      "pinyin": "Nǐ xiàng nǐ māma.",
+      "arti": "Kamu mirip ibumu."
+    },
+    {
+      "hanzi": "这只猫像一只小狗。",
+      "pinyin": "Zhè zhī māo xiàng yì zhī xiǎo gǒu.",
+      "arti": "Kucing ini seperti anak anjing."
+    }
+  ],
+  "小心": [
+    {
+      "hanzi": "小心!",
+      "pinyin": "Xiǎoxīn!",
+      "arti": "Hati-hati!"
+    },
+    {
+      "hanzi": "过马路要小心。",
+      "pinyin": "Guò mǎlù yào xiǎoxīn.",
+      "arti": "Menyeberang jalan harus hati-hati."
+    }
+  ],
+  "校长": [
+    {
+      "hanzi": "我们的校长很年轻。",
+      "pinyin": "Wǒmen de xiàozhǎng hěn niánqīng.",
+      "arti": "Kepala sekolah kami masih muda."
+    },
+    {
+      "hanzi": "校长欢迎大家。",
+      "pinyin": "Xiàozhǎng huānyíng dàjiā.",
+      "arti": "Kepala sekolah menyambut semuanya."
+    }
+  ],
+  "鞋": [
+    {
+      "hanzi": "请在门口换鞋。",
+      "pinyin": "Qǐng zài ménkǒu huàn xié.",
+      "arti": "Silakan ganti sepatu di pintu."
+    },
+    {
+      "hanzi": "你的鞋很漂亮。",
+      "pinyin": "Nǐ de xié hěn piàoliang.",
+      "arti": "Sepatumu cantik."
+    }
+  ],
+  "新闻": [
+    {
+      "hanzi": "爸爸每天看新闻。",
+      "pinyin": "Bàba měitiān kàn xīnwén.",
+      "arti": "Ayah menonton berita setiap hari."
+    },
+    {
+      "hanzi": "今天有什么新闻?",
+      "pinyin": "Jīntiān yǒu shénme xīnwén?",
+      "arti": "Ada berita apa hari ini?"
+    }
+  ],
+  "新鲜": [
+    {
+      "hanzi": "这些水果很新鲜。",
+      "pinyin": "Zhèxiē shuǐguǒ hěn xīnxiān.",
+      "arti": "Buah-buahan ini segar."
+    },
+    {
+      "hanzi": "早上的空气很新鲜。",
+      "pinyin": "Zǎoshang de kōngqì hěn xīnxiān.",
+      "arti": "Udara pagi hari segar."
+    }
+  ],
+  "信": [
+    {
+      "hanzi": "我给朋友写了一封信。",
+      "pinyin": "Wǒ gěi péngyou xiě le yì fēng xìn.",
+      "arti": "Saya menulis sepucuk surat untuk teman."
+    },
+    {
+      "hanzi": "你收到信了吗?",
+      "pinyin": "Nǐ shōudào xìn le ma?",
+      "arti": "Apakah kamu sudah menerima surat?"
+    }
+  ],
+  "行李箱": [
+    {
+      "hanzi": "我的行李箱很大。",
+      "pinyin": "Wǒ de xínglixiāng hěn dà.",
+      "arti": "Koper saya besar."
+    },
+    {
+      "hanzi": "请把行李箱放在这儿。",
+      "pinyin": "Qǐng bǎ xínglixiāng fàng zài zhèr.",
+      "arti": "Tolong taruh koper di sini."
+    }
+  ],
+  "兴趣": [
+    {
+      "hanzi": "我对汉语很有兴趣。",
+      "pinyin": "Wǒ duì Hànyǔ hěn yǒu xìngqù.",
+      "arti": "Saya sangat tertarik pada bahasa Mandarin."
+    },
+    {
+      "hanzi": "他对音乐没有兴趣。",
+      "pinyin": "Tā duì yīnyuè méiyǒu xìngqù.",
+      "arti": "Dia tidak tertarik pada musik."
+    }
+  ],
+  "熊猫": [
+    {
+      "hanzi": "熊猫很可爱。",
+      "pinyin": "Xióngmāo hěn kě'ài.",
+      "arti": "Panda sangat lucu."
+    },
+    {
+      "hanzi": "我想去看熊猫。",
+      "pinyin": "Wǒ xiǎng qù kàn xióngmāo.",
+      "arti": "Saya ingin pergi melihat panda."
+    }
+  ],
+  "需要": [
+    {
+      "hanzi": "我需要你的帮助。",
+      "pinyin": "Wǒ xūyào nǐ de bāngzhù.",
+      "arti": "Saya membutuhkan bantuanmu."
+    },
+    {
+      "hanzi": "你需要什么?",
+      "pinyin": "Nǐ xūyào shénme?",
+      "arti": "Kamu butuh apa?"
+    }
+  ],
+  "选择": [
+    {
+      "hanzi": "你可以选择红的或者蓝的。",
+      "pinyin": "Nǐ kěyǐ xuǎnzé hóng de huòzhě lán de.",
+      "arti": "Kamu boleh memilih yang merah atau biru."
+    },
+    {
+      "hanzi": "这是一个很难的选择。",
+      "pinyin": "Zhè shì yí ge hěn nán de xuǎnzé.",
+      "arti": "Ini pilihan yang sulit."
+    }
+  ],
+  "眼镜": [
+    {
+      "hanzi": "他戴着眼镜。",
+      "pinyin": "Tā dàizhe yǎnjìng.",
+      "arti": "Dia memakai kacamata."
+    },
+    {
+      "hanzi": "我的眼镜在哪儿?",
+      "pinyin": "Wǒ de yǎnjìng zài nǎr?",
+      "arti": "Di mana kacamata saya?"
+    }
+  ],
+  "要求": [
+    {
+      "hanzi": "老师要求我们认真写作业。",
+      "pinyin": "Lǎoshī yāoqiú wǒmen rènzhēn xiě zuòyè.",
+      "arti": "Guru meminta kami mengerjakan tugas dengan serius."
+    },
+    {
+      "hanzi": "这个工作要求很高。",
+      "pinyin": "Zhège gōngzuò yāoqiú hěn gāo.",
+      "arti": "Persyaratan pekerjaan ini tinggi."
+    }
+  ],
+  "爷爷": [
+    {
+      "hanzi": "爷爷每天早上爬山。",
+      "pinyin": "Yéye měitiān zǎoshang páshān.",
+      "arti": "Kakek mendaki gunung setiap pagi."
+    },
+    {
+      "hanzi": "我给爷爷打电话。",
+      "pinyin": "Wǒ gěi yéye dǎ diànhuà.",
+      "arti": "Saya menelepon kakek."
+    }
+  ],
+  "一定": [
+    {
+      "hanzi": "明天我一定来。",
+      "pinyin": "Míngtiān wǒ yídìng lái.",
+      "arti": "Besok saya pasti datang."
+    },
+    {
+      "hanzi": "你一定要小心。",
+      "pinyin": "Nǐ yídìng yào xiǎoxīn.",
+      "arti": "Kamu harus benar-benar hati-hati."
+    }
+  ],
+  "一共": [
+    {
+      "hanzi": "一共多少钱?",
+      "pinyin": "Yígòng duōshao qián?",
+      "arti": "Totalnya berapa?"
+    },
+    {
+      "hanzi": "我们一共五个人。",
+      "pinyin": "Wǒmen yígòng wǔ ge rén.",
+      "arti": "Kami berlima seluruhnya."
+    }
+  ],
+  "一会儿": [
+    {
+      "hanzi": "请等一会儿。",
+      "pinyin": "Qǐng děng yíhuìr.",
+      "arti": "Tolong tunggu sebentar."
+    },
+    {
+      "hanzi": "我休息一会儿。",
+      "pinyin": "Wǒ xiūxi yíhuìr.",
+      "arti": "Saya istirahat sebentar."
+    }
+  ],
+  "一样": [
+    {
+      "hanzi": "我们的手机一样。",
+      "pinyin": "Wǒmen de shǒujī yíyàng.",
+      "arti": "Ponsel kami sama."
+    },
+    {
+      "hanzi": "他和我一样高。",
+      "pinyin": "Tā hé wǒ yíyàng gāo.",
+      "arti": "Dia setinggi saya."
+    }
+  ],
+  "以后": [
+    {
+      "hanzi": "以后我想去中国。",
+      "pinyin": "Yǐhòu wǒ xiǎng qù Zhōngguó.",
+      "arti": "Nanti saya ingin pergi ke Tiongkok."
+    },
+    {
+      "hanzi": "吃饭以后,我去跑步。",
+      "pinyin": "Chīfàn yǐhòu, wǒ qù pǎobù.",
+      "arti": "Setelah makan, saya pergi berlari."
+    }
+  ],
+  "以前": [
+    {
+      "hanzi": "以前我不会游泳。",
+      "pinyin": "Yǐqián wǒ bú huì yóuyǒng.",
+      "arti": "Dulu saya tidak bisa berenang."
+    },
+    {
+      "hanzi": "睡觉以前要刷牙。",
+      "pinyin": "Shuìjiào yǐqián yào shuā yá.",
+      "arti": "Sebelum tidur harus menyikat gigi."
+    }
+  ],
+  "以为": [
+    {
+      "hanzi": "我以为你不来了。",
+      "pinyin": "Wǒ yǐwéi nǐ bù lái le.",
+      "arti": "Saya kira kamu tidak datang."
+    },
+    {
+      "hanzi": "我以为今天是星期五。",
+      "pinyin": "Wǒ yǐwéi jīntiān shì xīngqīwǔ.",
+      "arti": "Saya kira hari ini hari Jumat."
+    }
+  ],
+  "一般": [
+    {
+      "hanzi": "我一般七点起床。",
+      "pinyin": "Wǒ yìbān qī diǎn qǐchuáng.",
+      "arti": "Biasanya saya bangun pukul tujuh."
+    },
+    {
+      "hanzi": "这个饭馆的菜一般。",
+      "pinyin": "Zhège fànguǎn de cài yìbān.",
+      "arti": "Masakan restoran ini biasa saja."
+    }
+  ],
+  "一边": [
+    {
+      "hanzi": "他一边吃饭一边看电视。",
+      "pinyin": "Tā yìbiān chīfàn yìbiān kàn diànshì.",
+      "arti": "Dia makan sambil menonton televisi."
+    },
+    {
+      "hanzi": "我们一边走一边说。",
+      "pinyin": "Wǒmen yìbiān zǒu yìbiān shuō.",
+      "arti": "Kami berjalan sambil mengobrol."
+    }
+  ],
+  "一直": [
+    {
+      "hanzi": "一直往前走。",
+      "pinyin": "Yìzhí wǎng qián zǒu.",
+      "arti": "Jalan terus ke depan."
+    },
+    {
+      "hanzi": "雨一直在下。",
+      "pinyin": "Yǔ yìzhí zài xià.",
+      "arti": "Hujan terus turun."
+    }
+  ],
+  "音乐": [
+    {
+      "hanzi": "这个音乐很好听。",
+      "pinyin": "Zhège yīnyuè hěn hǎotīng.",
+      "arti": "Musik ini enak didengar."
+    },
+    {
+      "hanzi": "他在学习音乐。",
+      "pinyin": "Tā zài xuéxí yīnyuè.",
+      "arti": "Dia sedang belajar musik."
+    }
+  ],
+  "银行": [
+    {
+      "hanzi": "银行在超市旁边。",
+      "pinyin": "Yínháng zài chāoshì pángbiān.",
+      "arti": "Bank ada di samping supermarket."
+    },
+    {
+      "hanzi": "我要去银行。",
+      "pinyin": "Wǒ yào qù yínháng.",
+      "arti": "Saya perlu pergi ke bank."
+    }
+  ],
+  "应该": [
+    {
+      "hanzi": "你应该早点睡觉。",
+      "pinyin": "Nǐ yīnggāi zǎodiǎn shuìjiào.",
+      "arti": "Kamu seharusnya tidur lebih awal."
+    },
+    {
+      "hanzi": "我们应该帮助别人。",
+      "pinyin": "Wǒmen yīnggāi bāngzhù biérén.",
+      "arti": "Kita seharusnya membantu orang lain."
+    }
+  ],
+  "影响": [
+    {
+      "hanzi": "天气影响比赛。",
+      "pinyin": "Tiānqì yǐngxiǎng bǐsài.",
+      "arti": "Cuaca memengaruhi pertandingan."
+    },
+    {
+      "hanzi": "这件事对他有很大影响。",
+      "pinyin": "Zhè jiàn shì duì tā yǒu hěn dà yǐngxiǎng.",
+      "arti": "Hal ini sangat berpengaruh padanya."
+    }
+  ],
+  "用": [
+    {
+      "hanzi": "我用手机上网。",
+      "pinyin": "Wǒ yòng shǒujī shàngwǎng.",
+      "arti": "Saya memakai ponsel untuk berselancar di internet."
+    },
+    {
+      "hanzi": "这个怎么用?",
+      "pinyin": "Zhège zěnme yòng?",
+      "arti": "Bagaimana cara memakai ini?"
+    }
+  ],
+  "游戏": [
+    {
+      "hanzi": "孩子们在玩游戏。",
+      "pinyin": "Háizimen zài wán yóuxì.",
+      "arti": "Anak-anak sedang bermain game."
+    },
+    {
+      "hanzi": "他喜欢电脑游戏。",
+      "pinyin": "Tā xǐhuan diànnǎo yóuxì.",
+      "arti": "Dia suka game komputer."
+    }
+  ],
+  "有名": [
+    {
+      "hanzi": "这个饭馆很有名。",
+      "pinyin": "Zhège fànguǎn hěn yǒumíng.",
+      "arti": "Restoran ini terkenal."
+    },
+    {
+      "hanzi": "他是一个有名的医生。",
+      "pinyin": "Tā shì yí ge yǒumíng de yīshēng.",
+      "arti": "Dia adalah dokter terkenal."
+    }
+  ],
+  "又": [
+    {
+      "hanzi": "他又迟到了。",
+      "pinyin": "Tā yòu chídào le.",
+      "arti": "Dia terlambat lagi."
+    },
+    {
+      "hanzi": "今天又冷又下雨。",
+      "pinyin": "Jīntiān yòu lěng yòu xiàyǔ.",
+      "arti": "Hari ini dingin dan hujan."
+    }
+  ],
+  "遇到": [
+    {
+      "hanzi": "我在路上遇到了老师。",
+      "pinyin": "Wǒ zài lùshang yùdào le lǎoshī.",
+      "arti": "Di jalan saya bertemu guru."
+    },
+    {
+      "hanzi": "你遇到什么问题了?",
+      "pinyin": "Nǐ yùdào shénme wèntí le?",
+      "arti": "Masalah apa yang kamu hadapi?"
+    }
+  ],
+  "愿意": [
+    {
+      "hanzi": "我愿意帮助你。",
+      "pinyin": "Wǒ yuànyì bāngzhù nǐ.",
+      "arti": "Saya bersedia membantumu."
+    },
+    {
+      "hanzi": "你愿意和我去吗?",
+      "pinyin": "Nǐ yuànyì hé wǒ qù ma?",
+      "arti": "Maukah kamu pergi bersamaku?"
+    }
+  ],
+  "越": [
+    {
+      "hanzi": "雨越下越大。",
+      "pinyin": "Yǔ yuè xià yuè dà.",
+      "arti": "Hujan makin lama makin deras."
+    },
+    {
+      "hanzi": "他的汉语越说越好。",
+      "pinyin": "Tā de Hànyǔ yuè shuō yuè hǎo.",
+      "arti": "Bahasa Mandarinnya makin lama makin bagus."
+    }
+  ],
+  "月亮": [
+    {
+      "hanzi": "今天的月亮很大。",
+      "pinyin": "Jīntiān de yuèliang hěn dà.",
+      "arti": "Bulan hari ini besar."
+    },
+    {
+      "hanzi": "晚上可以看见月亮。",
+      "pinyin": "Wǎnshang kěyǐ kànjiàn yuèliang.",
+      "arti": "Malam hari bulan bisa terlihat."
+    }
+  ],
+  "云": [
+    {
+      "hanzi": "天上有很多云。",
+      "pinyin": "Tiān shàng yǒu hěn duō yún.",
+      "arti": "Di langit ada banyak awan."
+    },
+    {
+      "hanzi": "白云在天上。",
+      "pinyin": "Báiyún zài tiān shàng.",
+      "arti": "Awan putih ada di langit."
+    }
+  ],
+  "站": [
+    {
+      "hanzi": "请站在这儿。",
+      "pinyin": "Qǐng zhàn zài zhèr.",
+      "arti": "Silakan berdiri di sini."
+    },
+    {
+      "hanzi": "下一站是北京。",
+      "pinyin": "Xià yí zhàn shì Běijīng.",
+      "arti": "Stasiun berikutnya Beijing."
+    }
+  ],
+  "着急": [
+    {
+      "hanzi": "别着急。",
+      "pinyin": "Bié zháojí.",
+      "arti": "Jangan cemas."
+    },
+    {
+      "hanzi": "他迟到了,很着急。",
+      "pinyin": "Tā chídào le, hěn zháojí.",
+      "arti": "Dia terlambat, jadi sangat cemas."
+    }
+  ],
+  "照顾": [
+    {
+      "hanzi": "妈妈照顾孩子。",
+      "pinyin": "Māma zhàogù háizi.",
+      "arti": "Ibu merawat anak."
+    },
+    {
+      "hanzi": "请照顾好自己。",
+      "pinyin": "Qǐng zhàogù hǎo zìjǐ.",
+      "arti": "Jaga dirimu baik-baik."
+    }
+  ],
+  "照片": [
+    {
+      "hanzi": "这张照片很漂亮。",
+      "pinyin": "Zhè zhāng zhàopiàn hěn piàoliang.",
+      "arti": "Foto ini cantik."
+    },
+    {
+      "hanzi": "我给你看我的照片。",
+      "pinyin": "Wǒ gěi nǐ kàn wǒ de zhàopiàn.",
+      "arti": "Saya tunjukkan fotoku padamu."
+    }
+  ],
+  "照相机": [
+    {
+      "hanzi": "他有一个新照相机。",
+      "pinyin": "Tā yǒu yí ge xīn zhàoxiàngjī.",
+      "arti": "Dia punya kamera baru."
+    },
+    {
+      "hanzi": "我的照相机坏了。",
+      "pinyin": "Wǒ de zhàoxiàngjī huài le.",
+      "arti": "Kamera saya rusak."
+    }
+  ],
+  "只": [
+    {
+      "hanzi": "我有两只猫。",
+      "pinyin": "Wǒ yǒu liǎng zhī māo.",
+      "arti": "Saya punya dua ekor kucing."
+    },
+    {
+      "hanzi": "我家有两只鸟。",
+      "pinyin": "Wǒ jiā yǒu liǎng zhī niǎo.",
+      "arti": "Di rumah saya ada dua ekor burung."
+    },
+    {
+      "hanzi": "我只有一个哥哥。",
+      "pinyin": "Wǒ zhǐ yǒu yí ge gēge.",
+      "arti": "Saya hanya punya satu kakak laki-laki."
+    },
+    {
+      "hanzi": "他只喝水,不喝茶。",
+      "pinyin": "Tā zhǐ hē shuǐ, bù hē chá.",
+      "arti": "Dia hanya minum air, tidak minum teh."
+    }
+  ],
+  "终于": [
+    {
+      "hanzi": "我终于到了。",
+      "pinyin": "Wǒ zhōngyú dào le.",
+      "arti": "Akhirnya saya sampai."
+    },
+    {
+      "hanzi": "他终于考完了。",
+      "pinyin": "Tā zhōngyú kǎowán le.",
+      "arti": "Akhirnya dia selesai ujian."
+    }
+  ],
+  "中间": [
+    {
+      "hanzi": "学校在医院和超市中间。",
+      "pinyin": "Xuéxiào zài yīyuàn hé chāoshì zhōngjiān.",
+      "arti": "Sekolah ada di antara rumah sakit dan supermarket."
+    },
+    {
+      "hanzi": "桌子中间有一个杯子。",
+      "pinyin": "Zhuōzi zhōngjiān yǒu yí ge bēizi.",
+      "arti": "Di tengah meja ada sebuah gelas."
+    }
+  ],
+  "种": [
+    {
+      "hanzi": "你喜欢哪种颜色?",
+      "pinyin": "Nǐ xǐhuan nǎ zhǒng yánsè?",
+      "arti": "Kamu suka jenis warna yang mana?"
+    },
+    {
+      "hanzi": "这里有很多种水果。",
+      "pinyin": "Zhèlǐ yǒu hěn duō zhǒng shuǐguǒ.",
+      "arti": "Di sini ada banyak jenis buah."
+    }
+  ],
+  "重要": [
+    {
+      "hanzi": "这是一个重要的会议。",
+      "pinyin": "Zhè shì yí ge zhòngyào de huìyì.",
+      "arti": "Ini adalah rapat penting."
+    },
+    {
+      "hanzi": "你的意见很重要。",
+      "pinyin": "Nǐ de yìjiàn hěn zhòngyào.",
+      "arti": "Pendapatmu sangat penting."
+    }
+  ],
+  "周末": [
+    {
+      "hanzi": "周末你做什么?",
+      "pinyin": "Zhōumò nǐ zuò shénme?",
+      "arti": "Apa yang kamu lakukan di akhir pekan?"
+    },
+    {
+      "hanzi": "周末我喜欢在家休息。",
+      "pinyin": "Zhōumò wǒ xǐhuan zài jiā xiūxi.",
+      "arti": "Akhir pekan saya suka istirahat di rumah."
+    }
+  ],
+  "主要": [
+    {
+      "hanzi": "他的主要工作是教书。",
+      "pinyin": "Tā de zhǔyào gōngzuò shì jiāoshū.",
+      "arti": "Pekerjaan utamanya adalah mengajar."
+    },
+    {
+      "hanzi": "这是主要问题。",
+      "pinyin": "Zhè shì zhǔyào wèntí.",
+      "arti": "Ini adalah masalah utama."
+    }
+  ],
+  "祝": [
+    {
+      "hanzi": "祝你们幸福!",
+      "pinyin": "Zhù nǐmen xìngfú!",
+      "arti": "Semoga kalian bahagia!"
+    },
+    {
+      "hanzi": "祝你学习进步!",
+      "pinyin": "Zhù nǐ xuéxí jìnbù!",
+      "arti": "Semoga belajarmu semakin maju!"
+    }
+  ],
+  "注意": [
+    {
+      "hanzi": "请注意安全。",
+      "pinyin": "Qǐng zhùyì ānquán.",
+      "arti": "Harap perhatikan keselamatan."
+    },
+    {
+      "hanzi": "上课要注意听。",
+      "pinyin": "Shàngkè yào zhùyì tīng.",
+      "arti": "Saat kelas harus memperhatikan."
+    }
+  ],
+  "字典": [
+    {
+      "hanzi": "我有一本汉语字典。",
+      "pinyin": "Wǒ yǒu yì běn Hànyǔ zìdiǎn.",
+      "arti": "Saya punya kamus bahasa Mandarin."
+    },
+    {
+      "hanzi": "不懂的字可以查字典。",
+      "pinyin": "Bù dǒng de zì kěyǐ chá zìdiǎn.",
+      "arti": "Aksara yang tidak dimengerti bisa dicari di kamus."
+    }
+  ],
+  "自己": [
+    {
+      "hanzi": "我自己做饭。",
+      "pinyin": "Wǒ zìjǐ zuòfàn.",
+      "arti": "Saya memasak sendiri."
+    },
+    {
+      "hanzi": "这是我自己的房间。",
+      "pinyin": "Zhè shì wǒ zìjǐ de fángjiān.",
+      "arti": "Ini kamar saya sendiri."
+    }
+  ],
+  "总是": [
+    {
+      "hanzi": "他总是很忙。",
+      "pinyin": "Tā zǒngshì hěn máng.",
+      "arti": "Dia selalu sibuk."
+    },
+    {
+      "hanzi": "弟弟总是迟到。",
+      "pinyin": "Dìdi zǒngshì chídào.",
+      "arti": "Adik laki-laki selalu terlambat."
+    }
+  ],
+  "最近": [
+    {
+      "hanzi": "你最近怎么样?",
+      "pinyin": "Nǐ zuìjìn zěnmeyàng?",
+      "arti": "Bagaimana kabarmu belakangan ini?"
+    },
+    {
+      "hanzi": "最近天气很冷。",
+      "pinyin": "Zuìjìn tiānqì hěn lěng.",
+      "arti": "Belakangan ini cuaca sangat dingin."
+    }
+  ],
+  "作业": [
+    {
+      "hanzi": "我还没做作业。",
+      "pinyin": "Wǒ hái méi zuò zuòyè.",
+      "arti": "Saya belum mengerjakan pekerjaan rumah."
+    },
+    {
+      "hanzi": "今天的作业很多。",
+      "pinyin": "Jīntiān de zuòyè hěn duō.",
+      "arti": "Pekerjaan rumah hari ini banyak."
+    }
+  ],
+  "作用": [
+    {
+      "hanzi": "这个药很有作用。",
+      "pinyin": "Zhège yào hěn yǒu zuòyòng.",
+      "arti": "Obat ini sangat berkhasiat."
+    },
+    {
+      "hanzi": "手机有很多作用。",
+      "pinyin": "Shǒujī yǒu hěn duō zuòyòng.",
+      "arti": "Ponsel punya banyak fungsi."
+    }
+  ]
+}

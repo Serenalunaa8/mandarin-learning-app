@@ -6,28 +6,42 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
-    'composes a sentence using words from the bundled vocabulary data',
+    'loads example sentences from the JSON matching each HSK level',
     () async {
-      final item = VocabularyItem(
-        id: 1,
-        hanzi: '爱',
-        pinyin: 'ài',
-        artiIndonesia: 'mencintai',
-        translations: const ['mencintai'],
-        hskLevel: 1,
-        contohKalimat: const [],
-        sumber: 'test',
-      );
+      final examplesByLevel = {
+        1: ('爱', '我爱我的家人。'),
+        4: ('爱情', '他们的爱情故事非常感人。'),
+        5: ('唉', '唉，今天真累。'),
+        6: ('哎哟', '哎哟，我的脚好疼！'),
+      };
 
-      final example = await VocabularyService.instance.createExampleSentence(
-        item,
-      );
+      for (final entry in examplesByLevel.entries) {
+        final item = VocabularyItem(
+          id: entry.key,
+          hanzi: entry.value.$1,
+          pinyin: '',
+          artiIndonesia: '',
+          translations: const [],
+          hskLevel: entry.key,
+          contohKalimat: const [],
+          sumber: 'test',
+        );
 
-      expect(example.hanzi, '我今天学习「爱」。');
-      expect(
-        example.arti,
-        'Hari ini saya belajar kosakata "爱" yang berarti "mencintai".',
-      );
+        final example = await VocabularyService.instance.createExampleSentence(
+          item,
+        );
+
+        expect(example.hanzi, entry.value.$2);
+      }
     },
   );
+
+  test('keeps HSK 5 and 6 words when remote vocabulary is partial', () async {
+    final service = VocabularyService.instance;
+
+    await service.loadVocabulary();
+
+    expect(service.getByLevel(5), isNotEmpty);
+    expect(service.getByLevel(6), isNotEmpty);
+  });
 }
