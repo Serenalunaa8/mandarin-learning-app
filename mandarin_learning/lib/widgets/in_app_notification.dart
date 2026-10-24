@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -13,14 +11,14 @@ class InAppNotification {
   static OverlayEntry? _currentEntry;
 
   /// Tampilkan notifikasi reward / kuis selesai
-  static void showReward(
+  static Future<void> showReward(
     BuildContext context, {
     required String title,
     required String message,
     int? score,
     int? coins,
   }) {
-    show(
+    return show(
       context,
       title: title,
       message: message,
@@ -32,7 +30,7 @@ class InAppNotification {
   }
 
   /// Tampilkan notifikasi umum dalam aplikasi
-  static void show(
+  static Future<void> show(
     BuildContext context, {
     required String title,
     required String message,
@@ -41,7 +39,7 @@ class InAppNotification {
     List<Color>? gradientColors,
     Color accentColor = const Color(0xFFFBBF24),
     Duration duration = const Duration(milliseconds: 4000),
-  }) {
+  }) async {
     // Haptic feedback saat notifikasi muncul
     try {
       HapticFeedback.mediumImpact();
@@ -50,18 +48,18 @@ class InAppNotification {
     _currentEntry?.remove();
     _currentEntry = null;
 
+    try {
+      await NotificationService.instance.recordInAppNotification(
+        title: title,
+        body: message,
+      );
+    } catch (error) {
+      debugPrint('[InAppNotification] Gagal menyimpan notifikasi: $error');
+    }
+
+    if (!context.mounted) return;
     final overlay = Overlay.maybeOf(context);
     if (overlay == null) return;
-
-    unawaited(
-      NotificationService.instance
-          .recordInAppNotification(title: title, body: message)
-          .catchError((Object error) {
-            debugPrint(
-              '[InAppNotification] Gagal menyimpan notifikasi: $error',
-            );
-          }),
-    );
 
     late OverlayEntry entry;
     entry = OverlayEntry(
@@ -120,11 +118,6 @@ class _InAppNotificationWidgetState extends State<_InAppNotificationWidget>
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
   late Animation<double> _fadeAnimation;
-
-  @override
-  void initStateDatabase() {
-    super.initState();
-  }
 
   @override
   void initState() {
@@ -200,13 +193,13 @@ class _InAppNotificationWidgetState extends State<_InAppNotificationWidget>
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
+                      color: Colors.black.withValues(alpha: 0.25),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
                   ],
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     width: 1.2,
                   ),
                 ),
@@ -217,7 +210,7 @@ class _InAppNotificationWidgetState extends State<_InAppNotificationWidget>
                     Container(
                       padding: const EdgeInsets.all(9),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -274,7 +267,7 @@ class _InAppNotificationWidgetState extends State<_InAppNotificationWidget>
                           Text(
                             widget.message,
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.92),
+                              color: Colors.white.withValues(alpha: 0.92),
                               fontSize: 12,
                               height: 1.25,
                             ),

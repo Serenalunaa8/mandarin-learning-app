@@ -1,32 +1,99 @@
 import '../../widgets/avatar_image_helper.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
+import '../../services/session_service.dart';
 import '../../widgets/avatar_picker_modal.dart';
 import '../auth/landing_screen.dart';
 import '../auth/register_screen.dart';
-import '../practice/dictionary_screen.dart';
 import '../tools/feedback_screen.dart';
+import 'course_impression_screen.dart';
 import '../settings/settings_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  static const List<String> _backgroundImages = [
+    'assets/image/background/01_meadow_day.png',
+    'assets/image/background/02_chinese_lake_garden.png',
+    'assets/image/background/03_sunset_valley.png',
+    'assets/image/background/04_moonlit_lake.png',
+    'assets/image/background/05_forest_waterfall.png',
+    'assets/image/background/06_floating_islands.png',
+    'assets/image/background/07_bamboo_garden.png',
+    'assets/image/background/08_snowy_mountains.png',
+    'assets/image/background/09_twilight_river.png',
+    'assets/image/background/10_bright_meadow.png',
+  ];
+
+  late PageController _bgPageController;
+  int _currentBgIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _bgPageController = PageController(initialPage: 0);
+    _loadSavedBackground();
+  }
+
+  Future<void> _loadSavedBackground() async {
+    try {
+      final savedIndex = await SessionService.getProfileBackgroundIndex();
+      if (savedIndex >= 0 && savedIndex < _backgroundImages.length) {
+        if (mounted) {
+          setState(() {
+            _currentBgIndex = savedIndex;
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && _bgPageController.hasClients) {
+              _bgPageController.jumpToPage(savedIndex);
+            }
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  void _onBackgroundChanged(int index) {
+    if (index != _currentBgIndex) {
+      setState(() {
+        _currentBgIndex = index;
+      });
+      SessionService.setProfileBackgroundIndex(index);
+    }
+  }
+
+  @override
+  void dispose() {
+    _bgPageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final vocab = context.watch<VocabularyProvider>();
     final user = auth.profile;
-    final fullName = user?.fullName ?? (auth.isGuest ? 'Tamu' : 'Pelajar Mandarin');
-    final username = user?.username ?? (auth.isGuest ? 'tamu' : 'pelajar');
+    final fullName =
+        (user?.fullName != null && user!.fullName.trim().isNotEmpty)
+        ? user.fullName
+        : (auth.isGuest ? 'Tamu' : (user?.username ?? 'Pengguna'));
+    final username =
+        (user?.username != null && user!.username.trim().isNotEmpty)
+        ? user.username
+        : (auth.isGuest ? 'tamu' : 'pengguna');
     final avatarUrl = (user?.avatarUrl != null && user!.avatarUrl.isNotEmpty)
         ? user.avatarUrl
         : 'assets/image/register/09_mascot_head.png';
-
-    final badgeEmoji = auth.isGuest ? '👤' : '🎓';
-    final badgeTitle = auth.isGuest ? 'Mode Tamu' : 'Pelajar';
 
     Widget buildAvatarImage() {
       return buildUserAvatarWidget(avatarUrl, fit: BoxFit.cover);
@@ -105,18 +172,15 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Main profile card with river background
+                  // Main profile card with swipeable landscape background
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                      image: const DecorationImage(
-                        image: AssetImage('assets/image/beranda/bg_sungai.png'),
-                        fit: BoxFit.cover,
-                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF1E3A24).withValues(alpha: 0.18),
+                          color: const Color(0xFF1E3A24)
+                              .withValues(alpha: 0.18),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),
@@ -125,58 +189,97 @@ class ProfileScreen extends StatelessWidget {
                     clipBehavior: Clip.antiAlias,
                     child: Stack(
                       children: [
-                        // Decorative leaf overlays in background corners
-                        Positioned(
-                          right: -10,
-                          top: -10,
-                          width: 140,
-                          height: 140,
-                          child: Opacity(
-                            opacity: 0.22,
-                            child: Image.asset(
-                              'assets/image/beranda/daun_lebat.png',
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                            ),
+                        // 1. Swipeable Landscape Background PageView
+                        Positioned.fill(
+                          child: PageView.builder(
+                            controller: _bgPageController,
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: _backgroundImages.length,
+                            onPageChanged: _onBackgroundChanged,
+                            itemBuilder: (context, index) {
+                              return Image.asset(
+                                _backgroundImages[index],
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(color: const Color(0xFF1E3A24)),
+                              );
+                            },
                           ),
                         ),
-                        Positioned(
-                          right: 15,
-                          bottom: -20,
-                          width: 110,
-                          height: 110,
-                          child: Opacity(
-                            opacity: 0.25,
-                            child: Image.asset(
-                              'assets/image/beranda/daun_lebat.png',
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: -15,
-                          bottom: -15,
-                          width: 80,
-                          height: 80,
-                          child: Opacity(
-                            opacity: 0.20,
-                            child: Image.asset(
-                              'assets/image/beranda/daun_tunas.png',
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+
+                        // 2. Subtle Dark Gradient Scrim to ensure crisp text contrast
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.black.withValues(alpha: 0.45),
+                                    Colors.black.withValues(alpha: 0.18),
+                                    Colors.black.withValues(alpha: 0.45),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                              ),
                             ),
                           ),
                         ),
 
-                        // Card Content
+                        // 3. Swipe Indicator Pill at Top-Right
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: IgnorePointer(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.35),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.30),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.swipe_rounded,
+                                    size: 11,
+                                    color: Colors.white70,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${_currentBgIndex + 1}/${_backgroundImages.length}',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // 5. Card Content
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 22,
+                          ),
                           child: Row(
                             children: [
                               // Avatar with Glowing Rings & Edit Button
                               GestureDetector(
-                                onTap: () => showAvatarPickerModal(context, auth),
+                                onTap: () =>
+                                    showAvatarPickerModal(context, auth),
                                 child: Stack(
                                   clipBehavior: Clip.none,
                                   children: [
@@ -186,9 +289,13 @@ class ProfileScreen extends StatelessWidget {
                                       height: 86,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: Colors.white.withValues(alpha: 0.12),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.12,
+                                        ),
                                         border: Border.all(
-                                          color: Colors.white.withValues(alpha: 0.40),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.40,
+                                          ),
                                           width: 2.5,
                                         ),
                                       ),
@@ -225,7 +332,9 @@ class ProfileScreen extends StatelessWidget {
                                           ),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.25),
+                                              color: Colors.black.withValues(
+                                                alpha: 0.25,
+                                              ),
                                               blurRadius: 4,
                                               offset: const Offset(0, 1),
                                             ),
@@ -245,38 +354,22 @@ class ProfileScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 18),
 
-                              // Name, Username & Tier Pill
+                              // Name, Username & Mode Tamu (Pelajar badge removed)
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Full Name + Sprout Icon
-                                    Row(
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            fullName,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 22,
-                                              fontWeight: FontWeight.bold,
-                                              letterSpacing: -0.3,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Image.asset(
-                                          'assets/image/beranda/daun_tunas.png',
-                                          width: 20,
-                                          height: 20,
-                                          errorBuilder: (context, error, stackTrace) => const Text(
-                                            '🌱',
-                                            style: TextStyle(fontSize: 16),
-                                          ),
-                                        ),
-                                      ],
+                                    // Full Name
+                                    Text(
+                                      fullName,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: -0.3,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 2),
 
@@ -284,41 +377,99 @@ class ProfileScreen extends StatelessWidget {
                                     Text(
                                       '@$username',
                                       style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.82),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.85,
+                                        ),
                                         fontSize: 13,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                    const SizedBox(height: 10),
 
-                                    // Tier Badge Pill
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(20),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.08),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 2),
+                                    // Guest Badge (if guest mode only - "Pelajar" removed)
+                                    if (auth.isGuest) ...[
+                                      const SizedBox(height: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
                                           ),
-                                        ],
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(badgeEmoji, style: const TextStyle(fontSize: 13)),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            badgeTitle,
-                                            style: const TextStyle(
-                                              color: Color(0xFF1E3A24),
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.08,
+                                              ),
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 2),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              '👤',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                            SizedBox(width: 5),
+                                            Text(
+                                              'Mode Tamu',
+                                              style: TextStyle(
+                                                color: Color(0xFF1E3A24),
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+
+                                    // Dots indicator to jump between backgrounds
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: List.generate(
+                                        _backgroundImages.length,
+                                        (index) {
+                                          final isSelected =
+                                              index == _currentBgIndex;
+                                          return GestureDetector(
+                                            onTap: () {
+                                              _bgPageController.animateToPage(
+                                                index,
+                                                duration: const Duration(
+                                                  milliseconds: 300,
+                                                ),
+                                                curve: Curves.easeInOut,
+                                              );
+                                            },
+                                            child: AnimatedContainer(
+                                              duration: const Duration(
+                                                milliseconds: 250,
+                                              ),
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 2,
+                                                  ),
+                                              width: isSelected ? 12 : 5,
+                                              height: 4,
+                                              decoration: BoxDecoration(
+                                                color: isSelected
+                                                    ? Colors.white
+                                                    : Colors.white.withValues(
+                                                        alpha: 0.40,
+                                                      ),
+                                                borderRadius:
+                                                    BorderRadius.circular(2),
+                                              ),
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
                                   ],
@@ -336,20 +487,32 @@ class ProfileScreen extends StatelessWidget {
                   if (auth.isGuest) ...[
                     Container(
                       margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEF3C7),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.5)),
+                        border: Border.all(
+                          color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.info_outline_rounded, color: Color(0xFFB45309), size: 20),
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            color: Color(0xFFB45309),
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           const Expanded(
                             child: Text(
                               'Mode Tamu: Progres belajar & koin tidak disimpan.',
-                              style: TextStyle(fontSize: 12, color: Color(0xFF78350F)),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF78350F),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 6),
@@ -357,19 +520,32 @@ class ProfileScreen extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFD97706),
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               minimumSize: Size.zero,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               elevation: 0,
                             ),
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                                MaterialPageRoute(
+                                  builder: (_) => const RegisterScreen(),
+                                ),
                               );
                             },
-                            child: const Text('Daftar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            child: const Text(
+                              'Daftar',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -397,7 +573,8 @@ class ProfileScreen extends StatelessWidget {
                           iconEmoji: '🪙',
                           iconBgColor: const Color(0xFFFEF9C3),
                           title: 'Koin',
-                          value: '${auth.isGuest ? auth.coins : (auth.coins > 0 ? auth.coins : 185)}',
+                          value:
+                              '${auth.isGuest ? auth.coins : (auth.coins > 0 ? auth.coins : 185)}',
                           unit: 'Tersedia',
                         ),
                       ),
@@ -412,7 +589,8 @@ class ProfileScreen extends StatelessWidget {
                         'assets/image/beranda/daun_tunas.png',
                         width: 22,
                         height: 22,
-                        errorBuilder: (context, error, stackTrace) => const Text('🌱', style: TextStyle(fontSize: 18)),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Text('🌱', style: TextStyle(fontSize: 18)),
                       ),
                       const SizedBox(width: 8),
                       const Text(
@@ -436,21 +614,7 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () => _showStudySummary(context, vocab, auth),
                   ),
 
-                  // Menu 2: Kamus Lengkap HSK 1–6
-                  _buildMenuCard(
-                    context,
-                    title: 'Kamus Lengkap HSK 1–6',
-                    iconAsset: 'assets/image/beranda/ikon_terjemah.png',
-                    fallbackIcon: Icons.import_contacts_rounded,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const DictionaryScreen()),
-                      );
-                    },
-                  ),
-
-                  // Menu 3: Beri Ulasan & Masukan
+                  // Menu 2: Beri Ulasan & Masukan
                   _buildMenuCard(
                     context,
                     title: 'Beri Ulasan & Masukan (Feedback)',
@@ -459,7 +623,24 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const FeedbackScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const FeedbackScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  // Menu 4: Kesan & Pesan Kuliah Mobile
+                  _buildMenuCard(
+                    context,
+                    title: 'Kesan & Pesan Matkul Mobile',
+                    fallbackIcon: Icons.school_rounded,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CourseImpressionScreen(),
+                        ),
                       );
                     },
                   ),
@@ -489,22 +670,34 @@ class ProfileScreen extends StatelessWidget {
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.error,
-                        side: const BorderSide(color: Color(0xFFFCA5A5), width: 1.2),
+                        side: const BorderSide(
+                          color: Color(0xFFFCA5A5),
+                          width: 1.2,
+                        ),
                         backgroundColor: Colors.white.withValues(alpha: 0.8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
                         elevation: 0,
                       ),
                       icon: const Icon(Icons.logout_rounded, size: 20),
                       label: Text(
-                        auth.isGuest ? 'Keluar dari Mode Tamu' : 'Keluar dari Akun (Logout)',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        auth.isGuest
+                            ? 'Keluar dari Mode Tamu'
+                            : 'Keluar dari Akun (Logout)',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                       onPressed: () async {
                         await auth.logout();
                         if (context.mounted) {
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (_) => const LandingScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const LandingScreen(),
+                            ),
                             (route) => false,
                           );
                         }
@@ -545,7 +738,6 @@ class ProfileScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Emoji with soft circular background
           Container(
             width: 44,
             height: 44,
@@ -554,10 +746,7 @@ class ProfileScreen extends StatelessWidget {
               color: iconBgColor,
             ),
             child: Center(
-              child: Text(
-                iconEmoji,
-                style: const TextStyle(fontSize: 22),
-              ),
+              child: Text(iconEmoji, style: const TextStyle(fontSize: 22)),
             ),
           ),
           const SizedBox(height: 8),
@@ -581,10 +770,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 1),
           Text(
             unit,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Color(0xFF94A3B8),
-            ),
+            style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
           ),
         ],
       ),
@@ -620,7 +806,6 @@ class ProfileScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                // Rounded leading icon
                 Container(
                   width: 46,
                   height: 46,
@@ -648,8 +833,6 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 14),
-
-                // Title
                 Expanded(
                   child: Text(
                     title,
@@ -660,8 +843,6 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Trailing Chevron
                 const Icon(
                   Icons.chevron_right_rounded,
                   color: Color(0xFF94A3B8),
@@ -675,7 +856,11 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showStudySummary(BuildContext context, VocabularyProvider vocab, AuthProvider auth) {
+  void _showStudySummary(
+    BuildContext context,
+    VocabularyProvider vocab,
+    AuthProvider auth,
+  ) {
     final progress = vocab.getLevelProgress(vocab.selectedLevel);
     showModalBottomSheet(
       context: context,
@@ -700,12 +885,19 @@ class ProfileScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.school, color: AppColors.primary),
               title: Text('Tingkat Aktif: HSK ${vocab.selectedLevel}'),
-              subtitle: Text('${(progress * 100).toInt()}% dari materi level telah dipelajari'),
+              subtitle: Text(
+                '${(progress * 100).toInt()}% dari materi level telah dipelajari',
+              ),
             ),
             ListTile(
-              leading: const Icon(Icons.stars_rounded, color: AppColors.coinGold),
+              leading: const Icon(
+                Icons.stars_rounded,
+                color: AppColors.coinGold,
+              ),
               title: Text('Saldo Koin: ${auth.coins} 🪙'),
-              subtitle: const Text('Koin dapat digunakan untuk petunjuk kuis & mini game'),
+              subtitle: const Text(
+                'Koin dapat digunakan untuk petunjuk kuis & mini game',
+              ),
             ),
           ],
         ),
@@ -723,15 +915,28 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Bagaimana cara belajar pelafalan?', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('Gunakan menu Latihan Pelafalan di tab Latihan. Rekam suaramu dengan mikrofon dan sistem akan mengevaluasi kontur nada Mandarin Anda.\n'),
-              Text('Untuk apa koin digunakan?', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('Koin dapat digunakan untuk membuka bantuan petunjuk di Kuis Tebak Arti (20 koin) dan mini-game Hanzi.\n'),
+              Text(
+                'Bagaimana cara belajar pelafalan?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'Gunakan menu Latihan Pelafalan di tab Latihan. Rekam suaramu dengan mikrofon dan sistem akan mengevaluasi kontur nada Mandarin Anda.\n',
+              ),
+              Text(
+                'Untuk apa koin digunakan?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'Koin dapat digunakan untuk membuka bantuan petunjuk di Kuis Tebak Arti (20 koin) dan mini-game Hanzi.\n',
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Mengerti')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Mengerti'),
+          ),
         ],
       ),
     );
@@ -751,7 +956,8 @@ class ProfileScreen extends StatelessWidget {
               width: 60,
               height: 60,
               fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.school, size: 40, color: Color(0xFF16A34A)),
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.school, size: 40, color: Color(0xFF16A34A)),
             ),
             const SizedBox(height: 12),
             const Text(
@@ -768,7 +974,10 @@ class ProfileScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Tutup')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Tutup'),
+          ),
         ],
       ),
     );

@@ -154,7 +154,8 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
         if (!hasMicPermission) {
           setState(() {
             _isAnalyzing = false;
-            _recognitionError = 'Izin mikrofon diperlukan untuk merekam pelafalan Anda.';
+            _recognitionError =
+                'Izin mikrofon diperlukan untuk merekam pelafalan Anda.';
           });
           return;
         }
@@ -205,6 +206,7 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
             if (n.startsWith('zh_cn') || n.startsWith('cmn_hans')) return 1;
             return 2;
           }
+
           return rank(a.localeId).compareTo(rank(b.localeId));
         });
         localeId = chineseLocales.first.localeId;
@@ -301,9 +303,11 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
       });
     }
 
-    final rawText = (_recognizedText.trim().isNotEmpty
-        ? _recognizedText
-        : _speech.lastRecognizedWords).trim();
+    final rawText =
+        (_recognizedText.trim().isNotEmpty
+                ? _recognizedText
+                : _speech.lastRecognizedWords)
+            .trim();
 
     int calculatedScore = 0;
     String finalText = rawText;
@@ -355,7 +359,7 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
             'speech_${widget.item.id}_${DateTime.now().millisecondsSinceEpoch}',
       );
       if (mounted) {
-        InAppNotification.showReward(
+        await InAppNotification.showReward(
           context,
           title: '🎉 Pelafalan Tepat! (${result.score}%)',
           message:
@@ -621,16 +625,18 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                     Text(
                       _isRecording
                           ? (_recognizedText.isNotEmpty
-                              ? '🎙️ Terdengar: "$_recognizedText" • Ketuk untuk selesai'
-                              : (_hasVoiceActivity
-                                  ? '🎙️ Suara terdeteksi... ($_recordSeconds dtk) • Ucapkan kata'
-                                  : 'Mendengarkan... Silakan ucapkan ($_recordSeconds dtk)'))
+                                ? '🎙️ Terdengar: "$_recognizedText" • Ketuk untuk selesai'
+                                : (_hasVoiceActivity
+                                      ? '🎙️ Suara terdeteksi... ($_recordSeconds dtk) • Ucapkan kata'
+                                      : 'Mendengarkan... Silakan ucapkan ($_recordSeconds dtk)'))
                           : 'Ketuk mikrofon untuk melafalkan',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: _isRecording
-                            ? (_hasVoiceActivity ? const Color(0xFF15803D) : AppColors.error)
+                            ? (_hasVoiceActivity
+                                  ? const Color(0xFF15803D)
+                                  : AppColors.error)
                             : AppColors.textMuted,
                       ),
                     ),
@@ -660,7 +666,10 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Tes Evaluasi Pelafalan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Tes Evaluasi Pelafalan',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -674,8 +683,13 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
               controller: controller,
               decoration: InputDecoration(
                 hintText: 'Contoh: ni hao',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
               ),
             ),
           ],
@@ -720,31 +734,31 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
     final Color scoreColor = isEmpty
         ? AppColors.textMuted
         : isCorrect
-            ? const Color(0xFF15803D)
-            : isPartial
-                ? const Color(0xFFB45309)
-                : AppColors.error;
+        ? const Color(0xFF15803D)
+        : isPartial
+        ? const Color(0xFFB45309)
+        : AppColors.error;
     final Color scoreBg = isEmpty
         ? const Color(0xFFF1F5F9)
         : isCorrect
-            ? const Color(0xFFF0FDF4)
-            : isPartial
-                ? const Color(0xFFFFFBEB)
-                : const Color(0xFFFEF2F2);
+        ? const Color(0xFFF0FDF4)
+        : isPartial
+        ? const Color(0xFFFFFBEB)
+        : const Color(0xFFFEF2F2);
     final String statusIcon = isEmpty
         ? '🔇'
         : isCorrect
-            ? '✅'
-            : isPartial
-                ? '⚠️'
-                : '❌';
+        ? '✅'
+        : isPartial
+        ? '⚠️'
+        : '❌';
     final String statusLabel = isEmpty
         ? 'Suara Belum Terdeteksi'
         : isCorrect
-            ? 'Pelafalan Benar'
-            : isPartial
-                ? 'Hampir Tepat'
-                : 'Pelafalan Kurang Tepat';
+        ? 'Pelafalan Benar'
+        : isPartial
+        ? 'Hampir Tepat'
+        : 'Pelafalan Kurang Tepat';
 
     return Container(
       padding: const EdgeInsets.all(22),
@@ -858,10 +872,20 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Target Kata:', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                      const Text(
+                        'Target Kata:',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
                       Text(
                         '${widget.item.hanzi} (${widget.item.pinyin})',
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                        ),
                       ),
                     ],
                   ),
@@ -869,7 +893,13 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Terdengar oleh Aplikasi:', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                      const Text(
+                        'Terdengar oleh Aplikasi:',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
                       Flexible(
                         child: Text(
                           res.recognizedText,
@@ -880,7 +910,9 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                             fontWeight: FontWeight.bold,
                             color: isCorrect
                                 ? const Color(0xFF15803D)
-                                : (isPartial ? const Color(0xFFB45309) : AppColors.error),
+                                : (isPartial
+                                      ? const Color(0xFFB45309)
+                                      : AppColors.error),
                           ),
                         ),
                       ),
@@ -902,8 +934,8 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
                 isCorrect
                     ? 'Luar biasa! Pelafalan kamu sudah sesuai (${res.score}%).'
                     : isPartial
-                        ? 'Hampir tepat (${res.score}%). Perhatikan kembali intonasi dan pengucapan kata.'
-                        : 'Pelafalan belum sesuai (${res.score}%). Kata yang terdeteksi berbeda dengan target. Dengarkan audio contoh lalu coba lagi.',
+                    ? 'Hampir tepat (${res.score}%). Perhatikan kembali intonasi dan pengucapan kata.'
+                    : 'Pelafalan belum sesuai (${res.score}%). Kata yang terdeteksi berbeda dengan target. Dengarkan audio contoh lalu coba lagi.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,

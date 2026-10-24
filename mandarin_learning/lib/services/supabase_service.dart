@@ -392,4 +392,38 @@ class SupabaseService {
       return false;
     }
   }
+
+  // ===================== KESAN & PESAN MATKUL =====================
+
+  Future<bool> submitCourseImpression({
+    String? userId,
+    required String accountName,
+    required String message,
+  }) async {
+    try {
+      await client.from('course_impressions').insert({
+        'user_id': userId,
+        'account_name': accountName,
+        'message': message,
+      });
+      return true;
+    } catch (e) {
+      debugPrint('[SupabaseService] submitCourseImpression error: $e');
+      return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchCourseImpressions() async {
+    try {
+      final res = await client
+          .from('course_impressions')
+          .select()
+          .order('created_at', ascending: false)
+          .limit(100);
+      return List<Map<String, dynamic>>.from(res);
+    } catch (e) {
+      debugPrint('[SupabaseService] fetchCourseImpressions error: $e');
+      return [];
+    }
+  }
 }

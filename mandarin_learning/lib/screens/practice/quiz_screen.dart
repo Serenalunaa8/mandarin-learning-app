@@ -1,6 +1,8 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../models/vocabulary_model.dart';
 import '../../models/quiz_attempt_model.dart';
@@ -27,11 +29,7 @@ class QuizScreen extends StatefulWidget {
   final List<VocabularyItem>? customItems;
   final String title;
 
-  const QuizScreen({
-    super.key,
-    this.customItems,
-    this.title = 'Latihan',
-  });
+  const QuizScreen({super.key, this.customItems, this.title = 'Latihan'});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -43,6 +41,7 @@ class _QuizScreenState extends State<QuizScreen> {
   int? _selectedOptionIndex;
   bool _isAnswerChecked = false;
   int _correctCount = 0;
+  final Set<int> _correctVocabIds = {};
   bool _quizCompleted = false;
   bool _hintUsed = false;
   String? _hintText;
@@ -55,7 +54,8 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void _generateQuizQuestions() {
     final vocab = context.read<VocabularyProvider>();
-    List<VocabularyItem> pool = widget.customItems ?? vocab.currentLevelVocabulary;
+    List<VocabularyItem> pool =
+        widget.customItems ?? vocab.currentLevelVocabulary;
 
     if (pool.length < 4) {
       pool = vocab.currentLevelVocabulary;
@@ -72,8 +72,12 @@ class _QuizScreenState extends State<QuizScreen> {
       final target = shuffledPool[i];
 
       // Ambil 3 pilihan pengecoh dari kata lain
-      final distractors = pool.where((item) => item.id != target.id).toList()..shuffle(rand);
-      final wrongChoices = distractors.take(3).map((e) => e.artiIndonesia).toList();
+      final distractors = pool.where((item) => item.id != target.id).toList()
+        ..shuffle(rand);
+      final wrongChoices = distractors
+          .take(3)
+          .map((e) => e.artiIndonesia)
+          .toList();
 
       while (wrongChoices.length < 3) {
         wrongChoices.add('Pilihan ${wrongChoices.length + 1}');
@@ -82,11 +86,13 @@ class _QuizScreenState extends State<QuizScreen> {
       final options = [target.artiIndonesia, ...wrongChoices]..shuffle(rand);
       final correctIdx = options.indexOf(target.artiIndonesia);
 
-      list.add(QuizQuestion(
-        targetItem: target,
-        options: options,
-        correctIndex: correctIdx,
-      ));
+      list.add(
+        QuizQuestion(
+          targetItem: target,
+          options: options,
+          correctIndex: correctIdx,
+        ),
+      );
     }
 
     setState(() {
@@ -95,6 +101,7 @@ class _QuizScreenState extends State<QuizScreen> {
       _selectedOptionIndex = null;
       _isAnswerChecked = false;
       _correctCount = 0;
+      _correctVocabIds.clear();
       _quizCompleted = false;
       _hintUsed = false;
       _hintText = null;
@@ -118,6 +125,7 @@ class _QuizScreenState extends State<QuizScreen> {
       final isCorrect = _selectedOptionIndex == currentQ.correctIndex;
       if (isCorrect) {
         _correctCount++;
+        _correctVocabIds.add(currentQ.targetItem.id);
       }
       setState(() {
         _isAnswerChecked = true;
@@ -182,11 +190,12 @@ class _QuizScreenState extends State<QuizScreen> {
         coinsEarned: rewardCoins,
         createdAt: DateTime.now(),
       ),
+      correctVocabIds: _correctVocabIds,
     );
 
     // Tampilkan notifikasi reward di dalam aplikasi (In-App Notification)
     if (mounted) {
-      InAppNotification.showReward(
+      await InAppNotification.showReward(
         context,
         title: score >= 70
             ? '🎉 Kuis Selesai! Skor: $score/100'
@@ -243,7 +252,8 @@ class _QuizScreenState extends State<QuizScreen> {
       );
       if (success && mounted) {
         final target = _questions[_currentIndex].targetItem;
-        String hint = 'Petunjuk: Kata ini berkaitan dengan "${target.jenisKata ?? 'kategori umum'}".';
+        String hint =
+            'Petunjuk: Kata ini berkaitan dengan "${target.jenisKata ?? 'kategori umum'}".';
         if (target.contohKalimat.isNotEmpty) {
           hint += '\nContoh penggunaan: "${target.contohKalimat.first.arti}"';
         }
@@ -260,7 +270,9 @@ class _QuizScreenState extends State<QuizScreen> {
     if (_questions.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(widget.title)),
-        body: const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
@@ -282,12 +294,18 @@ class _QuizScreenState extends State<QuizScreen> {
         actions: [
           // Tombol Bantuan Kuis (20 Koin)
           IconButton(
-            icon: const Icon(Icons.lightbulb_outline_rounded, color: AppColors.coinGold),
+            icon: const Icon(
+              Icons.lightbulb_outline_rounded,
+              color: AppColors.coinGold,
+            ),
             tooltip: 'Petunjuk Bantuan (20 Koin)',
             onPressed: _hintUsed ? null : _useHint,
           ),
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: AppColors.textDark),
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: AppColors.textDark,
+            ),
             onPressed: () {},
           ),
         ],
@@ -305,11 +323,19 @@ class _QuizScreenState extends State<QuizScreen> {
                     children: [
                       Text(
                         'Soal ${_currentIndex + 1} dari ${_questions.length}',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textMuted),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textMuted,
+                        ),
                       ),
                       Text(
                         '${_currentIndex + 1}/${_questions.length}',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primaryDark),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryDark,
+                        ),
                       ),
                     ],
                   ),
@@ -320,7 +346,9 @@ class _QuizScreenState extends State<QuizScreen> {
                       value: progress,
                       minHeight: 6,
                       backgroundColor: const Color(0xFFDCFCE7),
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppColors.primary,
+                      ),
                     ),
                   ),
                 ],
@@ -376,14 +404,20 @@ class _QuizScreenState extends State<QuizScreen> {
                         ),
                         const SizedBox(width: 12),
                         GestureDetector(
-                          onTap: () => AudioService.instance.speak(currentQ.targetItem.hanzi),
+                          onTap: () => AudioService.instance.speak(
+                            currentQ.targetItem.hanzi,
+                          ),
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: AppColors.primaryLight,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.volume_up_rounded, color: AppColors.primaryDark, size: 22),
+                            child: const Icon(
+                              Icons.volume_up_rounded,
+                              color: AppColors.primaryDark,
+                              size: 22,
+                            ),
                           ),
                         ),
                       ],
@@ -420,7 +454,11 @@ class _QuizScreenState extends State<QuizScreen> {
                     Expanded(
                       child: Text(
                         _hintText!,
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF92400E), fontWeight: FontWeight.w500),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF92400E),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
@@ -447,7 +485,10 @@ class _QuizScreenState extends State<QuizScreen> {
                     height: 22,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFCBD5E1), width: 1.5),
+                      border: Border.all(
+                        color: const Color(0xFFCBD5E1),
+                        width: 1.5,
+                      ),
                     ),
                   );
 
@@ -461,17 +502,29 @@ class _QuizScreenState extends State<QuizScreen> {
                         color: AppColors.primary,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.check, size: 16, color: Colors.white),
+                      child: const Icon(
+                        Icons.check,
+                        size: 16,
+                        color: Colors.white,
+                      ),
                     );
                   } else if (_isAnswerChecked) {
                     if (isCorrectOption) {
                       borderColor = AppColors.success;
                       bgColor = const Color(0xFFDCFCE7);
-                      iconTrailing = const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 24);
+                      iconTrailing = const Icon(
+                        Icons.check_circle_rounded,
+                        color: AppColors.success,
+                        size: 24,
+                      );
                     } else if (isSelected && !isCorrectOption) {
                       borderColor = AppColors.error;
                       bgColor = const Color(0xFFFEE2E2);
-                      iconTrailing = const Icon(Icons.cancel_rounded, color: AppColors.error, size: 24);
+                      iconTrailing = const Icon(
+                        Icons.cancel_rounded,
+                        color: AppColors.error,
+                        size: 24,
+                      );
                     }
                   }
 
@@ -479,11 +532,17 @@ class _QuizScreenState extends State<QuizScreen> {
                     onTap: () => _selectOption(index),
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 16,
+                      ),
                       decoration: BoxDecoration(
                         color: bgColor,
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: borderColor, width: isSelected ? 1.8 : 1.2),
+                        border: Border.all(
+                          color: borderColor,
+                          width: isSelected ? 1.8 : 1.2,
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.02),
@@ -500,7 +559,9 @@ class _QuizScreenState extends State<QuizScreen> {
                               optionText,
                               style: TextStyle(
                                 fontSize: 15,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
                                 color: AppColors.textDark,
                               ),
                             ),
@@ -536,15 +597,24 @@ class _QuizScreenState extends State<QuizScreen> {
                         ? const Color(0xFFCBD5E1)
                         : AppColors.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(26),
+                    ),
                     elevation: 0,
                   ),
-                  onPressed: _selectedOptionIndex == null ? null : _handleNextOrCheck,
+                  onPressed: _selectedOptionIndex == null
+                      ? null
+                      : _handleNextOrCheck,
                   child: Text(
                     _isAnswerChecked
-                        ? (_currentIndex < _questions.length - 1 ? 'Lanjut' : 'Lihat Hasil')
+                        ? (_currentIndex < _questions.length - 1
+                              ? 'Lanjut'
+                              : 'Lihat Hasil')
                         : 'Periksa',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -587,13 +657,20 @@ class _QuizScreenState extends State<QuizScreen> {
 
               Text(
                 score >= 70 ? 'Luar Biasa!' : 'Terus Semangat!',
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Kamu menjawab $_correctCount dari $total soal dengan benar.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textMuted,
+                ),
               ),
               const SizedBox(height: 24),
 
@@ -616,17 +693,47 @@ class _QuizScreenState extends State<QuizScreen> {
                   children: [
                     Column(
                       children: [
-                        const Text('Skor Akhir', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                        const Text(
+                          'Skor Akhir',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        Text('$score%', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
+                        Text(
+                          '$score%',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryDark,
+                          ),
+                        ),
                       ],
                     ),
-                    Container(height: 40, width: 1, color: const Color(0xFFE2E8F0)),
+                    Container(
+                      height: 40,
+                      width: 1,
+                      color: const Color(0xFFE2E8F0),
+                    ),
                     Column(
                       children: [
-                        const Text('Reward Koin', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                        const Text(
+                          'Reward Koin',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        Text('+$rewardCoins 🪙', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.coinGold)),
+                        Text(
+                          '+$rewardCoins 🪙',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.coinGold,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -640,10 +747,15 @@ class _QuizScreenState extends State<QuizScreen> {
                 height: 52,
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.mic_rounded, color: Colors.white),
-                  label: const Text('Lanjut ke Latihan Pelafalan', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                  label: const Text(
+                    'Lanjut ke Latihan Pelafalan',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(26),
+                    ),
                   ),
                   onPressed: () {
                     final target = _questions.first.targetItem;
@@ -664,7 +776,9 @@ class _QuizScreenState extends State<QuizScreen> {
                 height: 48,
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                   ),
                   onPressed: () => Navigator.pop(context),
                   child: const Text('Kembali ke Menu Belajar'),

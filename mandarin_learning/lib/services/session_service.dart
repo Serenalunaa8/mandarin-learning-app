@@ -200,4 +200,18 @@ class SessionService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_keyDailyGoalMinutes, minutes);
   }
+
+  static const String _keyProfileBackgroundIndex = 'profile_background_index';
+
+  /// Mengambil index background profil yang tersimpan
+  static Future<int> getProfileBackgroundIndex() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_keyProfileBackgroundIndex) ?? 0;
+  }
+
+  /// Menyimpan index background profil yang dipilih
+  static Future<void> setProfileBackgroundIndex(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyProfileBackgroundIndex, index);
+  }
 }
