@@ -57,15 +57,13 @@ void main() {
   });
 
   group('Tahap 4 (AI Tutor Mandarin - FR-14 & PBI-034/035)', () {
-    test('AI Tutor menyediakan pilihan model provider yang dapat dipilih', () {
+    test('AI Tutor menyediakan 2 mode AI: app_api (dengan Database) dan gemini (Murni)', () {
       expect(
-        AiProvider.values.map((provider) => provider.id),
-        containsAll(['gemini', 'openai', 'anthropic', 'groq']),
+        AiTutorMode.values.map((mode) => mode.id),
+        containsAll(['app_api', 'gemini']),
       );
-      expect(AiProvider.gemini.model, 'gemini-1.5-flash');
-      expect(AiProvider.openAi.model, 'gpt-4o-mini');
-      expect(AiProvider.anthropic.model, 'claude-3-5-haiku-20241022');
-      expect(AiProvider.groq.model, 'llama-3.3-70b-versatile');
+      expect(AiTutorMode.appApi.id, 'app_api');
+      expect(AiTutorMode.gemini.id, 'gemini');
     });
   });
 
