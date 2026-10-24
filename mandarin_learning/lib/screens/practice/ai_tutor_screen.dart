@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../services/ai_tutor_service.dart';
 import '../../services/audio_service.dart';
+import '../../services/supabase_service.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/mascot_widget.dart';
 
 class AiTutorScreen extends StatefulWidget {
@@ -17,6 +20,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<AiChatMessage> _messages = [];
   bool _isGenerating = false;
+  String? _activeConversationId;
 
   AiTutorMode _selectedMode = AiTutorMode.appApi;
 
@@ -34,18 +38,138 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   @override
   void initState() {
     super.initState();
-    _messages.add(
-      AiChatMessage(
-        text:
-            'Halo! Aku Xiao Xiong, AI Tutor Mandarin pribadimu 🐼.\n\n'
-            'Pilih AI Tutor + Supabase untuk belajar Mandarin dari database aplikasi, '
-            'atau Gemini Murni untuk bertanya berbagai hal.',
+    _messages.add(_welcomeMessage());
+  }
+
+  AiChatMessage _welcomeMessage() => AiChatMessage(
+        text: 'Halo! Aku Xiao Xiong, AI Tutor Mandarin pribadimu 🐼.\n\n'
+            'Aku terhubung langsung dengan database kosakata HSK 1-6 aplikasi ini. '
+            'Tanyakan apa saja seputar kosakata Mandarin, tata bahasa, pelafalan nada, kuis, atau fitur aplikasi!',
         isUser: false,
         timestamp: DateTime.now(),
         mode: AiTutorMode.appApi,
-        modelBadge: 'Xiao Xiong Assistant',
-      ),
-    );
+        modelBadge: 'Xiao Xiong • Database Terhubung',
+      );
+
+  Future<void> _startNewConversation() async {
+    if (_isGenerating) return;
+    setState(() {
+      _activeConversationId = null;
+      _messages
+        ..clear()
+        ..add(_welcomeMessage());
+    });
+    _scrollToBottom();
+  }
+
+  Future<void> _showConversationHistory() async {
+    final userId = context.read<AuthProvider>().profile?.id;
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Masuk ke akun untuk menyimpan dan melihat riwayat percakapan.')),
+      );
+      return;
+    }
+    try {
+      final rows = await SupabaseService.instance.fetchAiConversations(userId);
+      if (!mounted) return;
+      final selected = await showModalBottomSheet<Map<String, dynamic>>(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        builder: (sheetContext) => SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(sheetContext).size.height * 0.7,
+            child: Column(children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
+                child: Row(children: [
+                  const Expanded(child: Text('Percakapan sebelumnya', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                  TextButton.icon(onPressed: () { Navigator.pop(sheetContext); _startNewConversation(); }, icon: const Icon(Icons.add), label: const Text('Baru')),
+                ]),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: rows.isEmpty
+                    ? const Center(child: Text('Belum ada percakapan tersimpan.'))
+                    : ListView.separated(
+                        itemCount: rows.length,
+                        separatorBuilder: (_, _) => const Divider(height: 1, indent: 68),
+                        itemBuilder: (context, index) {
+                          final row = rows[index];
+                          final messages = row['messages'] as List? ?? const [];
+                          final lastText = messages.isEmpty ? '' : (messages.last as Map)['text']?.toString() ?? '';
+                          return ListTile(
+                            leading: const CircleAvatar(child: Icon(Icons.chat_bubble_outline)),
+                            title: Text(row['title']?.toString() ?? 'Percakapan', maxLines: 1, overflow: TextOverflow.ellipsis),
+                            subtitle: Text(lastText, maxLines: 1, overflow: TextOverflow.ellipsis),
+                            onTap: () => Navigator.pop(sheetContext, row),
+                          );
+                        },
+                      ),
+              ),
+            ]),
+          ),
+        ),
+      );
+      if (selected != null && mounted) _openConversation(selected);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Riwayat belum dapat dimuat. Jalankan migrasi database terlebih dahulu. ($error)')),
+      );
+    }
+  }
+
+  void _openConversation(Map<String, dynamic> row) {
+    final storedMessages = row['messages'] as List? ?? const [];
+    final loaded = storedMessages.whereType<Map>().map((item) {
+      final isUser = item['role'] == 'user';
+      final text = item['text']?.toString() ?? '';
+      final timestamp = DateTime.tryParse(item['timestamp']?.toString() ?? '') ?? DateTime.now();
+      return AiChatMessage(
+        text: text,
+        isUser: isUser,
+        timestamp: timestamp,
+        mode: AiTutorMode.appApi,
+        modelBadge: isUser ? null : 'Xiao Xiong • Database Terhubung',
+        audioText: isUser ? null : AudioService.instance.extractMandarinText(text),
+      );
+    }).toList();
+    setState(() {
+      _activeConversationId = row['id'].toString();
+      _messages
+        ..clear()
+        ..addAll(loaded);
+    });
+    _scrollToBottom();
+  }
+
+  Future<void> _persistConversation() async {
+    final userId = context.read<AuthProvider>().profile?.id;
+    if (userId == null) return;
+    final turns = _messages
+        .where((message) => !message.text.startsWith('Halo! Aku Xiao Xiong'))
+        .map((message) => <String, dynamic>{
+              'role': message.isUser ? 'user' : 'assistant',
+              'text': message.text,
+              'timestamp': message.timestamp.toUtc().toIso8601String(),
+            })
+        .toList();
+    if (turns.isEmpty) return;
+    final firstPrompt = turns.first['text'] as String;
+    final title = firstPrompt.length > 60 ? '${firstPrompt.substring(0, 57)}…' : firstPrompt;
+    try {
+      final id = await SupabaseService.instance.saveAiConversation(
+        userId: userId,
+        conversationId: _activeConversationId,
+        title: title,
+        messages: turns,
+      );
+      if (mounted) setState(() => _activeConversationId = id);
+    } catch (error) {
+      debugPrint('[AiTutorScreen] Gagal menyimpan riwayat chat: $error');
+    }
   }
 
   @override
@@ -60,11 +184,10 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     if (trimmed.isEmpty || _isGenerating) return;
 
     _textController.clear();
-    final currentMode = _selectedMode;
+    const currentMode = AiTutorMode.appApi;
     final history = _messages
         .where(
           (message) =>
-              message.mode == currentMode &&
               !message.text.startsWith('Halo! Aku Xiao Xiong') &&
               !message.text.startsWith('Belum bisa mendapat jawaban:'),
         )
@@ -92,6 +215,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       _isGenerating = true;
     });
 
+    await _persistConversation();
+
     _scrollToBottom();
 
     String response;
@@ -116,13 +241,13 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           isUser: false,
           timestamp: DateTime.now(),
           mode: currentMode,
-          modelBadge: currentMode == AiTutorMode.appApi
-              ? 'AI Tutor • API aplikasi + Supabase'
-              : 'Gemini Murni • Tanpa konteks database',
+          modelBadge: 'Xiao Xiong • Database Terhubung',
           audioText: AudioService.instance.extractMandarinText(response),
         ),
       );
     });
+
+    await _persistConversation();
 
     _scrollToBottom();
   }
@@ -152,54 +277,98 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             Text('AI Tutor Mandarin'),
           ],
         ),
+        actions: [
+          IconButton(tooltip: 'Percakapan baru', onPressed: _startNewConversation, icon: const Icon(Icons.add_comment_outlined)),
+          IconButton(tooltip: 'Riwayat percakapan', onPressed: _showConversationHistory, icon: const Icon(Icons.history_rounded)),
+        ],
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // Dua mode: konteks aplikasi atau Gemini umum.
+            // Status info: Satu AI Tutor yang terhubung ke Database
             Container(
-              margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              padding: const EdgeInsets.all(4),
+              margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _ModeButton(
-                      label: 'AI Tutor + Supabase',
-                      icon: Icons.psychology_rounded,
-                      selected: _selectedMode == AiTutorMode.appApi,
-                      color: AppColors.primaryGreen,
-                      onTap: () =>
-                          setState(() => _selectedMode = AiTutorMode.appApi),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: _ModeButton(
-                      label: 'Gemini Murni',
-                      icon: Icons.auto_awesome_rounded,
-                      selected: _selectedMode == AiTutorMode.gemini,
-                      color: const Color(0xFF2563EB),
-                      onTap: () =>
-                          setState(() => _selectedMode = AiTutorMode.gemini),
-                    ),
+                border: Border.all(color: const Color(0xFFBBF7D0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-              child: Text(
-                _selectedMode == AiTutorMode.appApi
-                    ? 'Tutor memakai referensi kosakata dari database Supabase.'
-                    : 'Gemini menjawab berbagai topik tanpa konteks database.',
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: AppColors.textMuted,
-                ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0FDF4),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.psychology_rounded,
+                      color: AppColors.primaryGreen,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Xiao Xiong AI Tutor',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Terhubung Database Kosakata HSK 1-6 • Khusus Mandarin',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDCFCE7),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 12,
+                          color: Color(0xFF15803D),
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          'Database Aktif',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF15803D),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -276,17 +445,13 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                             height: 14,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: _selectedMode == AiTutorMode.appApi
-                                  ? AppColors.primaryGreen
-                                  : const Color(0xFF2563EB),
+                              color: AppColors.primaryGreen,
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            _selectedMode == AiTutorMode.appApi
-                                ? 'AI sedang mencari konteks belajar...'
-                                : 'Gemini sedang menyiapkan jawaban...',
-                            style: const TextStyle(
+                          const Text(
+                            'Xiao Xiong sedang mencari di database kosakata...',
+                            style: TextStyle(
                               fontSize: 12,
                               color: AppColors.textMuted,
                             ),
@@ -319,9 +484,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                       textInputAction: TextInputAction.send,
                       onSubmitted: _sendMessage,
                       decoration: InputDecoration(
-                        hintText: _selectedMode == AiTutorMode.appApi
-                            ? 'Tanyakan tentang Mandarin...'
-                            : 'Tanyakan langsung kepada Gemini...',
+                        hintText: 'Tanyakan seputar kosakata atau materi Mandarin...',
                         hintStyle: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textLight,
@@ -341,10 +504,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    decoration: BoxDecoration(
-                      color: _selectedMode == AiTutorMode.appApi
-                          ? AppColors.primaryGreen
-                          : const Color(0xFF2563EB),
+                    decoration: const BoxDecoration(
+                      color: AppColors.primaryGreen,
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -393,17 +554,9 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       );
     }
 
-    final mode = msg.mode;
-    final isGemini = mode == AiTutorMode.gemini;
-    final badgeBg = isGemini
-        ? const Color(0xFFEFF6FF)
-        : const Color(0xFFF0FDF4);
-    final badgeText = isGemini
-        ? const Color(0xFF1D4ED8)
-        : const Color(0xFF15803D);
-    final badgeIcon = isGemini
-        ? Icons.auto_awesome_rounded
-        : Icons.psychology_rounded;
+    const badgeBg = Color(0xFFF0FDF4);
+    const badgeText = Color(0xFF15803D);
+    const badgeIcon = Icons.psychology_rounded;
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -436,7 +589,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (msg.modelBadge != null || mode != null) ...[
+                    if (msg.modelBadge != null || msg.mode != null) ...[
                       Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.symmetric(
@@ -456,11 +609,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                             Icon(badgeIcon, size: 13, color: badgeText),
                             const SizedBox(width: 5),
                             Text(
-                              msg.modelBadge ??
-                                  (isGemini
-                                      ? 'Gemini Murni'
-                                      : 'AI Tutor • API aplikasi + Supabase'),
-                              style: TextStyle(
+                              msg.modelBadge ?? 'Xiao Xiong • Database Terhubung',
+                              style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: badgeText,
