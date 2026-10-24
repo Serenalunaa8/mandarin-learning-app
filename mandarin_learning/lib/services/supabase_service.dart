@@ -375,21 +375,59 @@ class SupabaseService {
 
   Future<bool> submitFeedback({
     String? userId,
+    String? accountName,
     required String category,
     required String message,
     required int rating,
   }) async {
     try {
-      await client.from('feedback').insert({
+      final payload = <String, dynamic>{
         'user_id': userId,
         'category': category,
         'message': message,
         'rating': rating,
-      });
+      };
+      if (accountName != null && accountName.isNotEmpty) {
+        payload['account_name'] = accountName;
+      }
+      await client.from('feedback').insert(payload);
       return true;
     } catch (e) {
-      debugPrint('[SupabaseService] submitFeedback error: $e');
-      return false;
+      try {
+        await client.from('feedback').insert({
+          'user_id': userId,
+          'category': category,
+          'message': message,
+          'rating': rating,
+        });
+        return true;
+      } catch (inner) {
+        debugPrint('[SupabaseService] submitFeedback error: $inner');
+        return false;
+      }
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchFeedbacks() async {
+    try {
+      final res = await client
+          .from('feedback')
+          .select('*, app_users(username, full_name, avatar_url)')
+          .order('created_at', ascending: false)
+          .limit(50);
+      return List<Map<String, dynamic>>.from(res);
+    } catch (e) {
+      try {
+        final res = await client
+            .from('feedback')
+            .select()
+            .order('created_at', ascending: false)
+            .limit(50);
+        return List<Map<String, dynamic>>.from(res);
+      } catch (inner) {
+        debugPrint('[SupabaseService] fetchFeedbacks error: $inner');
+        return [];
+      }
     }
   }
 
