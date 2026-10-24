@@ -1,3 +1,5 @@
+import '../../widgets/avatar_image_helper.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -8,16 +10,42 @@ import '../auth/register_screen.dart';
 import '../lesson/lesson_path_screen.dart';
 import '../../widgets/daily_goal_modal.dart';
 
-class HomeDashboardScreen extends StatelessWidget {
+class HomeDashboardScreen extends StatefulWidget {
   final Function(int) onNavigateTab;
 
   const HomeDashboardScreen({super.key, required this.onNavigateTab});
+
+  @override
+  State<HomeDashboardScreen> createState() => _HomeDashboardScreenState();
+}
+
+class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
+  Timer? _tickerTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _tickerTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tickerTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final vocab = context.watch<VocabularyProvider>();
     final user = auth.profile;
+    final avatarUrl = (user?.avatarUrl != null && user!.avatarUrl.isNotEmpty)
+        ? user.avatarUrl
+        : 'assets/image/register/09_mascot_head.png';
     final fullName = user?.fullName ?? 'Aria';
     final firstName = auth.isGuest ? 'Tamu' : fullName.split(' ').first;
     final level = vocab.selectedLevel;
@@ -31,9 +59,12 @@ class HomeDashboardScreen extends StatelessWidget {
     final cardProgressText = auth.isGuest ? '0%' : '${((displayProgress == 0 ? 0.6 : displayProgress) * 100).toInt()}%';
     final cardButtonText = auth.isGuest ? 'Mulai  →' : 'Lanjut  →';
     final targetMin = auth.dailyGoalMinutes;
-    final learnedMin = auth.isGuest ? 0 : (12 > targetMin ? targetMin : 12);
-    final dailyGoalProgressText = '$learnedMin / $targetMin menit';
-    final dailyGoalRatio = auth.isGuest ? 0.0 : (12 / targetMin).clamp(0.0, 1.0);
+    final activeSeconds = auth.activeStudySecondsToday;
+    final learnedMin = auth.activeStudyMinutesToday;
+    final dailyGoalRatio = auth.dailyGoalProgressRatio;
+    final String dailyGoalProgressText = (learnedMin == 0 && activeSeconds > 0)
+        ? '0 / $targetMin menit ($activeSeconds dtk)'
+        : '$learnedMin / $targetMin menit';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F8F4),
@@ -55,12 +86,12 @@ class HomeDashboardScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Bar: Mascot Avatar, Streak, Gem/XP, Bell
+                // Top Bar: Mascot Avatar, Streak, Gems, Bell
                 Row(
                   children: [
-                    // Mascot Avatar Button
+                    // Mascot Avatar Button (Sama dengan halaman Profil)
                     GestureDetector(
-                      onTap: () => onNavigateTab(4),
+                      onTap: () => widget.onNavigateTab(4),
                       child: Container(
                         width: 44,
                         height: 44,
@@ -76,40 +107,15 @@ class HomeDashboardScreen extends StatelessWidget {
                             ),
                           ],
                         ),
+                        padding: const EdgeInsets.all(2),
                         child: Center(
                           child: ClipOval(
-                            child: (user?.avatarUrl != null && user!.avatarUrl.isNotEmpty)
-                                ? (user.avatarUrl.startsWith('http')
-                                    ? Image.network(
-                                        user.avatarUrl,
-                                        width: 34,
-                                        height: 34,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => Image.asset(
-                                          'assets/image/beranda/wajah_01_senyum.png',
-                                          width: 32,
-                                          height: 32,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      )
-                                    : Image.asset(
-                                        user.avatarUrl,
-                                        width: 34,
-                                        height: 34,
-                                        fit: BoxFit.contain,
-                                        errorBuilder: (context, error, stackTrace) => Image.asset(
-                                          'assets/image/beranda/wajah_01_senyum.png',
-                                          width: 32,
-                                          height: 32,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ))
-                                : Image.asset(
-                                    'assets/image/beranda/wajah_01_senyum.png',
-                                    width: 32,
-                                    height: 32,
-                                    fit: BoxFit.contain,
-                                  ),
+                            child: buildUserAvatarWidget(
+                              avatarUrl,
+                              width: 38,
+                              height: 38,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
@@ -146,7 +152,7 @@ class HomeDashboardScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Diamond/XP/Coin Pill
+                    // Coin Pill (Ganti diamond jadi koin)
                     GestureDetector(
                       onTap: () => Navigator.push(
                         context,
@@ -168,7 +174,7 @@ class HomeDashboardScreen extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text('💎', style: TextStyle(fontSize: 13)),
+                            const Text('🪙', style: TextStyle(fontSize: 13)),
                             const SizedBox(width: 4),
                             Text(
                               '${auth.isGuest ? auth.coins : (auth.coins > 0 ? auth.coins : 120)}',
@@ -358,69 +364,6 @@ class HomeDashboardScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 14),
-
-                // 3 Stat Cards (Streak, XP, Peringkat)
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatCard(
-                        iconBadge: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFEF3C7),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Center(
-                            child: Text('🔥', style: TextStyle(fontSize: 18)),
-                          ),
-                        ),
-                        title: 'Streak',
-                        value: '${auth.streak}',
-                        unit: 'hari',
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildStatCard(
-                        iconBadge: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFE0F2FE),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Center(
-                            child: Text('💎', style: TextStyle(fontSize: 17)),
-                          ),
-                        ),
-                        title: 'XP',
-                        value: '${auth.isGuest ? auth.totalXp : (auth.totalXp > 0 ? auth.totalXp : 120)}',
-                        unit: 'Total XP',
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildStatCard(
-                        iconBadge: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEFF6FF),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Center(
-                            child: Text('🥈', style: TextStyle(fontSize: 18)),
-                          ),
-                        ),
-                        title: 'Peringkat',
-                        value: auth.isGuest ? 'Tamu' : 'Silver',
-                        unit: auth.isGuest ? 'Mode Tamu' : 'Top 12%',
-                      ),
-                    ),
-                  ],
                 ),
                 const SizedBox(height: 18),
 
@@ -746,7 +689,7 @@ class HomeDashboardScreen extends StatelessWidget {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => onNavigateTab(2), // Tab Praktik
+                      onTap: () => widget.onNavigateTab(2), // Tab Praktik
                       child: const Row(
                         children: [
                           Text(
@@ -796,61 +739,6 @@ class HomeDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard({
-    required Widget iconBadge,
-    required String title,
-    required String value,
-    required String unit,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1E3A24).withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            iconBadge,
-            const SizedBox(height: 6),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF64748B),
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF144D25),
-              ),
-            ),
-            Text(
-              unit,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF94A3B8),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildQuickActionItem({
     required String imageAsset,

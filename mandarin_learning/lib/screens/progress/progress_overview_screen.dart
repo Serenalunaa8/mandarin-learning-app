@@ -77,10 +77,6 @@ class ProgressOverviewScreen extends StatelessWidget {
                       children: [
                         _buildStatCol('🔥 ${auth.streak}', 'Hari Streak'),
                         _buildStatCol('💎 ${auth.coins}', 'Permata/Koin'),
-                        _buildStatCol(
-                          '⭐ ${auth.isGuest ? auth.totalXp : (auth.totalXp > 0 ? auth.totalXp : 320)}',
-                          'Poin XP',
-                        ),
                       ],
                     ),
                   ],
