@@ -49,6 +49,7 @@ CREATE TABLE public.app_users (
     avatar_url TEXT DEFAULT '',
     current_hsk_level INT DEFAULT 1 CHECK (current_hsk_level BETWEEN 1 AND 6),
     streak INT DEFAULT 1 CHECK (streak >= 0),
+    last_active_date DATE NOT NULL DEFAULT CURRENT_DATE,
     coins INT DEFAULT 50 CHECK (coins >= 0),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -81,6 +82,8 @@ CREATE TABLE public.user_progress (
     vocab_id INT NOT NULL REFERENCES public.vocabulary(id) ON DELETE CASCADE,
     hsk_level INT NOT NULL CHECK (hsk_level BETWEEN 1 AND 6),
     is_learned BOOLEAN DEFAULT true,
+    is_quiz_mastered BOOLEAN NOT NULL DEFAULT false,
+    is_favorite BOOLEAN NOT NULL DEFAULT false,
     review_count INT DEFAULT 1,
     last_studied_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),

@@ -5,6 +5,7 @@ import '../core/config/supabase_config.dart';
 import '../models/user_profile_model.dart';
 import '../models/vocabulary_model.dart';
 import '../models/coin_transaction_model.dart';
+import '../models/quiz_attempt_model.dart';
 
 class SupabaseService {
   static final SupabaseService instance = SupabaseService._internal();
@@ -99,6 +100,53 @@ class SupabaseService {
     }
   }
 
+  Future<Map<int, Map<String, bool>>> fetchUserVocabularyProgress(
+    String userId,
+  ) async {
+    try {
+      final rows = await client
+          .from('user_progress')
+          .select('vocab_id, is_learned, is_quiz_mastered, is_favorite')
+          .eq('user_id', userId);
+      return {
+        for (final row in rows)
+          (row['vocab_id'] as num).toInt(): {
+            'learned_in_path': row['is_learned'] == true,
+            'quiz_mastered': row['is_quiz_mastered'] == true,
+            'is_favorite': row['is_favorite'] == true,
+          },
+      };
+    } catch (e) {
+      debugPrint('[SupabaseService] fetchUserVocabularyProgress error: $e');
+      return {};
+    }
+  }
+
+  Future<bool> saveUserVocabularyProgress({
+    required String userId,
+    required int vocabId,
+    required int hskLevel,
+    required bool learnedInPath,
+    required bool quizMastered,
+    required bool isFavorite,
+  }) async {
+    try {
+      await client.from('user_progress').upsert({
+        'user_id': userId,
+        'vocab_id': vocabId,
+        'hsk_level': hskLevel,
+        'is_learned': learnedInPath,
+        'is_quiz_mastered': quizMastered,
+        'is_favorite': isFavorite,
+        'last_studied_at': DateTime.now().toIso8601String(),
+      }, onConflict: 'user_id,vocab_id');
+      return true;
+    } catch (e) {
+      debugPrint('[SupabaseService] saveUserVocabularyProgress error: $e');
+      return false;
+    }
+  }
+
   /// Mendaftarkan user baru ke tabel app_users di Supabase
   Future<Map<String, dynamic>?> registerAppUser({
     required String id,
@@ -124,13 +172,22 @@ class SupabaseService {
         'email': email?.trim().toLowerCase() ?? '',
         'current_hsk_level': currentHskLevel,
         'streak': streak,
+        'last_active_date': DateTime.now().toIso8601String().split('T').first,
         'coins': coins,
         'created_at': createdAt ?? now,
         'updated_at': now,
       };
-      debugPrint('[SupabaseService] Menyimpan user baru ke app_users: username=$username, id=$id');
-      final result = await client.from('app_users').insert(data).select().single();
-      debugPrint('[SupabaseService] ✅ User berhasil disimpan ke Supabase: $result');
+      debugPrint(
+        '[SupabaseService] Menyimpan user baru ke app_users: username=$username, id=$id',
+      );
+      final result = await client
+          .from('app_users')
+          .insert(data)
+          .select()
+          .single();
+      debugPrint(
+        '[SupabaseService] ✅ User berhasil disimpan ke Supabase: $result',
+      );
       return result;
     } catch (e) {
       debugPrint('[SupabaseService] ❌ registerAppUser GAGAL: $e');
@@ -145,6 +202,7 @@ class SupabaseService {
     int? streak,
     int? currentHskLevel,
     String? fullName,
+    DateTime? lastActiveDate,
   }) async {
     if (!_isInitialized) return false;
     try {
@@ -153,8 +211,16 @@ class SupabaseService {
       };
       if (coins != null) updateData['coins'] = coins;
       if (streak != null) updateData['streak'] = streak;
-      if (currentHskLevel != null) updateData['current_hsk_level'] = currentHskLevel;
+      if (currentHskLevel != null) {
+        updateData['current_hsk_level'] = currentHskLevel;
+      }
       if (fullName != null) updateData['full_name'] = fullName;
+      if (lastActiveDate != null) {
+        updateData['last_active_date'] = lastActiveDate
+            .toIso8601String()
+            .split('T')
+            .first;
+      }
 
       await client.from('app_users').update(updateData).eq('id', id);
       return true;
@@ -271,7 +337,8 @@ class SupabaseService {
       final res = await client
           .from('user_progress')
           .select('vocab_id')
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .eq('is_learned', true);
 
       return (res as List).map((e) => (e['vocab_id'] as num).toInt()).toSet();
     } catch (e) {
@@ -299,6 +366,23 @@ class SupabaseService {
   }
 
   // ===================== KUIS =====================
+
+  Future<List<QuizAttempt>> fetchQuizAttempts(String userId) async {
+    try {
+      final rows = await client
+          .from('quiz_attempts')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false)
+          .limit(1000);
+      return rows
+          .map((row) => QuizAttempt.fromJson(row))
+          .toList(growable: false);
+    } catch (e) {
+      debugPrint('[SupabaseService] fetchQuizAttempts error: $e');
+      return [];
+    }
+  }
 
   Future<bool> saveQuizAttempt({
     required String userId,

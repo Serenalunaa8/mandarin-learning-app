@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,7 +11,7 @@ import '../services/security_service.dart';
 import '../services/session_service.dart';
 import '../services/supabase_service.dart';
 
-class AuthProvider extends ChangeNotifier {
+class AuthProvider extends ChangeNotifier with WidgetsBindingObserver {
   UserProfile? _profile;
   final List<CoinTransaction> _coinTransactions = [];
   bool _isLoading = false;
@@ -20,6 +22,46 @@ class AuthProvider extends ChangeNotifier {
   DateTime _sessionStartTime = DateTime.now();
   int _savedSecondsToday = 0;
   String? _savedTodayDate;
+  Timer? _studyTimer;
+
+  AuthProvider() {
+    WidgetsBinding.instance.addObserver(this);
+    _startStudyTimer();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      saveTodayActiveSeconds();
+    } else if (state == AppLifecycleState.resumed) {
+      _sessionStartTime = DateTime.now();
+      _loadTodayActiveSeconds();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _stopStudyTimer();
+    super.dispose();
+  }
+
+  void _startStudyTimer() {
+    _studyTimer?.cancel();
+    _studyTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (_profile != null || _isGuest) {
+        saveTodayActiveSeconds();
+        notifyListeners();
+      }
+    });
+  }
+
+  void _stopStudyTimer() {
+    _studyTimer?.cancel();
+    _studyTimer = null;
+  }
 
   // Status Pendaftaran Biometrik (Sidik Jari & Pengenalan Wajah)
   bool _isBiometricEnrolled = false;
@@ -92,25 +134,52 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _loadTodayActiveSeconds() async {
     final now = DateTime.now();
-    _savedTodayDate = now.toIso8601String().split('T').first;
+    final todayStr = now.toIso8601String().split('T').first;
+    _savedTodayDate = todayStr;
     _sessionStartTime = now;
 
-    if (!_isGuest && _profile != null) {
+    try {
       final prefs = await SharedPreferences.getInstance();
-      final key = 'active_sec_${_savedTodayDate}_${_profile!.id}';
-      _savedSecondsToday = prefs.getInt(key) ?? 0;
-    } else {
+      if (_profile != null) {
+        final key = 'active_sec_${todayStr}_${_profile!.id}';
+        _savedSecondsToday = prefs.getInt(key) ?? 0;
+      } else if (_isGuest) {
+        final key = 'active_sec_${todayStr}_guest';
+        _savedSecondsToday = prefs.getInt(key) ?? 0;
+      } else {
+        _savedSecondsToday = 0;
+      }
+    } catch (_) {
       _savedSecondsToday = 0;
     }
   }
 
   Future<void> saveTodayActiveSeconds() async {
-    if (_isGuest || _profile == null) return;
+    final now = DateTime.now();
+    final todayStr = now.toIso8601String().split('T').first;
+
+    // Jika telah berganti hari saat app sedang terbuka
+    if (_savedTodayDate != null && _savedTodayDate != todayStr) {
+      _savedTodayDate = todayStr;
+      _savedSecondsToday = 0;
+      _sessionStartTime = now;
+      return;
+    }
+
+    final elapsed = now.difference(_sessionStartTime).inSeconds;
+    final int toAdd = elapsed > 0 ? elapsed : 0;
+    _savedSecondsToday += toAdd;
+    _sessionStartTime = now;
+
     try {
       final prefs = await SharedPreferences.getInstance();
-      final todayStr = DateTime.now().toIso8601String().split('T').first;
-      final key = 'active_sec_${todayStr}_${_profile!.id}';
-      await prefs.setInt(key, activeStudySecondsToday);
+      if (_profile != null) {
+        final key = 'active_sec_${todayStr}_${_profile!.id}';
+        await prefs.setInt(key, _savedSecondsToday);
+      } else if (_isGuest) {
+        final key = 'active_sec_${todayStr}_guest';
+        await prefs.setInt(key, _savedSecondsToday);
+      }
     } catch (_) {}
   }
 
@@ -145,15 +214,26 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
 
       try {
-        await LocalDatabaseService.instance.updateUserStats(
+        final savedLocally = await LocalDatabaseService.instance
+            .updateUserStats(
+              id: _profile!.id,
+              streak: newStreak,
+              lastActiveDate: now,
+            );
+        if (!savedLocally) {
+          debugPrint('[AuthProvider] Gagal menyimpan streak ke SQLite lokal.');
+        }
+        final savedRemotely = await SupabaseService.instance.updateAppUserStats(
           id: _profile!.id,
           streak: newStreak,
+          lastActiveDate: now,
         );
-        await SupabaseService.instance.updateAppUserStats(
-          id: _profile!.id,
-          streak: newStreak,
-        );
-      } catch (_) {}
+        if (!savedRemotely) {
+          debugPrint('[AuthProvider] Gagal menyinkronkan streak ke Supabase.');
+        }
+      } catch (e) {
+        debugPrint('[AuthProvider] Gagal menyimpan streak harian: $e');
+      }
     }
   }
 
@@ -240,7 +320,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-    /// Login dengan enkripsi password (tidak menggunakan Firebase)
+  /// Login dengan enkripsi password (tidak menggunakan Firebase)
   Future<bool> login(String usernameOrEmail, String password) async {
     _isLoading = true;
     _errorMessage = null;
@@ -320,6 +400,7 @@ class AuthProvider extends ChangeNotifier {
       }
       await updateDailyStreak();
       await _loadTodayActiveSeconds();
+      _startStudyTimer();
 
       // Ambil riwayat koin
       try {
@@ -399,6 +480,7 @@ class AuthProvider extends ChangeNotifier {
           'email': cleanEmail,
           'current_hsk_level': 1,
           'streak': 1,
+          'last_active_date': DateTime.now().toIso8601String().split('T').first,
           'coins': 50,
           'created_at': now,
           'updated_at': now,
@@ -648,10 +730,14 @@ class AuthProvider extends ChangeNotifier {
       _dailyGoalMinutes = await SessionService.getDailyGoalMinutes();
 
       _profile = UserProfile.fromJson(userData);
-      final savedAvatar = prefs.getString('user_avatar_');
+      final savedAvatar = prefs.getString('user_avatar_$username');
       if (savedAvatar != null && savedAvatar.isNotEmpty) {
         _profile = _profile!.copyWith(avatarUrl: savedAvatar);
       }
+
+      await updateDailyStreak();
+      await _loadTodayActiveSeconds();
+      _startStudyTimer();
 
       try {
         _coinTransactions
@@ -682,9 +768,6 @@ class AuthProvider extends ChangeNotifier {
     await prefs.remove('guest_hsk');
     await prefs.remove('guest_streak');
 
-    _savedSecondsToday = 0;
-    _sessionStartTime = DateTime.now();
-    _savedTodayDate = DateTime.now().toIso8601String().split('T').first;
     final savedGuestAvatar = prefs.getString('user_avatar_guest');
     _profile = UserProfile(
       id: 'guest_local_user',
@@ -698,11 +781,15 @@ class AuthProvider extends ChangeNotifier {
       coins: 0,
     );
     _coinTransactions.clear();
+    await _loadTodayActiveSeconds();
+    _startStudyTimer();
     notifyListeners();
   }
 
   /// Logout dan hapus sesi
   Future<void> logout() async {
+    await saveTodayActiveSeconds();
+    _stopStudyTimer();
     await SessionService.clearSession();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('is_guest_mode');

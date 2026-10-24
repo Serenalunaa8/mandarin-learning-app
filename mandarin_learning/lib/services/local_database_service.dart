@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
+import '../models/quiz_attempt_model.dart';
+
 class LocalDatabaseService {
   static final LocalDatabaseService instance = LocalDatabaseService._internal();
   LocalDatabaseService._internal();
@@ -33,7 +35,7 @@ class LocalDatabaseService {
 
       _db = await openDatabase(
         path,
-        version: 1,
+        version: 2,
         onCreate: (Database db, int version) async {
           // Tabel pengguna lokal dengan username & password_hash terenkripsi
           await db.execute('''
@@ -45,6 +47,7 @@ class LocalDatabaseService {
               email TEXT,
               current_hsk_level INTEGER DEFAULT 1,
               streak INTEGER DEFAULT 1,
+              last_active_date TEXT,
               total_xp INTEGER DEFAULT 0,
               coins INTEGER DEFAULT 50,
               created_at TEXT NOT NULL,
@@ -56,6 +59,15 @@ class LocalDatabaseService {
           await db.execute(
             'CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)',
           );
+          await _createProgressTables(db);
+        },
+        onUpgrade: (Database db, int oldVersion, int newVersion) async {
+          if (oldVersion < 2) {
+            await db.execute(
+              'ALTER TABLE users ADD COLUMN last_active_date TEXT',
+            );
+            await _createProgressTables(db);
+          }
         },
       );
       _isInitialized = true;
@@ -177,6 +189,7 @@ class LocalDatabaseService {
     int? streak,
     int? currentHskLevel,
     String? fullName,
+    DateTime? lastActiveDate,
   }) async {
     try {
       final db = await database;
@@ -191,6 +204,9 @@ class LocalDatabaseService {
         values['current_hsk_level'] = currentHskLevel;
       }
       if (fullName != null) values['full_name'] = fullName;
+      if (lastActiveDate != null) {
+        values['last_active_date'] = _dateOnly(lastActiveDate);
+      }
 
       await db.update('users', values, where: 'id = ?', whereArgs: [id]);
       return true;
@@ -199,4 +215,116 @@ class LocalDatabaseService {
       return false;
     }
   }
+
+  Future<List<Map<String, dynamic>>> fetchLearningProgress(
+    String userId,
+  ) async {
+    try {
+      final db = await database;
+      if (db == null) return [];
+      return await db.query(
+        'learning_progress',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+      );
+    } catch (e) {
+      debugPrint('[LocalDatabaseService] fetchLearningProgress error: $e');
+      return [];
+    }
+  }
+
+  Future<bool> saveLearningProgress({
+    required String userId,
+    required int vocabId,
+    required int hskLevel,
+    required bool learnedInPath,
+    required bool quizMastered,
+    required bool isFavorite,
+  }) async {
+    try {
+      final db = await database;
+      if (db == null) return false;
+      await db.insert('learning_progress', {
+        'user_id': userId,
+        'vocab_id': vocabId,
+        'hsk_level': hskLevel,
+        'learned_in_path': learnedInPath ? 1 : 0,
+        'quiz_mastered': quizMastered ? 1 : 0,
+        'is_favorite': isFavorite ? 1 : 0,
+        'updated_at': DateTime.now().toIso8601String(),
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      return true;
+    } catch (e) {
+      debugPrint('[LocalDatabaseService] saveLearningProgress error: $e');
+      return false;
+    }
+  }
+
+  Future<List<QuizAttempt>> fetchQuizAttempts(String userId) async {
+    try {
+      final db = await database;
+      if (db == null) return [];
+      final rows = await db.query(
+        'learning_quiz_attempts',
+        where: 'user_id = ?',
+        whereArgs: [userId],
+        orderBy: 'created_at DESC',
+      );
+      return rows
+          .map((row) => QuizAttempt.fromJson(Map<String, dynamic>.from(row)))
+          .toList();
+    } catch (e) {
+      debugPrint('[LocalDatabaseService] fetchQuizAttempts error: $e');
+      return [];
+    }
+  }
+
+  Future<bool> saveQuizAttempt(QuizAttempt attempt) async {
+    try {
+      final db = await database;
+      if (db == null) return false;
+      await db.insert(
+        'learning_quiz_attempts',
+        attempt.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      return true;
+    } catch (e) {
+      debugPrint('[LocalDatabaseService] saveQuizAttempt error: $e');
+      return false;
+    }
+  }
+
+  Future<void> _createProgressTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS learning_progress (
+        user_id TEXT NOT NULL,
+        vocab_id INTEGER NOT NULL,
+        hsk_level INTEGER NOT NULL,
+        learned_in_path INTEGER NOT NULL DEFAULT 0,
+        quiz_mastered INTEGER NOT NULL DEFAULT 0,
+        is_favorite INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT NOT NULL,
+        PRIMARY KEY (user_id, vocab_id)
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS learning_quiz_attempts (
+        attempt_id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        hsk_level INTEGER NOT NULL,
+        quiz_type TEXT NOT NULL,
+        score INTEGER NOT NULL,
+        total_questions INTEGER NOT NULL,
+        correct_answers INTEGER NOT NULL,
+        coins_earned INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
+      )
+    ''');
+  }
+
+  String _dateOnly(DateTime value) =>
+      '${value.year.toString().padLeft(4, '0')}-'
+      '${value.month.toString().padLeft(2, '0')}-'
+      '${value.day.toString().padLeft(2, '0')}';
 }

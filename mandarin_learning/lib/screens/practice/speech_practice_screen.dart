@@ -13,7 +13,6 @@ import '../../services/audio_service.dart';
 import '../../services/speech_evaluation_service.dart';
 import '../../services/speech_recognition_settings_service.dart';
 import '../../services/tone_analysis_service.dart';
-import '../../widgets/mascot_widget.dart';
 import '../../widgets/in_app_notification.dart';
 
 class SpeechPracticeScreen extends StatefulWidget {
@@ -379,34 +378,63 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.mintBackground,
+      backgroundColor: const Color(0xFFEAF7F2),
       appBar: AppBar(
-        title: const Text('Latihan Pelafalan'),
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leadingWidth: 72,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16, top: 6, bottom: 6),
+          child: _roundHeaderButton(
+            icon: Icons.arrow_back_rounded,
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        title: const Text(
+          'Latihan Pelafalan',
+          style: TextStyle(
+            color: Color(0xFF124B36),
+            fontSize: 21,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            margin: const EdgeInsets.only(right: 16, top: 6, bottom: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              color: Colors.white.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+                  color: const Color(0xFF164B38).withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('💎', style: TextStyle(fontSize: 13)),
+                Image.asset(
+                  'assets/image/beranda/koin.png',
+                  width: 21,
+                  height: 21,
+                  errorBuilder: (_, _, _) => const Icon(
+                    Icons.monetization_on_rounded,
+                    size: 20,
+                    color: AppColors.coinGold,
+                  ),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '${auth.coins}',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
-                    color: AppColors.textDark,
+                    color: Color(0xFF124B36),
                   ),
                 ),
               ],
@@ -415,248 +443,338 @@ class _SpeechPracticeScreenState extends State<SpeechPracticeScreen> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Target Character Card
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFE8F7F2), Color(0xFFF5FBF7), Color(0xFFEAF7F2)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          widget.item.hanzi,
-                          style: const TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        IconButton(
-                          tooltip: 'Dengarkan pelafalan Mandarin',
-                          onPressed: _playPronunciation,
-                          icon: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryLight,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.volume_up_rounded,
-                              color: AppColors.primaryDark,
-                              size: 26,
-                            ),
-                          ),
-                        ),
-                      ],
+                    Image.asset(
+                      'assets/image/beranda/maskot_04_lup.png',
+                      width: 58,
+                      height: 58,
+                      fit: BoxFit.contain,
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      widget.item.pinyin,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryDark,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.item.artiIndonesia,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              // Panduan Pola Nada
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0FDF4),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFBBF7D0)),
-                ),
-                child: Row(
-                  children: [
-                    const Text('💡', style: TextStyle(fontSize: 20)),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Target: ${_getToneTitle(tone)}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              color: Color(0xFF14532D),
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _getToneRule(tone),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF166534),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Hasil Analisis Validasi & Skor
-              if (_isAnalyzing) ...[
-                Container(
-                  padding: const EdgeInsets.all(28),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Column(
-                    children: [
-                      CircularProgressIndicator(color: AppColors.primary),
-                      SizedBox(height: 16),
-                      Text(
-                        'Memvalidasi pelafalan Mandarin...',
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Dengarkan, lalu ucapkan kata berikut.',
                         style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textDark,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF124B36),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Target Character Card
+                Container(
+                  height: 208,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF145D3B),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF145D3B).withValues(alpha: 0.2),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: Image.asset(
+                          'assets/image/beranda/bg_sungai.png',
+                          fit: BoxFit.cover,
+                          color: const Color(0xFF0C4C31)
+                              .withValues(alpha: 0.74),
+                          colorBlendMode: BlendMode.multiply,
+                        ),
+                      ),
+                      Positioned(
+                        right: -10,
+                        bottom: -12,
+                        width: 172,
+                        height: 172,
+                        child: Image.asset(
+                          'assets/image/beranda/maskot_02_baca_buku.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      Positioned(
+                        left: 22,
+                        top: 16,
+                        bottom: 16,
+                        right: 132,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      widget.item.hanzi,
+                                      maxLines: 1,
+                                      style: const TextStyle(
+                                        fontSize: 48,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                IconButton(
+                                  tooltip: 'Dengarkan pelafalan Mandarin',
+                                  onPressed: _playPronunciation,
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: const Color(0xFF2FAE60),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  icon: const Icon(
+                                    Icons.volume_up_rounded,
+                                    size: 23,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.item.pinyin,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFFD8F3DF),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              widget.item.artiIndonesia,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withValues(alpha: 0.84),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        right: 20,
+                        top: 20,
+                        child: Image.asset(
+                          'assets/image/beranda/kilau_01.png',
+                          width: 20,
+                          height: 20,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ] else if (_result != null) ...[
-                _buildAnalysisResultCard(_result!),
-              ] else ...[
-                // Ilustrasi Maskot Mendengarkan
-                const Center(
-                  child: MascotWidget(
-                    size: 110,
-                    pose: MascotPose.listening,
-                    speechBubbleText: 'Dengarkan & Ucapkan!',
-                  ),
-                ),
-              ],
-              if (_recognitionError != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  _recognitionError!,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.error, fontSize: 12),
-                ),
-                if (_needsSpeechSetup)
-                  TextButton.icon(
-                    onPressed: _openSpeechSettings,
-                    icon: const Icon(Icons.settings_voice_rounded),
-                    label: const Text('Atur bahasa Mandarin'),
-                  ),
-              ],
+                const SizedBox(height: 18),
 
-              const SizedBox(height: 24),
-
-              // Tombol Rekam Mikrofon (FR-04)
-              Center(
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      onTap: _isAnalyzing
-                          ? null
-                          : _isRecording
-                          ? _stopRecording
-                          : _startRecording,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        width: _isRecording ? 92 : 82,
-                        height: _isRecording ? 92 : 82,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _isRecording
-                              ? AppColors.error
-                              : AppColors.primary,
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  (_isRecording
-                                          ? AppColors.error
-                                          : AppColors.primary)
-                                      .withValues(alpha: 0.35),
-                              blurRadius: 18,
-                              spreadRadius: _isRecording
-                                  ? (4 + (_soundLevel * 1.5).clamp(0.0, 14.0))
-                                  : 2,
-                              offset: const Offset(0, 6),
+                // Panduan Pola Nada
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0FDF4),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: const Color(0xFFBBF7D0)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text('💡', style: TextStyle(fontSize: 20)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Target: ${_getToneTitle(tone)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: Color(0xFF14532D),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _getToneRule(tone),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF166534),
+                              ),
                             ),
                           ],
                         ),
-                        child: Icon(
-                          _isRecording ? Icons.stop_rounded : Icons.mic_rounded,
-                          color: Colors.white,
-                          size: 40,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Hasil Analisis Validasi & Skor
+                if (_isAnalyzing) ...[
+                  Container(
+                    padding: const EdgeInsets.all(28),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: const Column(
+                      children: [
+                        CircularProgressIndicator(color: AppColors.primary),
+                        SizedBox(height: 16),
+                        Text(
+                          'Memvalidasi pelafalan Mandarin...',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ] else if (_result != null) ...[
+                  _buildAnalysisResultCard(_result!),
+                ],
+                if (_recognitionError != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    _recognitionError!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.error,
+                      fontSize: 12,
+                    ),
+                  ),
+                  if (_needsSpeechSetup)
+                    TextButton.icon(
+                      onPressed: _openSpeechSettings,
+                      icon: const Icon(Icons.settings_voice_rounded),
+                      label: const Text('Atur bahasa Mandarin'),
+                    ),
+                ],
+
+                const SizedBox(height: 24),
+
+                // Tombol Rekam Mikrofon (FR-04)
+                Center(
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: _isAnalyzing
+                            ? null
+                            : _isRecording
+                            ? _stopRecording
+                            : _startRecording,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          width: _isRecording ? 92 : 82,
+                          height: _isRecording ? 92 : 82,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _isRecording
+                                ? AppColors.error
+                                : AppColors.primary,
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    (_isRecording
+                                            ? AppColors.error
+                                            : AppColors.primary)
+                                        .withValues(alpha: 0.35),
+                                blurRadius: 18,
+                                spreadRadius: _isRecording
+                                    ? (4 + (_soundLevel * 1.5).clamp(0.0, 14.0))
+                                    : 2,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            _isRecording
+                                ? Icons.stop_rounded
+                                : Icons.mic_rounded,
+                            color: Colors.white,
+                            size: 40,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      _isRecording
-                          ? (_recognizedText.isNotEmpty
-                                ? '🎙️ Terdengar: "$_recognizedText" • Ketuk untuk selesai'
-                                : (_hasVoiceActivity
-                                      ? '🎙️ Suara terdeteksi... ($_recordSeconds dtk) • Ucapkan kata'
-                                      : 'Mendengarkan... Silakan ucapkan ($_recordSeconds dtk)'))
-                          : 'Ketuk mikrofon untuk melafalkan',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: _isRecording
-                            ? (_hasVoiceActivity
-                                  ? const Color(0xFF15803D)
-                                  : AppColors.error)
-                            : AppColors.textMuted,
+                      const SizedBox(height: 14),
+                      Text(
+                        _isRecording
+                            ? (_recognizedText.isNotEmpty
+                                  ? '🎙️ Terdengar: "$_recognizedText" • Ketuk untuk selesai'
+                                  : (_hasVoiceActivity
+                                        ? '🎙️ Suara terdeteksi... ($_recordSeconds dtk) • Ucapkan kata'
+                                        : 'Mendengarkan... Silakan ucapkan ($_recordSeconds dtk)'))
+                            : 'Ketuk mikrofon untuk melafalkan',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: _isRecording
+                              ? (_hasVoiceActivity
+                                    ? const Color(0xFF15803D)
+                                    : AppColors.error)
+                              : AppColors.textMuted,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // Catatan Transparansi
-              const Center(
-                child: Text(
-                  'Penilaian memvalidasi kecocokan pelafalan lisan terhadap target Mandarin.',
-                  style: TextStyle(fontSize: 11, color: AppColors.textLight),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _roundHeaderButton({
+    required IconData icon,
+    required VoidCallback? onPressed,
+  }) {
+    return Container(
+      width: 46,
+      height: 46,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF164B38).withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon, color: const Color(0xFF124B36), size: 24),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/vocabulary_model.dart';
 import '../models/quiz_attempt_model.dart';
 import '../services/vocabulary_service.dart';
+import '../services/local_database_service.dart';
 import '../services/supabase_service.dart';
 
 class VocabularyProvider extends ChangeNotifier {
@@ -17,6 +18,8 @@ class VocabularyProvider extends ChangeNotifier {
   final Set<int> _favoriteVocabIds = {};
   final List<QuizAttempt> _quizAttempts = [];
   String _searchQuery = '';
+  String _activeUserId = 'guest_local_user';
+  bool _isGuestUser = true;
 
   bool get isLoading => _isLoading;
   int get selectedLevel => _selectedLevel;
@@ -62,49 +65,106 @@ class VocabularyProvider extends ChangeNotifier {
 
     await VocabularyService.instance.loadVocabulary();
 
-    final isGuestUser =
+    _activeUserId = userId ?? 'guest_local_user';
+    _isGuestUser =
         userId == null ||
         userId == 'guest_local_user' ||
         userId == 'guest_temp';
     final prefs = await SharedPreferences.getInstance();
-    _quizMasteredVocabIds
-      ..clear()
-      ..addAll(
-        (prefs.getStringList(
-                  'quiz_mastered_vocab_ids_${userId ?? 'guest_local_user'}',
-                ) ??
-                [])
-            .map((id) => int.tryParse(id))
-            .whereType<int>(),
-      );
+    final localProgress = await LocalDatabaseService.instance
+        .fetchLearningProgress(_activeUserId);
+    final remoteProgress = _isGuestUser
+        ? <int, Map<String, bool>>{}
+        : await SupabaseService.instance.fetchUserVocabularyProgress(
+            _activeUserId,
+          );
+    final progressByVocabId = <int, Map<String, bool>>{
+      for (final row in localProgress)
+        (row['vocab_id'] as num).toInt(): {
+          'learned_in_path': row['learned_in_path'] == 1,
+          'quiz_mastered': row['quiz_mastered'] == 1,
+          'is_favorite': row['is_favorite'] == 1,
+        },
+    };
+    progressByVocabId.addAll(remoteProgress);
 
-    // 1. Muat progres yang sudah dipelajari (PB-05 & FR-15)
     _learnedVocabIds.clear();
-    if (!isGuestUser) {
-      final ids = await SupabaseService.instance.fetchLearnedVocabIds(userId);
-      _learnedVocabIds.addAll(ids);
-    }
-
-    // 2. Muat koleksi kata favorit / kamus tersimpan
+    _quizMasteredVocabIds.clear();
     _favoriteVocabIds.clear();
-    if (!isGuestUser) {
-      final favList = prefs.getStringList('favorite_vocab_ids') ?? [];
-      _favoriteVocabIds.addAll(favList.map((e) => int.tryParse(e) ?? 0));
-    }
-
-    // 3. Muat riwayat kuis utama
-    _quizAttempts.clear();
-    if (!isGuestUser) {
-      final localAttempts = prefs.getStringList('local_quiz_attempts') ?? [];
-      for (var str in localAttempts) {
-        try {
-          final map = jsonDecode(str) as Map<String, dynamic>;
-          _quizAttempts.add(QuizAttempt.fromJson(map));
-        } catch (e) {
-          debugPrint('[VocabProvider] Error parsing quiz attempt: $e');
-        }
+    for (final entry in progressByVocabId.entries) {
+      final state = entry.value;
+      if (state['learned_in_path'] == true) {
+        _learnedVocabIds.add(entry.key);
+      }
+      if (state['quiz_mastered'] == true) {
+        _quizMasteredVocabIds.add(entry.key);
+      }
+      if (state['is_favorite'] == true) {
+        _favoriteVocabIds.add(entry.key);
       }
     }
+
+    final legacyQuizMastery = prefs.getStringList(
+      'quiz_mastered_vocab_ids_$_activeUserId',
+    );
+    _quizMasteredVocabIds.addAll(
+      (legacyQuizMastery ?? []).map((id) => int.tryParse(id)).whereType<int>(),
+    );
+    _learnedVocabIds.addAll(
+      (prefs.getStringList('local_progress_learned_$_activeUserId') ?? [])
+          .map((id) => int.tryParse(id))
+          .whereType<int>(),
+    );
+    _quizMasteredVocabIds.addAll(
+      (prefs.getStringList('local_progress_quiz_$_activeUserId') ?? [])
+          .map((id) => int.tryParse(id))
+          .whereType<int>(),
+    );
+    final legacyFavorites = prefs.getStringList(
+      'favorite_vocab_ids_$_activeUserId',
+    );
+    _favoriteVocabIds.addAll(
+      (legacyFavorites ?? prefs.getStringList('favorite_vocab_ids') ?? [])
+          .map((id) => int.tryParse(id))
+          .whereType<int>(),
+    );
+    _favoriteVocabIds.addAll(
+      (prefs.getStringList('local_progress_favorites_$_activeUserId') ?? [])
+          .map((id) => int.tryParse(id))
+          .whereType<int>(),
+    );
+
+    // Keep a local database cache and import records saved before database sync.
+    _quizAttempts.clear();
+    final localAttempts = await LocalDatabaseService.instance.fetchQuizAttempts(
+      _activeUserId,
+    );
+    final oldLocalAttempts = prefs.getStringList('local_quiz_attempts') ?? [];
+    final attemptsById = <String, QuizAttempt>{
+      for (final attempt in localAttempts) attempt.id: attempt,
+    };
+    for (final encodedAttempt in oldLocalAttempts) {
+      try {
+        final map = jsonDecode(encodedAttempt) as Map<String, dynamic>;
+        final attempt = QuizAttempt.fromJson(map);
+        if (attempt.userId == _activeUserId) {
+          attemptsById.putIfAbsent(attempt.id, () => attempt);
+        }
+      } catch (e) {
+        debugPrint('[VocabProvider] Error parsing quiz attempt: $e');
+      }
+    }
+    if (!_isGuestUser) {
+      final remoteAttempts = await SupabaseService.instance.fetchQuizAttempts(
+        _activeUserId,
+      );
+      for (final attempt in remoteAttempts) {
+        attemptsById[attempt.id] = attempt;
+        await LocalDatabaseService.instance.saveQuizAttempt(attempt);
+      }
+    }
+    _quizAttempts.addAll(attemptsById.values);
+    _quizAttempts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     _isLoading = false;
     notifyListeners();
@@ -142,9 +202,15 @@ class VocabularyProvider extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
-      'favorite_vocab_ids',
+      'favorite_vocab_ids_$_activeUserId',
       _favoriteVocabIds.map((e) => e.toString()).toList(),
     );
+    final matchingItems = VocabularyService.instance.allVocabulary.where(
+      (item) => item.id == vocabId,
+    );
+    if (matchingItems.isNotEmpty) {
+      await _persistVocabularyProgress(matchingItems.first);
+    }
   }
 
   Future<void> markAsLearned({
@@ -157,12 +223,11 @@ class VocabularyProvider extends ChangeNotifier {
     _learnedVocabIds.add(vocabId);
     notifyListeners();
 
-    if (userId != 'guest_local_user' && userId != 'guest_temp') {
-      await SupabaseService.instance.recordProgress(
-        userId: userId,
-        vocabId: vocabId,
-        hskLevel: hskLevel ?? _selectedLevel,
-      );
+    final matchingItems = VocabularyService.instance.allVocabulary.where(
+      (item) => item.id == vocabId,
+    );
+    if (matchingItems.isNotEmpty) {
+      await _persistVocabularyProgress(matchingItems.first, hskLevel: hskLevel);
     }
   }
 
@@ -175,20 +240,26 @@ class VocabularyProvider extends ChangeNotifier {
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
+    await LocalDatabaseService.instance.saveQuizAttempt(attempt);
     await prefs.setStringList(
       'quiz_mastered_vocab_ids_${attempt.userId}',
       _quizMasteredVocabIds.map((id) => id.toString()).toList(),
     );
+    await prefs.setStringList(
+      'local_quiz_attempts',
+      _quizAttempts.map((e) => jsonEncode(e.toJson())).toList(),
+    );
+    for (final vocabId in correctVocabIds) {
+      final matchingItems = VocabularyService.instance.allVocabulary.where(
+        (item) => item.id == vocabId,
+      );
+      if (matchingItems.isNotEmpty) {
+        await _persistVocabularyProgress(matchingItems.first);
+      }
+    }
 
-    // Mode Tamu tidak menyimpan riwayat kuis ke disk maupun online.
-    if (attempt.userId != 'guest_local_user' &&
-        attempt.userId != 'guest_temp') {
-      final jsonList = _quizAttempts
-          .map((e) => jsonEncode(e.toJson()))
-          .toList();
-      await prefs.setStringList('local_quiz_attempts', jsonList);
-
-      await SupabaseService.instance.saveQuizAttempt(
+    if (!_isGuestUser) {
+      final saved = await SupabaseService.instance.saveQuizAttempt(
         userId: attempt.userId,
         attemptId: attempt.id,
         hskLevel: attempt.hskLevel,
@@ -198,6 +269,62 @@ class VocabularyProvider extends ChangeNotifier {
         correctAnswers: attempt.correctAnswers,
         coinsEarned: attempt.coinsEarned,
       );
+      if (!saved) {
+        debugPrint(
+          '[VocabProvider] Quiz attempt cached locally; Supabase sync failed.',
+        );
+      }
+    }
+  }
+
+  Future<void> _persistVocabularyProgress(
+    VocabularyItem item, {
+    int? hskLevel,
+  }) async {
+    final level = hskLevel ?? item.hskLevel;
+    final learned = _learnedVocabIds.contains(item.id);
+    final mastered = _quizMasteredVocabIds.contains(item.id);
+    final favorite = _favoriteVocabIds.contains(item.id);
+    final savedLocally = await LocalDatabaseService.instance
+        .saveLearningProgress(
+          userId: _activeUserId,
+          vocabId: item.id,
+          hskLevel: level,
+          learnedInPath: learned,
+          quizMastered: mastered,
+          isFavorite: favorite,
+        );
+    if (!savedLocally) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(
+        'local_progress_learned_$_activeUserId',
+        _learnedVocabIds.map((id) => id.toString()).toList(),
+      );
+      await prefs.setStringList(
+        'local_progress_quiz_$_activeUserId',
+        _quizMasteredVocabIds.map((id) => id.toString()).toList(),
+      );
+      await prefs.setStringList(
+        'local_progress_favorites_$_activeUserId',
+        _favoriteVocabIds.map((id) => id.toString()).toList(),
+      );
+    }
+
+    if (!_isGuestUser) {
+      final savedRemotely = await SupabaseService.instance
+          .saveUserVocabularyProgress(
+            userId: _activeUserId,
+            vocabId: item.id,
+            hskLevel: level,
+            learnedInPath: learned,
+            quizMastered: mastered,
+            isFavorite: favorite,
+          );
+      if (!savedRemotely) {
+        debugPrint(
+          '[VocabProvider] Vocabulary progress cached locally; Supabase sync failed for ${item.id}.',
+        );
+      }
     }
   }
 

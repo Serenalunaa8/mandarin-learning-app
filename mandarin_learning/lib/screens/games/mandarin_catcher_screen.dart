@@ -12,10 +12,12 @@ import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../../services/audio_service.dart';
 
-// FR-10: Mandarin Catcher
-// Geser keranjang langsung dengan sentuhan/drag jari untuk menangkap kata Mandarin yang tepat!
-// Fitur pendukung: accelerometer tilt opsional, 3 nyawa (hati), combo streak, animasi arcade.
-
+/// FR-10: Mandarin Catcher Game
+/// Catcher Mascot:
+/// - Idle/normal: assets/image/games/Excited Green Frog Mascot.png
+/// - Correct catch: assets/image/games/Blushing Green Sprout Mascot.png
+/// - Wrong catch: assets/image/games/Crying Green Frog Chibi Mascot.png
+/// Backgrounds: Multiple atmospheric game backgrounds from assets/image/games/
 class MandarinCatcherScreen extends StatefulWidget {
   const MandarinCatcherScreen({super.key});
 
@@ -25,15 +27,46 @@ class MandarinCatcherScreen extends StatefulWidget {
 
 class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     with SingleTickerProviderStateMixin {
-  static const double _catcherWidth = 116.0;
-  static const double _catcherHeight = 72.0;
-  static const double _objectWidth = 64.0;
-  static const double _objectHeight = 84.0;
+  static const double _catcherWidth = 110.0;
+  static const double _catcherHeight = 100.0;
+  static const double _objectWidth = 68.0;
+  static const double _objectHeight = 86.0;
   static const double _minimumEggGap = 88.0;
   static const int _maxFallingObjects = 2;
   static const int _gameDurationSecs = 30;
   static const int _wrongCatchLimit = 5;
   static const double _fallSpeed = 2.8;
+
+  // Background choices from assets/image/games/
+  static const List<Map<String, String>> _gameBackgrounds = [
+    {
+      'title': 'Langit Biru',
+      'path': 'assets/image/games/background_2_langit_biru.png',
+      'subtitle': 'Awan putih & langit cerah',
+    },
+    {
+      'title': 'Padang Cerah',
+      'path': 'assets/image/games/background_1_padang_cerah.png',
+      'subtitle': 'Hamparan padang rumput',
+    },
+    {
+      'title': 'Jalan Desa',
+      'path': 'assets/image/games/background_3_jalan_desa.png',
+      'subtitle': 'Jalan pedesaan asri',
+    },
+    {
+      'title': 'Taman Bunga',
+      'path': 'assets/image/games/background_4_taman_bunga.png',
+      'subtitle': 'Taman bunga penuh warna',
+    },
+    {
+      'title': 'Malam Danau',
+      'path': 'assets/image/games/background_5_malam_dan_danau.png',
+      'subtitle': 'Suasana malam tenang',
+    },
+  ];
+
+  int _selectedBgIndex = 0;
 
   // Game state
   double _catcherX = 140.0;
@@ -48,6 +81,14 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
   int _timeRemaining = _gameDurationSecs;
   bool _isLoading = true;
   bool _useSensorTilt = false;
+
+  // Mascot reaction state:
+  // - true: dapat kata benar -> Blushing Green Sprout Mascot.png
+  // - false: kata salah -> Crying Green Frog Chibi Mascot.png
+  // - null: diam / normal -> Excited Green Frog Mascot.png
+  bool? _catchReaction;
+  String _reactionText = '';
+  Timer? _reactionTimer;
 
   // Sensor
   bool _sensorAvailable = false;
@@ -77,6 +118,7 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
 
   @override
   void dispose() {
+    _reactionTimer?.cancel();
     _accelSub?.cancel();
     _gameTimer?.cancel();
     _spawnTimer?.cancel();
@@ -139,12 +181,14 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
       _isPlaying = true;
       _gameOver = false;
       _catcherX = (_screenWidth - _catcherWidth) / 2;
+      _catchReaction = null;
+      _reactionText = '';
     });
 
     _tickController.repeat();
 
     // Spawn falling objects secara teratur
-    _spawnTimer = Timer.periodic(const Duration(milliseconds: 2600), (t) {
+    _spawnTimer = Timer.periodic(const Duration(milliseconds: 2400), (t) {
       if (!mounted || _gameOver) {
         t.cancel();
         return;
@@ -174,6 +218,8 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     final distractors = _allWords
         .where((word) => word.id != _targetWord!.id)
         .toList();
+    if (distractors.isEmpty) return;
+
     final word = isTarget
         ? _targetWord!
         : distractors[_rng.nextInt(distractors.length)];
@@ -194,8 +240,6 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
         break;
       }
     }
-    // Leave a little breathing room when the screen has no free lane instead
-    // of stacking another egg on top of an existing one.
     if (spacedX == null) return;
 
     final obj = _FallingObject(
@@ -210,6 +254,22 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     setState(() => _fallingObjects.add(obj));
   }
 
+  void _triggerCatchReaction(bool isCorrect) {
+    _reactionTimer?.cancel();
+    setState(() {
+      _catchReaction = isCorrect;
+      _reactionText = isCorrect ? '+1 Benar! ✨' : 'Salah! 😭';
+    });
+    _reactionTimer = Timer(const Duration(milliseconds: 800), () {
+      if (mounted) {
+        setState(() {
+          _catchReaction = null;
+          _reactionText = '';
+        });
+      }
+    });
+  }
+
   void _tick() {
     if (!mounted || !_isPlaying || _gameOver) return;
 
@@ -220,12 +280,13 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     _catcherX = _catcherX.clamp(0.0, _screenWidth - _catcherWidth);
 
     final screenHeight = MediaQuery.of(context).size.height;
-    final catcherY = screenHeight - 160.0;
+    // Catcher is placed at bottom: 65, so top of catcher is screenHeight - 65 - _catcherHeight
+    final catcherY = screenHeight - 65.0 - _catcherHeight;
     final catcherRect = Rect.fromLTWH(
-      _catcherX,
-      catcherY,
-      _catcherWidth,
-      _catcherHeight,
+      _catcherX + 8,
+      catcherY + 12,
+      _catcherWidth - 16,
+      _catcherHeight - 20,
     );
 
     final toRemove = <_FallingObject>[];
@@ -235,7 +296,7 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
 
       final objRect = Rect.fromLTWH(obj.x, obj.y, _objectWidth, _objectHeight);
 
-      // Cek tabrakan objek dengan keranjang
+      // Cek tabrakan objek dengan mulut katak
       if (objRect.overlaps(catcherRect)) {
         toRemove.add(obj);
 
@@ -245,17 +306,19 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
           if (_combo > _maxCombo) _maxCombo = _combo;
           _score++;
           _caughtWords.add(obj.word);
+          _triggerCatchReaction(true);
           AudioService.instance.speak(obj.word.hanzi);
         } else {
           // ❌ Menangkap kata distractor! Kurangi nyawa
           _combo = 0;
           _wrongCaught++;
+          _triggerCatchReaction(false);
           if (_wrongCaught >= _wrongCatchLimit) {
             _endGame();
             return;
           }
         }
-      } else if (obj.y > screenHeight - 140) {
+      } else if (obj.y > screenHeight - 120) {
         // Terlewat ke bawah layar
         toRemove.add(obj);
         if (obj.isTarget) {
@@ -302,7 +365,6 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
         ? _caughtWords.length / totalTargetItems
         : 0.0;
 
-    // PRD 6.1: reward 15, 10, atau 5 koin
     final coins = accuracy >= 0.75
         ? 15
         : accuracy >= 0.45
@@ -332,7 +394,6 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     );
   }
 
-  // Handle direct finger drag on the basket
   void _onHorizontalDragUpdate(DragUpdateDetails details) {
     if (!_isPlaying || _gameOver) return;
     setState(() {
@@ -343,238 +404,453 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     });
   }
 
+  void _cycleBackground() {
+    setState(() {
+      _selectedBgIndex = (_selectedBgIndex + 1) % _gameBackgrounds.length;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    _screenWidth = MediaQuery.of(context).size.width;
-
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        backgroundColor: Color(0xFFF0FDF4),
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primaryGreen),
+        ),
+      );
     }
 
     if (_allWords.length < 3) {
       return Scaffold(
+        backgroundColor: const Color(0xFFF0FDF4),
         appBar: AppBar(title: const Text('Mandarin Catcher')),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildCatcherMascot(width: 110, height: 126),
-              const SizedBox(height: 16),
-              const Text('Butuh minimal 3 kosakata untuk mulai bermain.'),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Kembali'),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/image/games/Excited Green Frog Mascot.png',
+                  width: 110,
+                  height: 110,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Kosakata Belum Cukup',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Dibutuhkan minimal 3 kata pada level HSK saat ini untuk memainkan Mandarin Catcher.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.textMuted),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
-    if (_gameOver) return _buildGameOverScreen();
-    if (!_isPlaying) return _buildWelcomeScreen();
+    if (_gameOver) {
+      return _buildGameOverScreen();
+    }
 
-    return _buildActivePlayScreen();
+    if (_isPlaying) {
+      return _buildActivePlayScreen();
+    }
+
+    return _buildWelcomeScreen();
   }
 
   // 1. Welcome / Intro Screen
   Widget _buildWelcomeScreen() {
+    final currentBg = _gameBackgrounds[_selectedBgIndex];
+
     return Scaffold(
-      backgroundColor: AppColors.mintBackground,
-      appBar: AppBar(
-        title: const Text('Mandarin Catcher'),
-        actions: [
-          IconButton(
-            tooltip: 'Panduan',
-            icon: const Icon(Icons.help_outline_rounded),
-            onPressed: () {},
+      body: Stack(
+        children: [
+          // Background Scenery
+          Positioned.fill(
+            child: Image.asset(
+              currentBg['path']!,
+              fit: BoxFit.cover,
+            ),
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          // Subtle soft white/transparent gradient overlay for readability
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.15),
+                    Colors.white.withValues(alpha: 0.70),
+                    Colors.white.withValues(alpha: 0.95),
+                  ],
+                  stops: const [0.0, 0.45, 0.85],
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildCatcherMascot(width: 124, height: 142),
-                const SizedBox(height: 16),
-                const Text(
-                  'Mandarin Catcher 🧺',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryDark,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Geser keranjang ke kiri dan kanan untuk menangkap kata Mandarin yang diminta!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textMuted,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Target preview card
-                if (_targetWord != null)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: const Color(0xFFBBF7D0),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        const Text(
-                          '🎯 KOSAKATA TARGET KAMU',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                            color: Color(0xFFB45309),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              _targetWord!.hanzi,
-                              style: const TextStyle(
-                                fontSize: 44,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryDark,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            IconButton(
-                              onPressed: () => AudioService.instance.speak(
-                                _targetWord!.hanzi,
-                              ),
-                              icon: const Icon(
-                                Icons.volume_up_rounded,
-                                color: AppColors.primaryGreen,
-                                size: 28,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          _targetWord!.pinyin,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryGreen,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _targetWord!.artiIndonesia,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                const SizedBox(height: 20),
-
-                // Control Mode Selector
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                // Top App Bar row
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.touch_app_rounded,
-                        color: AppColors.primaryGreen,
+                      Material(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        shape: const CircleBorder(),
+                        elevation: 2,
+                        child: IconButton(
+                          tooltip: 'Kembali',
+                          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF1E293B)),
+                          onPressed: () => Navigator.of(context).maybePop(),
+                        ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Kontrol Sentuh & Geser (Rekomendasi)',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'Geser jari di layar bawah untuk memindahkan keranjang',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: AppColors.textMuted,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          'Mandarin Catcher',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
+                          ),
                         ),
                       ),
-                      if (_sensorAvailable)
-                        Switch(
-                          value: _useSensorTilt,
-                          activeThumbColor: AppColors.primaryGreen,
-                          onChanged: (val) =>
-                              setState(() => _useSensorTilt = val),
+                      // Background switcher button
+                      Material(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(20),
+                        elevation: 2,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: _cycleBackground,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.landscape_rounded, size: 18, color: Color(0xFF2563EB)),
+                                const SizedBox(width: 6),
+                                Text(
+                                  currentBg['title']!,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF1E293B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
+                      ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 24),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _startGame,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGreen,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      elevation: 4,
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                // Main content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    child: Column(
                       children: [
-                        Icon(Icons.play_arrow_rounded, size: 28),
-                        SizedBox(width: 8),
-                        Text(
-                          'Mulai Menangkap!',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
+                        const SizedBox(height: 6),
+                        // Mascot Hero Preview
+                        Hero(
+                          tag: 'catcher_mascot',
+                          child: Image.asset(
+                            'assets/image/games/Excited Green Frog Mascot.png',
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.contain,
                           ),
                         ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Ayo Tangkap Kata Mandarin! 🐸',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Bantu katak menangkap kata Mandarin yang cocok ke dalam mulutnya. Jangan sampai menangkap kata yang salah ya!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF475569),
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+
+                        // Target Preview Card
+                        if (_targetWord != null)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.06),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFEF3C7),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Text(
+                                    '🎯 KOSAKATA TARGET KAMU',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.8,
+                                      color: Color(0xFFB45309),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      _targetWord!.hanzi,
+                                      style: const TextStyle(
+                                        fontSize: 42,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    IconButton(
+                                      onPressed: () => AudioService.instance.speak(
+                                        _targetWord!.hanzi,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.volume_up_rounded,
+                                        color: Color(0xFF2563EB),
+                                        size: 28,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  _targetWord!.pinyin,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF2563EB),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Artinya: ${_targetWord!.artiIndonesia}',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF334155),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        const SizedBox(height: 14),
+
+                        // Background theme choices carousel
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Pilih Suasana Latar Belakang:',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1E293B),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            SizedBox(
+                              height: 68,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _gameBackgrounds.length,
+                                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                                itemBuilder: (context, idx) {
+                                  final bg = _gameBackgrounds[idx];
+                                  final isSelected = idx == _selectedBgIndex;
+                                  return InkWell(
+                                    borderRadius: BorderRadius.circular(14),
+                                    onTap: () => setState(() => _selectedBgIndex = idx),
+                                    child: Container(
+                                      width: 90,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(14),
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? const Color(0xFF2563EB)
+                                              : Colors.white,
+                                          width: isSelected ? 2.5 : 1,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.1),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ],
+                                      ),
+                                      clipBehavior: Clip.antiAlias,
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          Image.asset(
+                                            bg['path']!,
+                                            fit: BoxFit.cover,
+                                          ),
+                                          Container(
+                                            color: isSelected
+                                                ? const Color(0x332563EB)
+                                                : Colors.black.withValues(alpha: 0.25),
+                                          ),
+                                          Center(
+                                            child: Text(
+                                              bg['title']!,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.w900
+                                                    : FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        // Sensor Tilt Toggle
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.touch_app_rounded,
+                                color: Color(0xFF2563EB),
+                                size: 22,
+                              ),
+                              const SizedBox(width: 10),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Kontrol Sentuh & Geser',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                    ),
+                                    Text(
+                                      'Geser jari di layar bawah untuk menggerakkan katak',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (_sensorAvailable)
+                                Switch(
+                                  value: _useSensorTilt,
+                                  activeColor: const Color(0xFF2563EB),
+                                  onChanged: (val) =>
+                                      setState(() => _useSensorTilt = val),
+                                ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Play Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _startGame,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF10B981),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              elevation: 5,
+                              shadowColor: const Color(0xFF10B981).withValues(alpha: 0.4),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.play_arrow_rounded, size: 28),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Mulai Menangkap!',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
@@ -582,39 +858,58 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   // 2. Active Game Screen
   Widget _buildActivePlayScreen() {
+    final currentBg = _gameBackgrounds[_selectedBgIndex];
+    final screenHeight = MediaQuery.of(context).size.height;
+    final catcherY = screenHeight - 65.0 - _catcherHeight;
+
+    // Anticipation logic: saat mau ambil kata (falling object mendekat di atas mulut katak)
+    final isAnticipating = _fallingObjects.any((obj) {
+      final inXRange = (obj.x + _objectWidth / 2 - (_catcherX + _catcherWidth / 2)).abs() < 60;
+      final inYRange = obj.y >= catcherY - 110 && obj.y <= catcherY + 30;
+      return inXRange && inYRange;
+    });
+
     return Scaffold(
       body: GestureDetector(
         onHorizontalDragUpdate: _onHorizontalDragUpdate,
         child: Stack(
           children: [
-            const Positioned.fill(
-              child: CustomPaint(painter: _CatcherGardenPainter()),
+            // Background Image from assets/image/games/
+            Positioned.fill(
+              child: Image.asset(
+                currentBg['path']!,
+                fit: BoxFit.cover,
+              ),
             ),
+
+            // Top HUD Overlay
             SafeArea(
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+                  padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Top Row: Back Button, Title Bar, and Quick BG Switcher
                       Row(
                         children: [
                           Material(
-                            color: const Color(0xFFF4FFF5).withValues(alpha: 0.92),
+                            color: Colors.white.withValues(alpha: 0.92),
                             shape: const CircleBorder(),
+                            elevation: 3,
                             child: IconButton(
-                              tooltip: 'Kembali',
+                              tooltip: 'Keluar',
                               onPressed: _exitActiveGame,
                               icon: const Icon(Icons.arrow_back_rounded),
-                              color: const Color(0xFF174A3F),
+                              color: const Color(0xFF0F172A),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -622,22 +917,20 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
-                                vertical: 12,
+                                vertical: 10,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF4FFF5)
-                                    .withValues(alpha: 0.92),
-                                borderRadius: BorderRadius.circular(24),
+                                color: Colors.white.withValues(alpha: 0.92),
+                                borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  width: 2,
+                                  color: Colors.white,
+                                  width: 1.5,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF145C50)
-                                        .withValues(alpha: 0.2),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 5),
+                                    color: Colors.black.withValues(alpha: 0.12),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
@@ -645,40 +938,53 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                                 'TANGKAP KATA YANG BENAR!',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Color(0xFF174A3F),
+                                  color: Color(0xFF0F172A),
                                   fontWeight: FontWeight.w900,
-                                  fontSize: 15,
-                                  letterSpacing: 0.4,
+                                  fontSize: 14,
+                                  letterSpacing: 0.3,
                                 ),
                               ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Material(
+                            color: Colors.white.withValues(alpha: 0.92),
+                            shape: const CircleBorder(),
+                            elevation: 3,
+                            child: IconButton(
+                              tooltip: 'Ganti Suasana Latar',
+                              onPressed: _cycleBackground,
+                              icon: const Icon(Icons.palette_outlined),
+                              color: const Color(0xFF2563EB),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
+
+                      // Stats Row: Hearts (Lives), Timer, Score
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          // Hearts for remaining lives
                           _buildGameBadge(
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.close_rounded,
-                                  size: 17,
-                                  color: Color(0xFFEF5C62),
-                                ),
-                                const SizedBox(width: 3),
-                                Text(
-                                  '$_wrongCaught/$_wrongCatchLimit',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF24594F),
+                              children: List.generate(_wrongCatchLimit, (index) {
+                                final isAlive = index < (_wrongCatchLimit - _wrongCaught);
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 1.5),
+                                  child: Icon(
+                                    isAlive ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                                    size: 18,
+                                    color: isAlive ? const Color(0xFFEF4444) : const Color(0xFF94A3B8),
                                   ),
-                                ),
-                              ],
+                                );
+                              }),
                             ),
                           ),
+
+                          // Time Remaining
                           _buildGameBadge(
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -686,36 +992,40 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                                 const Icon(
                                   Icons.timer_rounded,
                                   size: 16,
-                                  color: Color(0xFF39776C),
+                                  color: Color(0xFF2563EB),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '$_timeRemaining dtk',
                                   style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 13,
                                     color: _timeRemaining <= 5
-                                        ? const Color(0xFFCE3434)
-                                        : const Color(0xFF24594F),
+                                        ? const Color(0xFFDC2626)
+                                        : const Color(0xFF1E293B),
                                   ),
                                 ),
                               ],
                             ),
                           ),
+
+                          // Score Badge
                           _buildGameBadge(
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Icon(
                                   Icons.star_rounded,
-                                  size: 18,
-                                  color: Color(0xFFF2A925),
+                                  size: 19,
+                                  color: Color(0xFFF59E0B),
                                 ),
                                 const SizedBox(width: 3),
                                 Text(
                                   '$_score',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w900,
-                                    color: Color(0xFF7B4A12),
+                                    fontSize: 14,
+                                    color: Color(0xFF92400E),
                                   ),
                                 ),
                               ],
@@ -723,6 +1033,8 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                           ),
                         ],
                       ),
+
+                      // Target Word Banner
                       if (_targetWord != null) ...[
                         const SizedBox(height: 8),
                         Container(
@@ -732,16 +1044,15 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.92),
+                            color: Colors.white.withValues(alpha: 0.94),
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
-                              color: const Color(0xFFB6E2D4),
+                              color: const Color(0xFF93C5FD),
                               width: 1.5,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF145C50)
-                                    .withValues(alpha: 0.16),
+                                color: Colors.black.withValues(alpha: 0.12),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -749,12 +1060,19 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                           ),
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.south_rounded,
-                                color: Color(0xFF398C70),
-                                size: 22,
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEFF6FF),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.radar_rounded,
+                                  color: Color(0xFF2563EB),
+                                  size: 20,
+                                ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 10),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -765,9 +1083,9 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
-                                        color: Color(0xFF377265),
+                                        color: Color(0xFF2563EB),
                                         fontSize: 10,
-                                        fontWeight: FontWeight.w800,
+                                        fontWeight: FontWeight.w900,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
@@ -776,33 +1094,51 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
-                                        color: Color(0xFF193F38),
-                                        fontSize: 17,
+                                        color: Color(0xFF0F172A),
+                                        fontSize: 18,
                                         fontWeight: FontWeight.w900,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              if (_combo > 1)
+                              IconButton(
+                                iconSize: 22,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                tooltip: 'Dengarkan',
+                                icon: const Icon(
+                                  Icons.volume_up_rounded,
+                                  color: Color(0xFF2563EB),
+                                ),
+                                onPressed: () => AudioService.instance.speak(
+                                  _targetWord!.hanzi,
+                                ),
+                              ),
+                              if (_combo > 1) ...[
+                                const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
-                                    vertical: 5,
+                                    vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFFE6A8),
+                                    color: const Color(0xFFFEF3C7),
                                     borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: const Color(0xFFFBBF24),
+                                    ),
                                   ),
                                   child: Text(
                                     'x$_combo 🔥',
                                     style: const TextStyle(
-                                      color: Color(0xFF9C5B12),
+                                      color: Color(0xFFB45309),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w900,
                                     ),
                                   ),
                                 ),
+                              ],
                             ],
                           ),
                         ),
@@ -812,6 +1148,8 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                 ),
               ),
             ),
+
+            // Falling Word Bubbles
             ..._fallingObjects.map(
               (obj) => Positioned(
                 left: obj.x,
@@ -819,35 +1157,39 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                 child: _buildFallingEgg(obj),
               ),
             ),
+
+            // Dynamic Mascot Catcher at Bottom
             Positioned(
               left: _catcherX,
-              bottom: 88,
-              child: _buildCatcherBasket(),
+              bottom: 65,
+              child: _buildCatcherMascotWidget(isAnticipating: isAnticipating),
             ),
+
+            // Bottom Guide Hint
             Positioned(
-              bottom: 18,
+              bottom: 16,
               left: 0,
               right: 0,
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 8,
+                    horizontal: 16,
+                    vertical: 7,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF164F49).withValues(alpha: 0.72),
+                    color: Colors.black.withValues(alpha: 0.65),
                     borderRadius: BorderRadius.circular(22),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.45),
+                      color: Colors.white.withValues(alpha: 0.35),
                     ),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.swipe_rounded, color: Colors.white, size: 17),
-                      SizedBox(width: 7),
+                      Icon(Icons.swipe_rounded, color: Colors.white, size: 16),
+                      SizedBox(width: 6),
                       Text(
-                        'Geser untuk menggerakkan keranjang',
+                        'Geser katak ke kiri & kanan untuk menangkap kata',
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.white,
@@ -865,25 +1207,75 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     );
   }
 
-  Widget _buildCatcherMascot({required double width, required double height}) {
-    final fullHeight = height / 0.74;
-    return ClipRect(
-      child: SizedBox(
-        width: width,
-        height: height,
-        child: OverflowBox(
-          alignment: Alignment.topCenter,
-          minWidth: width,
-          maxWidth: width,
-          minHeight: fullHeight,
-          maxHeight: fullHeight,
-          child: Image.asset(
-            'assets/image/landing_page/01_maskot.png',
-            width: width,
-            height: fullHeight,
-            fit: BoxFit.contain,
+  /// Catcher Mascot Widget
+  /// - Menangkap kata yang benar: Blushing Green Sprout Mascot.png
+  /// - Menangkap kata yang salah: Crying Green Frog Chibi Mascot.png
+  /// - Saat diam / bermain: Excited Green Frog Mascot.png
+  Widget _buildCatcherMascotWidget({bool isAnticipating = false}) {
+    String assetPath;
+    if (_catchReaction == true) {
+      assetPath = 'assets/image/games/Blushing Green Sprout Mascot.png';
+    } else if (_catchReaction == false) {
+      assetPath = 'assets/image/games/Crying Green Frog Chibi Mascot.png';
+    } else {
+      assetPath = 'assets/image/games/Excited Green Frog Mascot.png';
+    }
+
+    final hasReaction = _catchReaction != null;
+
+    return SizedBox(
+      width: _catcherWidth,
+      height: _catcherHeight + 24,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.bottomCenter,
+        children: [
+          // Floating eating pop text reaction (+1 Benar! / Salah!)
+          if (_reactionText.isNotEmpty)
+            Positioned(
+              top: -8,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 150),
+                opacity: hasReaction ? 1.0 : 0.0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _catchReaction == true
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFFEF4444),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    _reactionText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // Frog Mascot
+          AnimatedScale(
+            duration: const Duration(milliseconds: 120),
+            scale: hasReaction ? 1.10 : (isAnticipating ? 1.05 : 1.0),
+            child: Image.asset(
+              assetPath,
+              width: _catcherWidth,
+              height: _catcherHeight,
+              fit: BoxFit.contain,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -892,12 +1284,12 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
+        color: Colors.white.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+        border: Border.all(color: Colors.white),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF174A3F).withValues(alpha: 0.12),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -908,56 +1300,59 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
   }
 
   Widget _buildFallingEgg(_FallingObject obj) {
+    // 4 Distinct palette styles for clear contrast
     const eggColors = [
-      (Color(0xFFFFF3D6), Color(0xFFE9C991), Color(0xFF684E35)),
-      (Color(0xFFE0F1E6), Color(0xFFB8D3BD), Color(0xFF365C49)),
-      (Color(0xFFE9E5F6), Color(0xFFC9C1E2), Color(0xFF554B70)),
-      (Color(0xFFFFE5DC), Color(0xFFE9BBAE), Color(0xFF70483E)),
+      (Color(0xFFFFFBEB), Color(0xFFFDE68A), Color(0xFF78350F)), // Warm Amber
+      (Color(0xFFEFF6FF), Color(0xFFBFDBFE), Color(0xFF1E3A8A)), // Sky Blue
+      (Color(0xFFFDF4FF), Color(0xFFF5D0FE), Color(0xFF701A75)), // Soft Purple
+      (Color(0xFFFFF1F2), Color(0xFFFECDD3), Color(0xFF881337)), // Coral Rose
     ];
     final (light, dark, ink) = eggColors[obj.colorIndex];
+
     return SizedBox(
       width: _objectWidth,
       height: _objectHeight,
       child: Center(
         child: Container(
-          width: 56,
-          height: 74,
+          width: 60,
+          height: 78,
           decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.elliptical(30, 40)),
+            borderRadius: const BorderRadius.all(Radius.elliptical(32, 42)),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [light, dark],
             ),
             border: Border.all(
-              color: const Color(0xFFFFFDF4).withValues(alpha: 0.85),
-              width: 1.5,
+              color: Colors.white.withValues(alpha: 0.95),
+              width: 2.0,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF194F45).withValues(alpha: 0.16),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
+                color: Colors.black.withValues(alpha: 0.16),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Stack(
             alignment: Alignment.center,
             children: [
+              // Gloss highlight
               Positioned(
-                top: 12,
-                left: 12,
+                top: 10,
+                left: 10,
                 child: Container(
-                  width: 6,
-                  height: 12,
+                  width: 8,
+                  height: 14,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.46),
+                    color: Colors.white.withValues(alpha: 0.65),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -967,8 +1362,8 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                         obj.word.hanzi,
                         style: TextStyle(
                           color: ink,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 23,
+                          fontWeight: FontWeight.w900,
                           height: 1.1,
                         ),
                       ),
@@ -979,9 +1374,9 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                       child: Text(
                         obj.word.pinyin,
                         style: TextStyle(
-                          color: ink.withValues(alpha: 0.85),
-                          fontSize: 8,
-                          fontWeight: FontWeight.w600,
+                          color: ink.withValues(alpha: 0.9),
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
@@ -995,32 +1390,9 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     );
   }
 
-  Widget _buildCatcherBasket() {
-    return SizedBox(
-      width: _catcherWidth,
-      height: 164,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            bottom: 26,
-            child: _buildCatcherMascot(width: 126, height: 144),
-          ),
-          Positioned(
-            bottom: 0,
-            child: CustomPaint(
-              size: Size(_catcherWidth, _catcherHeight),
-              painter: _WovenBasketPainter(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // 3. Game Over Screen
   Widget _buildGameOverScreen() {
+    final currentBg = _gameBackgrounds[_selectedBgIndex];
     final totalTargetItems = _caughtWords.length + _missedTargets;
     final accuracy = totalTargetItems > 0
         ? _caughtWords.length / totalTargetItems
@@ -1036,145 +1408,208 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
         ? 2
         : 1;
 
+    final isVictory = accuracy >= 0.5;
+
     return Scaffold(
       body: Stack(
         children: [
+          // Background Scenery
           Positioned.fill(
             child: Image.asset(
-              'assets/image/games/mandarin_catcher_night.png',
+              currentBg['path']!,
               fit: BoxFit.cover,
-              alignment: Alignment.bottomCenter,
             ),
           ),
-          Positioned.fill(child: ColoredBox(color: Color(0x33070E36))),
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.45),
+            ),
+          ),
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.91),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(28),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      width: 1.5,
-                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF07112B).withValues(alpha: 0.28),
-                        blurRadius: 28,
-                        offset: const Offset(0, 12),
+                        color: Colors.black.withValues(alpha: 0.25),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildCatcherMascot(width: 124, height: 142),
-                      const SizedBox(height: 16),
+                      // Mascot Result Expression
+                      Image.asset(
+                        isVictory
+                            ? 'assets/image/games/Blushing Green Sprout Mascot.png'
+                            : 'assets/image/games/Crying Green Frog Chibi Mascot.png',
+                        width: 105,
+                        height: 105,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 12),
                       Text(
-                        stars == 3
-                            ? '🎉 Tangkapan Sempurna!'
-                            : stars == 2
-                            ? '👍 Bagus Sekali!'
-                            : '💪 Latihan Lagi Yuk!',
+                        isVictory ? 'Luar Biasa! 🎉' : 'Permainan Selesai!',
                         style: const TextStyle(
                           fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryDark,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF0F172A),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
+                      Text(
+                        isVictory
+                            ? 'Kamu berhasil menangkap banyak kata target!'
+                            : 'Jangan patah semangat, ayo coba lagi!',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
 
-                      // Stars rating
+                      // Stars
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          3,
-                          (i) => Icon(
-                            i < stars
+                        children: List.generate(3, (index) {
+                          return Icon(
+                            index < stars
                                 ? Icons.star_rounded
-                                : Icons.star_outline_rounded,
-                            color: const Color(0xFFF59E0B),
-                            size: 38,
-                          ),
-                        ),
+                                : Icons.star_border_rounded,
+                            size: 42,
+                            color: index < stars
+                                ? const Color(0xFFF59E0B)
+                                : const Color(0xFFCBD5E1),
+                          );
+                        }),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
 
-                      // Stats Cards
+                      // Stats Grid
                       Row(
                         children: [
                           Expanded(
                             child: _buildStatTile(
-                              '🎯 Skor',
-                              '$_score',
-                              AppColors.primaryDark,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _buildStatTile(
-                              '✅ Tertangkap',
+                              'Tertangkap',
                               '${_caughtWords.length}',
-                              AppColors.primaryGreen,
+                              const Color(0xFF10B981),
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: _buildStatTile(
-                              '🔥 Max Combo',
+                              'Salah',
+                              '$_wrongCaught/$_wrongCatchLimit',
+                              const Color(0xFFEF4444),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildStatTile(
+                              'Max Combo',
                               'x$_maxCombo',
-                              const Color(0xFFEA580C),
+                              const Color(0xFFF59E0B),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
 
-                      // Reward Koin
+                      // Coins Earned Pill
                       Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFEF3C7),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFF59E0B)),
+                          border: Border.all(
+                            color: const Color(0xFFFBBF24),
+                          ),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text('🪙', style: TextStyle(fontSize: 22)),
+                            const Icon(
+                              Icons.monetization_on_rounded,
+                              color: Color(0xFFD97706),
+                              size: 22,
+                            ),
                             const SizedBox(width: 8),
                             Text(
-                              'Bonus Hadiah: +$coins Koin',
+                              '+$coins Koin Didapatkan!',
                               style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFFB45309),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF92400E),
                               ),
                             ),
                           ],
                         ),
                       ),
 
-                      const SizedBox(height: 24),
+                      // Review caught words
+                      if (_caughtWords.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Kata yang berhasil ditangkap:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF334155),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: _caughtWords.map((w) {
+                            return Chip(
+                              label: Text('${w.hanzi} (${w.pinyin})'),
+                              labelStyle: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1E293B),
+                              ),
+                              backgroundColor: const Color(0xFFF1F5F9),
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                            );
+                          }).toList(),
+                        ),
+                      ],
 
+                      const SizedBox(height: 20),
+
+                      // Action Buttons
                       Row(
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () => Navigator.pop(context),
+                              onPressed: () => Navigator.of(context).maybePop(),
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
+                                foregroundColor: const Color(0xFF475569),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
+                                side: const BorderSide(color: Color(0xFFCBD5E1)),
                               ),
-                              child: const Text('Keluar'),
+                              child: const Text(
+                                'Keluar',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -1182,16 +1617,18 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                             child: ElevatedButton(
                               onPressed: _startGame,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryGreen,
+                                backgroundColor: const Color(0xFF10B981),
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
+                                elevation: 3,
                               ),
-                              child: const Text('Main Lagi'),
+                              child: const Text(
+                                'Main Lagi',
+                                style: TextStyle(fontWeight: FontWeight.w900),
+                              ),
                             ),
                           ),
                         ],
@@ -1209,30 +1646,24 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
 
   Widget _buildStatTile(String label, String value, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+            style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
           ),
           const SizedBox(height: 4),
           Text(
             value,
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
               color: color,
             ),
           ),
@@ -1258,325 +1689,4 @@ class _FallingObject {
     required this.isTarget,
     this.colorIndex = 0,
   });
-}
-
-class _CatcherGardenPainter extends CustomPainter {
-  const _CatcherGardenPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final width = size.width;
-    final height = size.height;
-    final rect = Offset.zero & size;
-
-    canvas.drawRect(
-      rect,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF65C9B3), Color(0xFF32AFA4), Color(0xFF168E8D)],
-        ).createShader(rect),
-    );
-
-    final waterGlow = Paint()
-      ..color = const Color(0xFFB9F4D8).withValues(alpha: 0.24)
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    for (var i = 0; i < 15; i++) {
-      final x = width * (0.34 + (i * 0.137) % 0.62);
-      final y = height * (0.12 + (i * 0.173) % 0.66);
-      final waveWidth = 12.0 + (i % 4) * 7;
-      canvas.drawLine(Offset(x, y), Offset(x + waveWidth, y - 3), waterGlow);
-    }
-
-    final bank = Path()
-      ..moveTo(0, height * 0.43)
-      ..quadraticBezierTo(
-        width * 0.15,
-        height * 0.36,
-        width * 0.27,
-        height * 0.47,
-      )
-      ..quadraticBezierTo(
-        width * 0.4,
-        height * 0.58,
-        width * 0.59,
-        height * 0.66,
-      )
-      ..quadraticBezierTo(width * 0.82, height * 0.76, width, height * 0.72)
-      ..lineTo(width, height)
-      ..lineTo(0, height)
-      ..close();
-    canvas.drawPath(
-      bank,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFAAA184), Color(0xFF6D6652)],
-        ).createShader(rect),
-    );
-
-    canvas.save();
-    canvas.clipPath(bank);
-    const stoneColors = [
-      Color(0xFFD0C7AA),
-      Color(0xFFBEB596),
-      Color(0xFFAAA184),
-      Color(0xFFD7CEB1),
-    ];
-    final stoneShade = Paint()..color = const Color(0xFF716A55);
-    for (var row = 0; row < 9; row++) {
-      final y = height * 0.4 + row * 55;
-      final offset = row.isEven ? -24.0 : 18.0;
-      for (var column = -1; column < 7; column++) {
-        final x = offset + column * 78;
-        final stonePaint = Paint()
-          ..color = stoneColors[(row + column).abs() % 4];
-        final stone = RRect.fromRectAndRadius(
-          Rect.fromLTWH(x, y, 70, 48),
-          const Radius.circular(8),
-        );
-        canvas.drawRRect(stone.shift(const Offset(1, 4)), stoneShade);
-        canvas.drawRRect(stone, stonePaint);
-        canvas.drawLine(
-          Offset(x + 9, y + 9),
-          Offset(x + 35, y + 9),
-          Paint()
-            ..color = Colors.white.withValues(alpha: 0.24)
-            ..strokeWidth = 2.5,
-        );
-      }
-    }
-    canvas.restore();
-
-    final shoreline = Path()
-      ..moveTo(0, height * 0.43)
-      ..quadraticBezierTo(
-        width * 0.15,
-        height * 0.36,
-        width * 0.27,
-        height * 0.47,
-      )
-      ..quadraticBezierTo(
-        width * 0.4,
-        height * 0.58,
-        width * 0.59,
-        height * 0.66,
-      )
-      ..quadraticBezierTo(width * 0.82, height * 0.76, width, height * 0.72);
-    canvas.drawPath(
-      shoreline,
-      Paint()
-        ..color = const Color(0xFFDFD4AA).withValues(alpha: 0.62)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4,
-    );
-
-    _drawLeaf(canvas, Offset(width * 0.02, height * 0.48), -0.75, 92);
-    _drawLeaf(canvas, Offset(width * 0.08, height * 0.37), -0.15, 78);
-    _drawLeaf(canvas, Offset(width * 0.15, height * 0.46), 0.55, 86);
-    _drawLeaf(canvas, Offset(width * 0.01, height * 0.61), -1.1, 90);
-    _drawLeaf(canvas, Offset(width * 0.24, height * 0.48), -0.2, 60);
-    _drawLeaf(canvas, Offset(width * 0.34, height * 0.57), 0.4, 54);
-    _drawFlower(canvas, Offset(width * 0.37, height * 0.34), 0.8);
-    _drawFlower(canvas, Offset(width * 0.25, height * 0.52), 0.58);
-
-    final sparklePaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.74)
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round;
-    for (final point in [
-      Offset(width * 0.82, height * 0.39),
-      Offset(width * 0.93, height * 0.57),
-      Offset(width * 0.65, height * 0.31),
-    ]) {
-      canvas.drawLine(
-        point.translate(-5, 0),
-        point.translate(5, 0),
-        sparklePaint,
-      );
-      canvas.drawLine(
-        point.translate(0, -5),
-        point.translate(0, 5),
-        sparklePaint,
-      );
-    }
-  }
-
-  void _drawLeaf(Canvas canvas, Offset origin, double angle, double length) {
-    canvas.save();
-    canvas.translate(origin.dx, origin.dy);
-    canvas.rotate(angle);
-    final leaf = Path()
-      ..moveTo(0, 0)
-      ..quadraticBezierTo(length * 0.34, -length * 0.36, length, -length * 0.2)
-      ..quadraticBezierTo(length * 0.82, length * 0.2, 0, 0)
-      ..close();
-    canvas.drawPath(
-      leaf,
-      Paint()..color = const Color(0xFF287D50).withValues(alpha: 0.82),
-    );
-    canvas.drawLine(
-      Offset.zero,
-      Offset(length * 0.82, -length * 0.18),
-      Paint()
-        ..color = const Color(0xFF9BD58B).withValues(alpha: 0.7)
-        ..strokeWidth = 1.5,
-    );
-    canvas.restore();
-  }
-
-  void _drawFlower(Canvas canvas, Offset center, double scale) {
-    final stem = Paint()
-      ..color = const Color(0xFF357A4F)
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    canvas.drawLine(
-      center.translate(0, 6 * scale),
-      center.translate(-8 * scale, 45 * scale),
-      stem,
-    );
-    for (var i = 0; i < 5; i++) {
-      final angle = i * pi * 2 / 5;
-      canvas.drawOval(
-        Rect.fromCenter(
-          center: center.translate(
-            cos(angle) * 9 * scale,
-            sin(angle) * 9 * scale,
-          ),
-          width: 11 * scale,
-          height: 17 * scale,
-        ),
-        Paint()..color = const Color(0xFF8A79D6),
-      );
-    }
-    canvas.drawCircle(
-      center,
-      5 * scale,
-      Paint()..color = const Color(0xFFF4D36B),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _CatcherGardenPainter oldDelegate) => false;
-}
-
-class _WovenBasketPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final width = size.width;
-    final height = size.height;
-    final handle = Path()
-      ..moveTo(width * 0.24, height * 0.49)
-      ..cubicTo(
-        width * 0.22,
-        height * -0.08,
-        width * 0.78,
-        height * -0.08,
-        width * 0.76,
-        height * 0.49,
-      );
-    canvas.drawPath(
-      handle,
-      Paint()
-        ..color = const Color(0xFF9A5928)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 9
-        ..strokeCap = StrokeCap.round,
-    );
-    canvas.drawPath(
-      handle,
-      Paint()
-        ..color = const Color(0xFFFFD38B)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3
-        ..strokeCap = StrokeCap.round,
-    );
-
-    final basket = Path()
-      ..moveTo(width * 0.04, height * 0.22)
-      ..quadraticBezierTo(
-        width * 0.5,
-        height * 0.37,
-        width * 0.96,
-        height * 0.22,
-      )
-      ..lineTo(width * 0.84, height * 0.91)
-      ..quadraticBezierTo(
-        width * 0.5,
-        height * 1.08,
-        width * 0.16,
-        height * 0.91,
-      )
-      ..close();
-    canvas.drawPath(
-      basket,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFE9B765), Color(0xFFB96F35)],
-        ).createShader(Offset.zero & size),
-    );
-
-    canvas.save();
-    canvas.clipPath(basket);
-    for (var row = 0; row < 5; row++) {
-      final y = height * (0.38 + row * 0.12);
-      final curve = Path()
-        ..moveTo(width * 0.1, y)
-        ..quadraticBezierTo(width * 0.5, y + 8, width * 0.9, y);
-      canvas.drawPath(
-        curve,
-        Paint()
-          ..color = row.isEven
-              ? const Color(0xFFFFD58D)
-              : const Color(0xFF92542D)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 5,
-      );
-    }
-    for (var column = 0; column < 6; column++) {
-      final x = width * (0.12 + column * 0.15);
-      final weave = Path()
-        ..moveTo(x, height * 0.28)
-        ..quadraticBezierTo(x - 8, height * 0.58, x + 2, height * 0.94);
-      canvas.drawPath(
-        weave,
-        Paint()
-          ..color = column.isEven
-              ? const Color(0xFFFFD58D)
-              : const Color(0xFF9D5B30)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 4,
-      );
-    }
-    canvas.restore();
-    canvas.drawPath(
-      basket,
-      Paint()
-        ..color = const Color(0xFF89502D)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2,
-    );
-    canvas.drawOval(
-      Rect.fromLTWH(0, height * 0.13, width, height * 0.28),
-      Paint()
-        ..shader = const LinearGradient(
-          colors: [Color(0xFFFFD78D), Color(0xFFB86B32)],
-        ).createShader(Offset.zero & size),
-    );
-    canvas.drawOval(
-      Rect.fromLTWH(0, height * 0.13, width, height * 0.28),
-      Paint()
-        ..color = const Color(0xFF98552D)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _WovenBasketPainter oldDelegate) => false;
 }
