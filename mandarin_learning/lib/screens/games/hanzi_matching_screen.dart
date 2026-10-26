@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -7,9 +8,10 @@ import '../../core/constants/app_colors.dart';
 import '../../models/vocabulary_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
+import '../../services/audio_service.dart';
 import '../../widgets/mascot_widget.dart';
 
-// FR-07: Hanzi Matching — 8 kartu (4 Bahasa Mandarin & 4 Bahasa Indonesia) dengan posisi acak
+// FR-07: Hanzi Matching — 8 kartu (4 Bahasa Mandarin & 4 Bahasa Indonesia)
 // Cocokkan kartu Hanzi dengan kartu Arti Indonesia
 // FR-18: Bonus 25 koin tiap 5 kemenangan beruntun (idempotent per streak milestone)
 // FR-19: Bantuan 30 koin — mencocokkan otomatis 1 pasang kartu
@@ -34,6 +36,11 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
   bool _roundComplete = false;
   bool _usedHintThisRound = false;
 
+  // Mascot dynamic reaction
+  // true = correct reaction, false = wrong reaction, null = normal state
+  bool? _mascotReaction;
+  Timer? _reactionTimer;
+
   late AnimationController _successController;
   late Animation<double> _successScale;
 
@@ -45,7 +52,7 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
     super.initState();
     _successController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 550),
     );
     _successScale = CurvedAnimation(
       parent: _successController,
@@ -56,6 +63,7 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
 
   @override
   void dispose() {
+    _reactionTimer?.cancel();
     _successController.dispose();
     super.dispose();
   }
@@ -72,6 +80,19 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
     setState(() => _isLoading = false);
   }
 
+  void _triggerMascotReaction({required bool isCorrect}) {
+    _reactionTimer?.cancel();
+    setState(() {
+      _mascotReaction = isCorrect;
+    });
+    _reactionTimer = Timer(const Duration(milliseconds: 1800), () {
+      if (!mounted) return;
+      setState(() {
+        _mascotReaction = null;
+      });
+    });
+  }
+
   void _dealNewRound() {
     final rng = Random();
     final shuffled = List<VocabularyItem>.from(_pool)..shuffle(rng);
@@ -86,7 +107,7 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
         isMandarin: true,
         isMatched: false,
       );
-    }).toList();
+    }).toList()..shuffle(rng);
 
     // 4 Kartu Bahasa Indonesia
     final indoList = chosenWords.map((item) {
@@ -97,10 +118,14 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
         isMandarin: false,
         isMatched: false,
       );
-    }).toList();
+    }).toList()..shuffle(rng);
 
-    // Posisi 8 kartu diacak sepenuhnya (tidak dipisah kiri-kanan)
-    final allCards = [...mandarinList, ...indoList]..shuffle(rng);
+    // Susun secara interleaved agar kolom kiri selalu Mandarin dan kolom kanan selalu Indonesia
+    final allCards = <_CardData>[];
+    for (var i = 0; i < _pairCount; i++) {
+      allCards.add(mandarinList[i]);
+      allCards.add(indoList[i]);
+    }
 
     setState(() {
       _cards = allCards;
@@ -108,6 +133,7 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
       _isChecking = false;
       _roundComplete = false;
       _usedHintThisRound = false;
+      _mascotReaction = null;
     });
   }
 
@@ -115,14 +141,25 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
     if (_isChecking || _roundComplete) return;
     if (_cards[index].isMatched) return;
 
+    final tappedCard = _cards[index];
+
+    // Jika menyentuh kartu Mandarin, bunyikan pengucapan audio
+    if (tappedCard.isMandarin) {
+      AudioService.instance.speak(tappedCard.mainText);
+    }
+
     if (_selectedCardIndex == null) {
-      setState(() => _selectedCardIndex = index);
+      setState(() {
+        _selectedCardIndex = index;
+      });
       return;
     }
 
     if (_selectedCardIndex == index) {
       // Klik kartu yang sama -> batalkan pilihan
-      setState(() => _selectedCardIndex = null);
+      setState(() {
+        _selectedCardIndex = null;
+      });
       return;
     }
 
@@ -132,7 +169,9 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
 
     // Jika kedua kartu sama bahasa (Mandarin & Mandarin atau Indo & Indo), pindahkan seleksi
     if (firstCard.isMandarin == secondCard.isMandarin) {
-      setState(() => _selectedCardIndex = index);
+      setState(() {
+        _selectedCardIndex = index;
+      });
       return;
     }
 
@@ -140,12 +179,17 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
 
     if (firstCard.vocabId == secondCard.vocabId) {
       // ✅ Cocok!
+      final mandarinText = firstCard.isMandarin ? firstCard.mainText : secondCard.mainText;
+      AudioService.instance.speak(mandarinText);
+
       setState(() {
         _cards[firstIndex] = firstCard.copyWith(isMatched: true);
         _cards[index] = secondCard.copyWith(isMatched: true);
         _selectedCardIndex = null;
         _isChecking = false;
       });
+
+      _triggerMascotReaction(isCorrect: true);
 
       // Cek apakah semua 8 kartu telah cocok
       if (_cards.every((c) => c.isMatched)) {
@@ -156,6 +200,8 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
       }
     } else {
       // ❌ Salah, beri efek merah sesaat lalu batalkan seleksi
+      _triggerMascotReaction(isCorrect: false);
+
       setState(() {
         _cards[firstIndex] = firstCard.copyWith(isError: true);
         _cards[index] = secondCard.copyWith(isError: true);
@@ -174,7 +220,9 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
   }
 
   Future<void> _onRoundComplete() async {
-    setState(() => _roundComplete = true);
+    setState(() {
+      _roundComplete = true;
+    });
     _successController.forward(from: 0);
 
     // FR-18: bonus 25 koin tiap 5 beruntun (idempotent)
@@ -185,10 +233,21 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              '🔥 Streak $_consecutiveWins! Bonus 25 koin streak berhasil diraih!',
+            content: Row(
+              children: [
+                Image.asset('assets/image/beranda/koin.png', width: 22, height: 22),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '🔥 Streak $_consecutiveWins! Bonus 25 koin streak berhasil diraih!',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
-            backgroundColor: AppColors.primaryGreen,
+            backgroundColor: const Color(0xFF059669),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -214,9 +273,17 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
     final balance = auth.coins;
     if (balance < 30) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Koin tidak cukup! Butuh 30 💎 untuk bantuan.'),
+        SnackBar(
+          content: Row(
+            children: [
+              Image.asset('assets/image/beranda/koin.png', width: 20, height: 20),
+              const SizedBox(width: 8),
+              const Text('Koin tidak cukup! Butuh 30 koin untuk bantuan.'),
+            ],
+          ),
           backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
       return;
@@ -259,17 +326,32 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
 
     _usedHintThisRound = true;
 
+    final matchedMandarin = _cards[mIndex];
+    AudioService.instance.speak(matchedMandarin.mainText);
+
     setState(() {
       _cards[mIndex!] = _cards[mIndex].copyWith(isMatched: true);
       _cards[iIndex!] = _cards[iIndex].copyWith(isMatched: true);
       _selectedCardIndex = null;
     });
 
+    _triggerMascotReaction(isCorrect: true);
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('💡 Bantuan digunakan (-30 💎)! 1 pasang dicocokkan.'),
-          backgroundColor: Color(0xFFD97706),
+        SnackBar(
+          content: Row(
+            children: [
+              Image.asset('assets/image/beranda/koin.png', width: 20, height: 20),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text('💡 Bantuan digunakan (-30 koin)! 1 pasang otomatis cocok.'),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFD97706),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
     }
@@ -288,34 +370,162 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
     final auth = context.watch<AuthProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.mintBackground,
-      appBar: AppBar(
-        title: const Text('Hanzi Matching (8 Kartu)'),
-        actions: [
+      backgroundColor: const Color(0xFFF0FDF4),
+      body: Stack(
+        children: [
+          // Latar Belakang Alam Lembut & Awan dari assets
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.18,
+              child: Image.asset(
+                'assets/image/games/background_1_padang_cerah.png',
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            ),
+          ),
+          Positioned(
+            top: -15,
+            right: -25,
+            child: Opacity(
+              opacity: 0.4,
+              child: Image.asset(
+                'assets/image/beranda/awan_kecil.png',
+                width: 150,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 90,
+            left: -35,
+            child: Opacity(
+              opacity: 0.28,
+              child: Image.asset(
+                'assets/image/beranda/awan_besar.png',
+                width: 170,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            ),
+          ),
+
+          // Konten Utama
+          SafeArea(
+            child: Column(
+              children: [
+                _buildAppBar(auth.coins),
+                if (!_isLoading && _pool.length >= _pairCount) ...[
+                  _buildMascotCompanionCard(),
+                  const SizedBox(height: 2),
+                  Expanded(child: _buildMatchingGrid()),
+                  _buildBottomBar(),
+                ] else if (_isLoading) ...[
+                  const Expanded(child: Center(child: CircularProgressIndicator())),
+                ] else ...[
+                  Expanded(child: _buildEmptyState()),
+                ],
+              ],
+            ),
+          ),
+
+          // Dialog Kemenangan
+          if (_roundComplete) _buildRoundCompleteOverlay(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBar(int coins) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+      child: Row(
+        children: [
+          // Tombol Kembali
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                color: Color(0xFF334155),
+                size: 22,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Judul dengan Ikon Game (Tanpa Subtitle)
+          Expanded(
+            child: Row(
+              children: [
+                Image.asset(
+                  'assets/image/icon_beranda/hanzi_matching.png',
+                  width: 32,
+                  height: 32,
+                  errorBuilder: (_, __, ___) => const Text('🧩', style: TextStyle(fontSize: 22)),
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  'Hanzi Matching',
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0F172A),
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Saldo Koin
           Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFFFBEB), Colors.white],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFFDE68A), width: 1.5),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 6,
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
+                  blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('💎', style: TextStyle(fontSize: 13)),
-                const SizedBox(width: 4),
+                Image.asset(
+                  'assets/image/beranda/koin.png',
+                  width: 18,
+                  height: 18,
+                  errorBuilder: (_, __, ___) => const Text('🪙', style: TextStyle(fontSize: 14)),
+                ),
+                const SizedBox(width: 6),
                 Text(
-                  '${auth.coins}',
+                  '$coins',
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: AppColors.textDark,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
+                    color: Color(0xFFB45309),
                   ),
                 ),
               ],
@@ -323,111 +533,148 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _pool.length < _pairCount
-              ? _buildEmptyState()
-              : SafeArea(
-                  child: Column(
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(Icons.shuffle_rounded, size: 16, color: AppColors.primary),
-                              SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Posisi 8 kartu diacak. Cocokkan 1 kartu Mandarin dengan 1 kartu artinya.',
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    color: AppColors.textDark,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Expanded(child: _buildMatchingGrid()),
-                      _buildBottomBar(),
-                      if (_roundComplete) _buildRoundCompleteOverlay(),
-                    ],
-                  ),
-                ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildMascotCompanionCard() {
+    final matchedPairs = _cards.where((c) => c.isMatched).length ~/ 2;
+
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Row(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Streak Kemenangan',
-                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: List.generate(
-                  5,
-                  (i) => Icon(
-                    i < (_consecutiveWins % 5)
-                        ? Icons.star_rounded
-                        : Icons.star_outline_rounded,
-                    color: const Color(0xFFF59E0B),
-                    size: 22,
+          // Maskot Interaktif dengan reaksi dinamis
+          _buildInteractiveMascot(),
+          const SizedBox(width: 12),
+
+          // Indikator Angka Pasangan (1, 2, 3, 4) & Streak
+          Expanded(
+            child: Row(
+              children: [
+                ...List.generate(_pairCount, (i) {
+                  final isMatched = i < matchedPairs;
+                  return Expanded(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      margin: EdgeInsets.only(right: i < _pairCount - 1 ? 6 : 0),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isMatched ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isMatched ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
+                          width: isMatched ? 1.8 : 1.0,
+                        ),
+                      ),
+                      child: Center(
+                        child: isMatched
+                            ? const Icon(
+                                Icons.check_rounded,
+                                size: 14,
+                                color: Color(0xFF15803D),
+                              )
+                            : Text(
+                                '${i + 1}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF94A3B8),
+                                ),
+                              ),
+                      ),
+                    ),
+                  );
+                }),
+                const SizedBox(width: 10),
+
+                // Streak Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF7ED),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFFFEDD5), width: 1.2),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('🔥', style: TextStyle(fontSize: 12)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$_consecutiveWins',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFFEA580C),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              const Text(
-                'Streak Saat Ini',
-                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '$_consecutiveWins Beruntun',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryDark,
-                  fontSize: 15,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInteractiveMascot() {
+    String assetPath = 'assets/image/games/Excited Green Frog Mascot.png';
+    if (_mascotReaction == true) {
+      assetPath = 'assets/image/games/Blushing Green Sprout Mascot.png';
+    } else if (_mascotReaction == false) {
+      assetPath = 'assets/image/games/Crying Green Frog Chibi Mascot.png';
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: Container(
+        key: ValueKey<String>(assetPath),
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: _mascotReaction == true
+              ? const Color(0xFFECFDF5)
+              : (_mascotReaction == false
+                  ? const Color(0xFFFEF2F2)
+                  : const Color(0xFFF8FAFC)),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: _mascotReaction == true
+                ? const Color(0xFF10B981)
+                : (_mascotReaction == false
+                    ? const Color(0xFFF87171)
+                    : const Color(0xFFE2E8F0)),
+            width: 1.5,
+          ),
+        ),
+        padding: const EdgeInsets.all(4),
+        child: Image.asset(
+          assetPath,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => MascotWidget(
+            pose: _mascotReaction == true
+                ? MascotPose.celebrating
+                : (_mascotReaction == false
+                    ? MascotPose.holdingSign
+                    : MascotPose.waving),
+            size: 40,
+          ),
+        ),
       ),
     );
   }
@@ -439,12 +686,12 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
         builder: (context, constraints) {
           const crossAxisCount = 2;
           const rows = 4;
-          const spacing = 10.0;
+          const spacing = 11.0;
           final availableWidth = constraints.maxWidth;
           final availableHeight = constraints.maxHeight;
           final itemWidth = (availableWidth - spacing) / crossAxisCount;
           final itemHeight = (availableHeight - (rows - 1) * spacing) / rows;
-          final ratio = (itemWidth / itemHeight).clamp(1.1, 2.6);
+          final ratio = (itemWidth / itemHeight).clamp(0.9, 2.8);
 
           return GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
@@ -475,97 +722,197 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    Color bgColor = Colors.white;
-    Color borderColor = const Color(0xFFE2E8F0);
-    double borderWidth = 1.5;
+    // Warna & Gaya Kartu berdasarkan status
+    Color bgColor;
+    Color borderColor;
+    Color shadowColor;
+    Color textColor;
+    double borderWidth = 1.8;
+    double bevelOffset = 4.0;
 
     if (card.isMatched) {
-      bgColor = const Color(0xFFD1FAE5);
-      borderColor = AppColors.primaryGreen;
+      // ✅ Status Pasangan Cocok: Hijau mint segar seragam & rapi
+      bgColor = const Color(0xFFDCFCE7);
+      borderColor = const Color(0xFF16A34A);
+      shadowColor = const Color(0xFF16A34A).withValues(alpha: 0.2);
+      textColor = const Color(0xFF15803D);
       borderWidth = 2.0;
+      bevelOffset = 2.0;
     } else if (card.isError) {
-      bgColor = const Color(0xFFFEE2E2);
-      borderColor = Colors.red;
-      borderWidth = 2.0;
+      // ❌ Status Salah: Rose Coral Red
+      bgColor = const Color(0xFFFEF2F2);
+      borderColor = const Color(0xFFEF4444);
+      shadowColor = const Color(0xFFEF4444).withValues(alpha: 0.2);
+      textColor = const Color(0xFFB91C1C);
+      borderWidth = 2.2;
+      bevelOffset = 2.0;
     } else if (isSelected) {
-      bgColor = card.isMandarin ? const Color(0xFFEFF6FF) : const Color(0xFFFEF3C7);
-      borderColor = card.isMandarin ? AppColors.primaryDark : const Color(0xFFD97706);
-      borderWidth = 2.5;
+      // 🔍 Status Terpilih: Glow cerah sesuai bahasa kartu
+      if (card.isMandarin) {
+        bgColor = const Color(0xFFEDE9FE); // Lavender Indigo Glow
+        borderColor = const Color(0xFF7C3AED);
+        shadowColor = const Color(0xFF7C3AED).withValues(alpha: 0.3);
+        textColor = const Color(0xFF4C1D95);
+      } else {
+        bgColor = const Color(0xFFFEF3C7); // Warm Amber Gold Glow
+        borderColor = const Color(0xFFD97706);
+        shadowColor = const Color(0xFFD97706).withValues(alpha: 0.3);
+        textColor = const Color(0xFF78350F);
+      }
+      borderWidth = 2.6;
+      bevelOffset = 2.0;
+    } else {
+      // ⚪ Status Normal: Dual-Tone Selaras (Mandarin Violet-Slate vs Indonesia Warm-Amber)
+      if (card.isMandarin) {
+        bgColor = const Color(0xFFFAF5FF); // Soft Lavender Tint
+        borderColor = const Color(0xFFDDD6FE); // Soft Violet Border
+        shadowColor = const Color(0xFFC4B5FD); // 3D Bevel Shadow
+        textColor = const Color(0xFF312E81); // Deep Indigo Hanzi
+      } else {
+        bgColor = const Color(0xFFFFFDF5); // Soft Honey Cream Tint
+        borderColor = const Color(0xFFFDE68A); // Warm Amber Border
+        shadowColor = const Color(0xFFFCD34D); // 3D Bevel Shadow
+        textColor = const Color(0xFF1E293B); // Clean Dark Slate
+      }
     }
 
     return GestureDetector(
       onTap: card.isMatched ? null : onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(color: borderColor, width: borderWidth),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isSelected ? 0.08 : 0.03),
-              blurRadius: isSelected ? 8 : 4,
-              offset: const Offset(0, 2),
+              color: shadowColor,
+              offset: Offset(0, bevelOffset),
+              blurRadius: isSelected ? 8 : 0,
             ),
           ],
         ),
-        child: Center(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Baris Header Mini Kartu (Badge Jenis & Ikon Centang saat cocok)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (card.isMandarin) ...[
-                      Text(
-                        card.mainText,
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: card.isMatched
-                              ? AppColors.primaryGreen
-                              : AppColors.primaryDark,
-                        ),
-                        textAlign: TextAlign.center,
+                    // Badge Tag
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: card.isMatched
+                            ? const Color(0xFFBBF7D0)
+                            : (card.isMandarin
+                                ? const Color(0xFFEDE9FE)
+                                : const Color(0xFFFEF3C7)),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        card.subText,
+                      child: Text(
+                        card.isMatched
+                            ? '✓ Cocok'
+                            : (card.isMandarin ? '🀄 Hanzi' : '🇮🇩 Arti'),
                         style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
                           color: card.isMatched
-                              ? AppColors.primaryGreen
-                              : AppColors.textMuted,
+                              ? const Color(0xFF166534)
+                              : (card.isMandarin
+                                  ? const Color(0xFF6D28D9)
+                                  : const Color(0xFFB45309)),
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    ] else ...[
-                      Text(
-                        card.mainText,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: card.isMatched
-                              ? AppColors.primaryGreen
-                              : AppColors.textDark,
-                          height: 1.2,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                    ),
+
+                    // Centang Sukses saat Cocok
                     if (card.isMatched)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 2),
-                        child: Icon(
-                          Icons.check_circle_rounded,
-                          color: AppColors.primaryGreen,
-                          size: 16,
-                        ),
-                      ),
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        size: 16,
+                        color: Color(0xFF16A34A),
+                      )
+                    else
+                      const SizedBox(width: 16),
                   ],
                 ),
+
+                // Teks Utama Kartu
+                Expanded(
+                  child: Center(
+                    child: card.isMandarin
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  card.mainText,
+                                  style: TextStyle(
+                                    fontSize: 27,
+                                    fontWeight: FontWeight.w900,
+                                    color: textColor,
+                                    height: 1.1,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  card.subText,
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: card.isMatched
+                                        ? const Color(0xFF16A34A)
+                                        : const Color(0xFF6D28D9),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Text(
+                              card.mainText,
+                              style: TextStyle(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w800,
+                                color: textColor,
+                                height: 1.25,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                  ),
+                ),
+
+                // Feedback status saat error
+                if (card.isError)
+                  const Text(
+                    '✕ Coba lagi',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFDC2626),
+                    ),
+                  )
+                else
+                  const SizedBox(height: 2),
+              ],
+            ),
           ),
         ),
       ),
@@ -574,41 +921,83 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
 
   Widget _buildBottomBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      decoration: const BoxDecoration(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          ),
+        ],
       ),
       child: Row(
         children: [
+          // Tombol Bantuan Koin
           Expanded(
-            child: OutlinedButton.icon(
+            child: OutlinedButton(
               onPressed: _roundComplete ? null : _useHint,
-              icon: const Icon(Icons.lightbulb_outline_rounded, size: 20),
-              label: const Text('Bantuan (-30 💎)'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFD97706),
-                side: const BorderSide(color: Color(0xFFF59E0B)),
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                foregroundColor: const Color(0xFFB45309),
+                backgroundColor: const Color(0xFFFFFBEB),
+                side: const BorderSide(color: Color(0xFFFCD34D), width: 1.5),
+                padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                 ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.lightbulb_rounded, size: 18, color: Color(0xFFD97706)),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Bantuan (-30 ',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                  ),
+                  Image.asset(
+                    'assets/image/beranda/koin.png',
+                    width: 16,
+                    height: 16,
+                    errorBuilder: (_, __, ___) => const Text('🪙', style: TextStyle(fontSize: 12)),
+                  ),
+                  const Text(
+                    ')',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                  ),
+                ],
               ),
             ),
           ),
           const SizedBox(width: 12),
+
+          // Tombol Ronde Berikutnya
           Expanded(
-            child: ElevatedButton.icon(
+            child: ElevatedButton(
               onPressed: _roundComplete ? _nextRound : null,
-              icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-              label: const Text('Ronde Berikutnya'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryGreen,
+                backgroundColor: const Color(0xFF059669),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                disabledBackgroundColor: const Color(0xFFE2E8F0),
+                disabledForegroundColor: const Color(0xFF94A3B8),
+                padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                 ),
+                elevation: _roundComplete ? 4 : 0,
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Berikutnya',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                  ),
+                  SizedBox(width: 6),
+                  Icon(Icons.arrow_forward_rounded, size: 18),
+                ],
               ),
             ),
           ),
@@ -622,64 +1011,106 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
         _consecutiveWins > 0 && _consecutiveWins % 5 == 0;
 
     return Container(
-      color: Colors.black.withValues(alpha: 0.4),
+      color: Colors.black.withValues(alpha: 0.45),
       child: Center(
         child: ScaleTransition(
           scale: _successScale,
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 32),
+            margin: const EdgeInsets.symmetric(horizontal: 28),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: const Color(0xFF86EFAC), width: 2),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
+                  color: Colors.black.withValues(alpha: 0.18),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const MascotWidget(pose: MascotPose.celebrating, size: 90),
-                const SizedBox(height: 12),
+                // Maskot Perayaan dengan Sparkles
+                Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      top: -12,
+                      right: -16,
+                      child: Image.asset(
+                        'assets/image/beranda/kilau_01.png',
+                        width: 38,
+                        height: 38,
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: -8,
+                      left: -14,
+                      child: Image.asset(
+                        'assets/image/beranda/kilau_02.png',
+                        width: 32,
+                        height: 32,
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                      ),
+                    ),
+                    Container(
+                      width: 95,
+                      height: 95,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFECFDF5),
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Image.asset(
+                        'assets/image/games/Excited Green Frog Mascot.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const MascotWidget(
+                          pose: MascotPose.celebrating,
+                          size: 75,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
                 const Text(
-                  'Luar Biasa!',
+                  'Luar Biasa! 🎉',
                   style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryDark,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF065F46),
+                    letterSpacing: -0.3,
                   ),
                 ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Semua 4 pasang kata berhasil dicocokkan dengan tepat!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: AppColors.textMuted),
-                ),
+
+                // Milestone Streak Bonus jika tercapai
                 if (isStreakMilestone) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFEF3C7),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
+                      ),
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFF59E0B)),
                     ),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text('🎁', style: TextStyle(fontSize: 18)),
+                        Image.asset('assets/image/beranda/koin.png', width: 22, height: 22),
                         const SizedBox(width: 8),
                         Text(
-                          'Streak Milestone $_consecutiveWins! +25 💎',
+                          'Streak Milestone $_consecutiveWins! +25 Koin 🎁',
                           style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFB45309),
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF92400E),
                             fontSize: 13,
                           ),
                         ),
@@ -687,22 +1118,33 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
                     ),
                   ),
                 ],
+
                 const SizedBox(height: 20),
+
+                // Tombol Lanjut Ronde
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _nextRound,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGreen,
+                      backgroundColor: const Color(0xFF059669),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(16),
                       ),
+                      elevation: 3,
                     ),
-                    child: const Text(
-                      'Lanjut Ronde Berikutnya',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Berikutnya',
+                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                        ),
+                        SizedBox(width: 6),
+                        Icon(Icons.arrow_forward_rounded, size: 18),
+                      ],
                     ),
                   ),
                 ),
@@ -716,21 +1158,43 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const MascotWidget(pose: MascotPose.holdingSign, size: 100),
-          const SizedBox(height: 16),
-          const Text(
-            'Belum ada kosakata yang cukup di level ini.',
-            style: TextStyle(color: AppColors.textMuted, fontSize: 14),
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Kembali'),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/image/games/Crying Green Frog Chibi Mascot.png',
+              width: 100,
+              height: 100,
+              errorBuilder: (_, __, ___) => const MascotWidget(
+                pose: MascotPose.holdingSign,
+                size: 90,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Belum ada kosakata yang cukup di level ini.',
+              style: TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF059669),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('Kembali'),
+            ),
+          ],
+        ),
       ),
     );
   }
