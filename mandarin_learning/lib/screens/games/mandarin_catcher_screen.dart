@@ -162,13 +162,36 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     if (mounted) setState(() => _isLoading = false);
   }
 
-  void _pickNewTargetWord() {
+  void _pickNewTargetWord({bool excludeCurrent = false}) {
     if (_allWords.isEmpty) return;
-    _targetWord = _allWords[_rng.nextInt(_allWords.length)];
+
+    // Utamakan kata yang belum pernah ditangkap di sesi ini
+    final uncaught = _allWords
+        .where(
+          (w) =>
+              !_caughtWords.any((c) => c.id == w.id) &&
+              (!excludeCurrent || w.id != _targetWord?.id),
+        )
+        .toList();
+
+    if (uncaught.isNotEmpty) {
+      _targetWord = uncaught[_rng.nextInt(uncaught.length)];
+    } else {
+      final others =
+          _allWords
+              .where((w) => !excludeCurrent || w.id != _targetWord?.id)
+              .toList();
+      _targetWord =
+          others.isNotEmpty
+              ? others[_rng.nextInt(others.length)]
+              : _allWords[_rng.nextInt(_allWords.length)];
+    }
   }
 
   void _startGame() {
-    _pickNewTargetWord();
+    if (_targetWord == null) {
+      _pickNewTargetWord();
+    }
     setState(() {
       _score = 0;
       _combo = 0;
@@ -300,7 +323,7 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
       if (objRect.overlaps(catcherRect)) {
         toRemove.add(obj);
 
-        if (obj.isTarget) {
+        if (obj.word.id == _targetWord?.id) {
           // ✅ Tertangkap target yang benar!
           _combo++;
           if (_combo > _maxCombo) _maxCombo = _combo;
@@ -308,6 +331,11 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
           _caughtWords.add(obj.word);
           _triggerCatchReaction(true);
           AudioService.instance.speak(obj.word.hanzi);
+
+          // Pindah ke kosakata target berikutnya agar pemain menangkap kata-kata baru
+          _pickNewTargetWord(excludeCurrent: true);
+          // Hapus objek yang memiliki kata lama yang baru saja ditangkap
+          _fallingObjects.removeWhere((o) => o.word.id == obj.word.id);
         } else {
           // ❌ Menangkap kata distractor! Kurangi nyawa
           _combo = 0;
@@ -360,22 +388,28 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
     final vocab = context.read<VocabularyProvider>();
     final userId = auth.profile?.id ?? 'guest_local_user';
 
-    final totalTargetItems = _caughtWords.length + _missedTargets;
-    final accuracy = totalTargetItems > 0
-        ? _caughtWords.length / totalTargetItems
-        : 0.0;
+    final totalAttempts = _score + _wrongCaught;
+    final accuracy = totalAttempts > 0 ? _score / totalAttempts : 0.0;
 
-    final coins = accuracy >= 0.75
-        ? 15
-        : accuracy >= 0.45
-        ? 10
-        : 5;
+    final int coins;
+    if (_score >= 5 && _wrongCaught <= 1) {
+      coins = 20;
+    } else if (_score >= 3) {
+      coins = 15;
+    } else if (_score >= 2) {
+      coins = 10;
+    } else if (_score >= 1) {
+      coins = 5;
+    } else {
+      coins = 2;
+    }
+
     final attemptId = 'catcher_${DateTime.now().millisecondsSinceEpoch}';
 
     await auth.addCoins(
       coins,
       'mandarin_catcher',
-      'Mandarin Catcher: ${_caughtWords.length} kata tertangkap',
+      'Mandarin Catcher: $_score kata tertangkap',
       attemptId: attemptId,
     );
 
@@ -386,8 +420,8 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
         hskLevel: vocab.selectedLevel,
         quizType: 'mandarin_catcher',
         score: (accuracy * 100).round(),
-        totalQuestions: max(1, totalTargetItems),
-        correctAnswers: _caughtWords.length,
+        totalQuestions: max(1, totalAttempts),
+        correctAnswers: _score,
         coinsEarned: coins,
         createdAt: DateTime.now(),
       ),
@@ -516,14 +550,26 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
-                        child: Text(
-                          'Mandarin Catcher',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF0F172A),
-                          ),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Image.asset(
+                              'assets/image/icon_beranda/mandarin_catcher.png',
+                              width: 32,
+                              height: 32,
+                              errorBuilder: (_, __, ___) => const Text('🐸', style: TextStyle(fontSize: 22)),
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
+                              'Mandarin Catcher',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF0F172A),
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       // Background switcher button
@@ -575,27 +621,7 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                             fit: BoxFit.contain,
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Ayo Tangkap Kata Mandarin! 🐸',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Bantu katak menangkap kata Mandarin yang cocok ke dalam mulutnya. Jangan sampai menangkap kata yang salah ya!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF475569),
-                            height: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 16),
 
                         // Target Preview Card
                         if (_targetWord != null)
@@ -629,7 +655,7 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: const Text(
-                                    '🎯 KOSAKATA TARGET KAMU',
+                                    '🎯 KOSAKATA KAMU',
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w900,
@@ -691,7 +717,7 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Pilih Suasana Latar Belakang:',
+                              'Pilih Latar Belakang:',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -836,10 +862,10 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.play_arrow_rounded, size: 28),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Mulai Menangkap!',
+                                const Icon(Icons.play_arrow_rounded, size: 28),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Mulai',
                                   style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w900,
@@ -1393,22 +1419,27 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
   // 3. Game Over Screen
   Widget _buildGameOverScreen() {
     final currentBg = _gameBackgrounds[_selectedBgIndex];
-    final totalTargetItems = _caughtWords.length + _missedTargets;
-    final accuracy = totalTargetItems > 0
-        ? _caughtWords.length / totalTargetItems
-        : 0.0;
-    final coins = accuracy >= 0.75
-        ? 15
-        : accuracy >= 0.45
-        ? 10
-        : 5;
-    final stars = accuracy >= 0.75
-        ? 3
-        : accuracy >= 0.45
-        ? 2
-        : 1;
+    final isVictory = _wrongCaught < _wrongCatchLimit && _score > 0;
 
-    final isVictory = accuracy >= 0.5;
+    final int stars;
+    final int coins;
+
+    if (_score >= 5 && _wrongCaught <= 1) {
+      stars = 3;
+      coins = 20;
+    } else if (_score >= 3) {
+      stars = 3;
+      coins = 15;
+    } else if (_score >= 2) {
+      stars = 2;
+      coins = 10;
+    } else if (_score >= 1) {
+      stars = 1;
+      coins = 5;
+    } else {
+      stars = 0;
+      coins = 2;
+    }
 
     return Scaffold(
       body: Stack(
@@ -1466,8 +1497,10 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                       const SizedBox(height: 4),
                       Text(
                         isVictory
-                            ? 'Kamu berhasil menangkap banyak kata target!'
-                            : 'Jangan patah semangat, ayo coba lagi!',
+                            ? 'Kamu berhasil menangkap $_score kata dengan tepat!'
+                            : (_wrongCaught >= _wrongCatchLimit
+                                ? 'Katak terlalu banyak menangkap kata yang salah.'
+                                : 'Belum ada kata yang berhasil ditangkap. Ayo coba lagi!'),
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 13,
@@ -1499,7 +1532,7 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                           Expanded(
                             child: _buildStatTile(
                               'Tertangkap',
-                              '${_caughtWords.length}',
+                              '$_score Kata',
                               const Color(0xFF10B981),
                             ),
                           ),
@@ -1560,11 +1593,11 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                       // Review caught words
                       if (_caughtWords.isNotEmpty) ...[
                         const SizedBox(height: 16),
-                        const Align(
+                        Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'Kata yang berhasil ditangkap:',
-                            style: TextStyle(
+                            'Kata yang berhasil ditangkap (${_caughtWords.length}):',
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF334155),
@@ -1576,15 +1609,28 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
                           spacing: 6,
                           runSpacing: 6,
                           children: _caughtWords.map((w) {
-                            return Chip(
-                              label: Text('${w.hanzi} (${w.pinyin})'),
-                              labelStyle: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1E293B),
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF0FDF4),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFFBBF7D0)),
                               ),
-                              backgroundColor: const Color(0xFFF1F5F9),
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.check_circle_rounded, size: 14, color: Color(0xFF16A34A)),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '${w.hanzi} (${w.pinyin}) · ${w.artiIndonesia}',
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF166534),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             );
                           }).toList(),
                         ),
