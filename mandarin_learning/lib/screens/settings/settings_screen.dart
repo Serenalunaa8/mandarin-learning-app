@@ -9,7 +9,6 @@ import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../../widgets/daily_goal_modal.dart';
 import '../../services/notification_service.dart';
-import '../../services/supabase_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -22,8 +21,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _dailyReminderEnabled = true;
   int _reminderHour = 19;
   int _reminderMinute = 0;
-  bool? _isCloudConnected;
-
   LocationPermission _locationStatus = LocationPermission.denied;
 
   @override
@@ -49,11 +46,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _reminderMinute = minute;
         _locationStatus = locStatus;
       });
-    }
-
-    final cloudConnected = await SupabaseService.instance.checkConnection();
-    if (mounted) {
-      setState(() => _isCloudConnected = cloudConnected == true);
     }
   }
 
@@ -277,14 +269,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.mintBackground,
-      appBar: AppBar(title: const Text('Pengaturan Aplikasi')),
+      appBar: AppBar(title: const Text('Pengaturan')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           children: [
             // Section 1: Pembelajaran HSK
             const Text(
-              'Target Pembelajaran',
+              'Pembelajaran',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -318,9 +310,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         fontSize: 14,
                       ),
                     ),
-                    subtitle: Text(
-                      'Sedang fokus di HSK Level ${vocab.selectedLevel}',
-                    ),
+                    subtitle: Text('HSK Level ${vocab.selectedLevel}'),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => _showLevelPicker(context, vocab, auth),
                   ),
@@ -344,7 +334,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         fontSize: 14,
                       ),
                     ),
-                    subtitle: Text('${auth.dailyGoalMinutes} menit per hari'),
+                    subtitle: Text('${auth.dailyGoalMinutes} menit/hari'),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => showDailyGoalBottomSheet(context, auth),
                   ),
@@ -355,7 +345,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // Section 2: Keamanan & Pendaftaran Biometrik
             const Text(
-              'Keamanan & Pendaftaran Biometrik',
+              'Keamanan & Biometrik',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -733,9 +723,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         fontSize: 14,
                       ),
                     ),
-                    subtitle: const Text(
-                      'Password dienkripsi SHA-256 tanpa Firebase (Tersimpan aman di DB)',
-                    ),
+                    subtitle: const Text('Tersimpan aman'),
                     trailing: const Icon(
                       Icons.check_circle_rounded,
                       color: AppColors.primaryGreen,
@@ -748,7 +736,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // Section 3: Notifikasi & Jadwal Pengingat (FR-16)
             const Text(
-              'Notifikasi & Jadwal Pengingat (FR-16)',
+              'Notifikasi',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -782,9 +770,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         fontSize: 14,
                       ),
                     ),
-                    subtitle: const Text(
-                      'Kirim notifikasi untuk menjaga streak belajar',
-                    ),
+                    subtitle: const Text('Jaga streak belajar'),
                     value: _dailyReminderEnabled,
                     activeTrackColor: AppColors.primaryGreen,
                     onChanged: _toggleReminder,
@@ -847,7 +833,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // Section 4: Izin Perangkat & Sensor (FR-04, FR-11)
             const Text(
-              'Izin Perangkat & Sensor (FR-04, FR-11)',
+              'Izin Perangkat',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -884,8 +870,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     subtitle: Text(
                       _locationStatus == LocationPermission.always ||
                               _locationStatus == LocationPermission.whileInUse
-                          ? 'Diizinkan (Siap untuk Direction Explorer)'
-                          : 'Belum diizinkan / Ditolak',
+                          ? 'Siap digunakan'
+                          : 'Belum diizinkan',
                       style: const TextStyle(fontSize: 12),
                     ),
                     trailing:
@@ -921,7 +907,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     subtitle: const Text(
-                      'Diperlukan untuk Latihan Pelafalan & Analisis Nada',
+                      'Untuk latihan pelafalan',
                       style: TextStyle(fontSize: 12),
                     ),
                     trailing: const Icon(
@@ -933,74 +919,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Section 5: Akun & Status Penyimpanan
-            const Text(
-              'Status Penyimpanan (Lokal & Online)',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        _isCloudConnected == null
-                            ? Icons.cloud_sync_rounded
-                            : _isCloudConnected!
-                            ? Icons.cloud_done_rounded
-                            : Icons.cloud_off_rounded,
-                        color: _isCloudConnected == null
-                            ? AppColors.textMuted
-                            : _isCloudConnected!
-                            ? AppColors.primaryGreen
-                            : AppColors.error,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _isCloudConnected == null
-                            ? 'Memeriksa koneksi Supabase...'
-                            : _isCloudConnected!
-                            ? 'Supabase dapat dijangkau'
-                            : 'Supabase tidak dapat dijangkau',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    auth.isGuest
-                        ? 'Mode Tamu (Akses Terbatas): Progres belajar, koin, dan skor bersifat sementara (in-memory) dan tidak disimpan ke perangkat maupun database.'
-                        : 'Username: ${auth.profile?.username.isNotEmpty == true ? auth.profile!.username : (auth.profile?.fullName ?? "-")}\nDatabase lokal: SQLite\nSupabase: ${_isCloudConnected == null
-                              ? "sedang diperiksa"
-                              : _isCloudConnected!
-                              ? "dapat dijangkau"
-                              : "tidak dapat dijangkau"}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
 
             // Tombol Keluar dari Akun
             SizedBox(

@@ -1148,7 +1148,8 @@ HanziEvaluationResult evaluateHanziWriting({
 }) {
   final expectedCount = reference.strokes.length;
   final actualCount = drawnStrokes.length;
-  final isCountValid = actualCount > 0 && (actualCount - expectedCount).abs() <= 1;
+  final isCountValid =
+      actualCount > 0 && (actualCount - expectedCount).abs() <= 1;
 
   if (drawnStrokes.isEmpty || canvasSize.isEmpty) {
     return HanziEvaluationResult(
@@ -1212,10 +1213,11 @@ HanziEvaluationResult evaluateHanziWriting({
     for (var sample = 0; sample < sampleCount; sample++) {
       final distance = (refSamples[sample] - userSamples[sample]).distance;
       distanceTotal += distance;
-      if (distance <= 80) nearCount++;
+      // Beri sedikit ruang untuk variasi tulisan tangan di layar sentuh.
+      if (distance <= 100) nearCount++;
     }
     final averageDistance = distanceTotal / sampleCount;
-    final pathAccuracy = (1 - averageDistance / 220).clamp(0.0, 1.0);
+    final pathAccuracy = (1 - averageDistance / 260).clamp(0.0, 1.0);
     final pathCoverage = nearCount / sampleCount;
     totalStrokeShapeScore += (pathAccuracy * 0.7 + pathCoverage * 0.3) * 100;
 
@@ -1243,7 +1245,7 @@ HanziEvaluationResult evaluateHanziWriting({
   final directionScore = validDirCount > 0
       ? ((totalDirSim / validDirCount) * 100).round()
       : 0;
-  final isOrderAndDirectionValid = directionScore >= 60;
+  final isOrderAndDirectionValid = directionScore >= 50;
 
   // Wrong stroke count, order, or direction cannot pass on silhouette alone.
   final totalScore = isCountValid
@@ -1252,7 +1254,7 @@ HanziEvaluationResult evaluateHanziWriting({
             .clamp(0, 100)
             .toInt()
       : math.min(49, (shapeScore * 0.7).round()).toInt();
-  final isPassed = isCountValid && shapeScore >= 58 && directionScore >= 50;
+  final isPassed = isCountValid && shapeScore >= 52 && directionScore >= 45;
 
   String title;
   String message;

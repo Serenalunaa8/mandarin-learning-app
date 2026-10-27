@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_colors.dart';
 
 // FR-13: Konversi Waktu (WIB, WITA, WIT, London dengan DST, CST / Beijing Time)
@@ -16,7 +18,8 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
   late DateTime _currentTime;
   Timer? _timer;
   bool _isLiveTime = true;
-  double _customHourOffset = 0; // offset in hours from current time if user slides
+  double _customHourOffset =
+      0; // offset in hours from current time if user slides
   String _sourceZoneId = 'WIB';
   String _targetZoneId = 'China';
 
@@ -57,25 +60,13 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
     final year = utcDate.year;
     final marchSunday = DateTime.utc(year, 3, 31);
     final octoberSunday = DateTime.utc(year, 10, 31);
-    final bstStarts = DateTime.utc(
-      year,
-      3,
-      31 - (marchSunday.weekday % 7),
-      1,
-    );
-    final bstEnds = DateTime.utc(
-      year,
-      10,
-      31 - (octoberSunday.weekday % 7),
-      1,
-    );
+    final bstStarts = DateTime.utc(year, 3, 31 - (marchSunday.weekday % 7), 1);
+    final bstEnds = DateTime.utc(year, 10, 31 - (octoberSunday.weekday % 7), 1);
     return !utcDate.isBefore(bstStarts) && utcDate.isBefore(bstEnds);
   }
 
-  _TimeZoneOption _zone(String id) => _zones.firstWhere(
-    (zone) => zone.id == id,
-    orElse: () => _zones.first,
-  );
+  _TimeZoneOption _zone(String id) =>
+      _zones.firstWhere((zone) => zone.id == id, orElse: () => _zones.first);
 
   DateTime _timeInZone(DateTime utc, _TimeZoneOption zone) =>
       utc.add(Duration(hours: zone.offsetAt(utc)));
@@ -111,7 +102,20 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
 
   String _formatDate(DateTime dt) {
     const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
     return '${days[dt.weekday - 1]}, ${dt.day} ${months[dt.month - 1]}';
   }
 
@@ -125,7 +129,9 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final nowUtc = _currentTime.add(Duration(minutes: (_customHourOffset * 60).round()));
+    final nowUtc = _currentTime.add(
+      Duration(minutes: (_customHourOffset * 60).round()),
+    );
     final isDst = _isLondonDst(nowUtc);
     final londonOffset = isDst ? 1 : 0;
 
@@ -192,7 +198,10 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                           ],
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
@@ -233,7 +242,10 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
 
               // Mode Realtime / Slider Simulasi
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(18),
@@ -250,7 +262,9 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          _isLiveTime ? '⏱ Waktu Real-Time (Aktif)' : '🎚️ Simulasi Jam Khusus',
+                          _isLiveTime
+                              ? '⏱ Waktu Real-Time (Aktif)'
+                              : '🎚️ Simulasi Jam Khusus',
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
@@ -264,7 +278,9 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                               if (_isLiveTime) _customHourOffset = 0;
                             });
                           },
-                          child: Text(_isLiveTime ? 'Ganti Manual' : 'Kembali Realtime'),
+                          child: Text(
+                            _isLiveTime ? 'Ganti Manual' : 'Kembali Realtime',
+                          ),
                         ),
                       ],
                     ),
@@ -275,7 +291,8 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                         max: 12,
                         divisions: 24,
                         activeColor: AppColors.primaryGreen,
-                        label: '${_customHourOffset >= 0 ? '+' : ''}${_customHourOffset.toInt()} Jam',
+                        label:
+                            '${_customHourOffset >= 0 ? '+' : ''}${_customHourOffset.toInt()} Jam',
                         onChanged: (val) {
                           setState(() {
                             _customHourOffset = val;
@@ -284,7 +301,10 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                       ),
                       Text(
                         'Geser offset: ${_customHourOffset >= 0 ? '+' : ''}${_customHourOffset.toInt()} jam dari saat ini',
-                        style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textMuted,
+                        ),
                       ),
                     ],
                   ],
@@ -457,13 +477,14 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                 flag: '🇬🇧',
                 title: 'London (Inggris)',
                 utcLabel: isDst ? 'BST (UTC+1)' : 'GMT (UTC+0)',
-                diffFromCst: isDst ? '-7 Jam dari Beijing (Summer Time)' : '-8 Jam dari Beijing (Winter)',
+                diffFromCst: isDst
+                    ? '-7 Jam dari Beijing (Summer Time)'
+                    : '-8 Jam dari Beijing (Winter)',
                 time: londonTime,
                 color: const Color(0xFFFFFBEB),
                 badge: isDst ? 'Daylight Saving Aktif' : 'Standard Time',
               ),
               const SizedBox(height: 24),
-
             ],
           ),
         ),
@@ -583,12 +604,18 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                 const SizedBox(height: 2),
                 Text(
                   diffFromCst,
-                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textMuted,
+                  ),
                 ),
                 if (badge != null) ...[
                   const SizedBox(height: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFEF3C7),
                       borderRadius: BorderRadius.circular(6),
@@ -610,7 +637,6 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
       ),
     );
   }
-
 }
 
 class _TimeZoneOption {

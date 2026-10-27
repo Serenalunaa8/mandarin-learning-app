@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,10 +15,7 @@ class HanziRuleInfo {
   final String ruleTitle;
   final String ruleDesc;
 
-  const HanziRuleInfo({
-    required this.ruleTitle,
-    required this.ruleDesc,
-  });
+  const HanziRuleInfo({required this.ruleTitle, required this.ruleDesc});
 }
 
 class StrokeChallengeScreen extends StatefulWidget {
@@ -63,7 +61,7 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
 
   // Alat Pena
   Color _selectedColor = const Color(0xFF15803D); // Hijau Tua default
-  double _strokeWidth = 6.0;
+  double _strokeWidth = 8.0;
   bool _isEraser = false;
 
   // Pilihan warna pena
@@ -125,13 +123,16 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
           _animStrokeIndex++;
           _activeStrokeStep = _animStrokeIndex;
         });
-        _animController.duration = Duration(milliseconds: (750 / _animSpeed).round());
+        _animController.duration = Duration(
+          milliseconds: (750 / _animSpeed).round(),
+        );
         _animController.forward(from: 0.0);
       } else {
         setState(() {
           _isAnimationComplete = true;
           _isPlayingAnimation = false;
-          _showActiveStepGuide = false; // Arahan penulisan pada kanvas hanya diputar sekali saja
+          _showActiveStepGuide =
+              false; // Arahan penulisan pada kanvas hanya diputar sekali saja
         });
       }
     }
@@ -144,13 +145,18 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
       _isPlayingAnimation = true;
       _isAnimationComplete = false;
     });
-    if (_animStrokeIndex >= strokes.length - 1 && _animController.value >= 1.0) {
+    if (_animStrokeIndex >= strokes.length - 1 &&
+        _animController.value >= 1.0) {
       setState(() {
         _animStrokeIndex = 0;
       });
     }
-    _animController.duration = Duration(milliseconds: (750 / _animSpeed).round());
-    _animController.forward(from: _animController.value >= 1.0 ? 0.0 : _animController.value);
+    _animController.duration = Duration(
+      milliseconds: (750 / _animSpeed).round(),
+    );
+    _animController.forward(
+      from: _animController.value >= 1.0 ? 0.0 : _animController.value,
+    );
   }
 
   void _pauseAnimation() {
@@ -169,7 +175,9 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
       _isAnimationComplete = false;
       _animStrokeIndex = 0;
     });
-    _animController.duration = Duration(milliseconds: (750 / _animSpeed).round());
+    _animController.duration = Duration(
+      milliseconds: (750 / _animSpeed).round(),
+    );
     _animController.forward(from: 0.0);
   }
 
@@ -182,7 +190,9 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
       _animStrokeIndex = (_animStrokeIndex + 1).clamp(0, strokes.length - 1);
       _activeStrokeStep = _animStrokeIndex;
     });
-    _animController.duration = Duration(milliseconds: (750 / _animSpeed).round());
+    _animController.duration = Duration(
+      milliseconds: (750 / _animSpeed).round(),
+    );
     _animController.forward(from: 0.0);
   }
 
@@ -195,7 +205,9 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
       _animStrokeIndex = (_animStrokeIndex - 1).clamp(0, strokes.length - 1);
       _activeStrokeStep = _animStrokeIndex;
     });
-    _animController.duration = Duration(milliseconds: (750 / _animSpeed).round());
+    _animController.duration = Duration(
+      milliseconds: (750 / _animSpeed).round(),
+    );
     _animController.forward(from: 0.0);
   }
 
@@ -208,7 +220,9 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
       _animStrokeIndex = index;
       _activeStrokeStep = index;
     });
-    _animController.duration = Duration(milliseconds: (750 / _animSpeed).round());
+    _animController.duration = Duration(
+      milliseconds: (750 / _animSpeed).round(),
+    );
     _animController.forward(from: 0.0);
   }
 
@@ -221,14 +235,16 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
       } else {
         _animSpeed = 1.0;
       }
-      _animController.duration = Duration(milliseconds: (750 / _animSpeed).round());
+      _animController.duration = Duration(
+        milliseconds: (750 / _animSpeed).round(),
+      );
     });
   }
 
   VocabularyItem? get _current =>
       _words.isNotEmpty && _currentIndex < _words.length
-          ? _words[_currentIndex]
-          : null;
+      ? _words[_currentIndex]
+      : null;
 
   String get _currentCharacter {
     final runes = (_current?.hanzi ?? '').runes.toList();
@@ -265,7 +281,9 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
         _isAnimationComplete = false;
         _isPlayingAnimation = true;
       });
-      _animController.duration = Duration(milliseconds: (750 / _animSpeed).round());
+      _animController.duration = Duration(
+        milliseconds: (750 / _animSpeed).round(),
+      );
       _animController.forward(from: 0.0);
     } catch (_) {
       if (!mounted || character != _currentCharacter) return;
@@ -355,11 +373,15 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Row(
             children: [
               Icon(
-                res.isPassed ? Icons.check_circle_rounded : Icons.info_outline_rounded,
+                res.isPassed
+                    ? Icons.check_circle_rounded
+                    : Icons.info_outline_rounded,
                 color: res.isPassed ? AppColors.primaryGreen : Colors.orange,
                 size: 28,
               ),
@@ -367,7 +389,10 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
               Expanded(
                 child: Text(
                   res.feedbackTitle,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -387,7 +412,11 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
               const SizedBox(height: 8),
               Text(
                 res.feedbackMessage,
-                style: const TextStyle(fontSize: 13, height: 1.4, color: AppColors.textDark),
+                style: const TextStyle(
+                  fontSize: 13,
+                  height: 1.4,
+                  color: AppColors.textDark,
+                ),
               ),
             ],
           ),
@@ -403,7 +432,9 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGreen,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onPressed: () {
                 Navigator.pop(ctx);
@@ -445,7 +476,11 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
     _loadStrokeData();
   }
 
-  HanziRuleInfo _getStrokeRule(int index, List<Offset> points, int totalStrokes) {
+  HanziRuleInfo _getStrokeRule(
+    int index,
+    List<Offset> points,
+    int totalStrokes,
+  ) {
     if (points.isEmpty) {
       return const HanziRuleInfo(
         ruleTitle: 'Dari Atas ke Bawah',
@@ -515,7 +550,8 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
       if (index == 0) {
         return const HanziRuleInfo(
           ruleTitle: 'Luar Sebelum Dalam',
-          ruleDesc: 'Buat bingkai luar terlebih dahulu sebelum mengisi dalamnya',
+          ruleDesc:
+              'Buat bingkai luar terlebih dahulu sebelum mengisi dalamnya',
         );
       } else if (index == totalStrokes - 1) {
         return const HanziRuleInfo(
@@ -535,10 +571,12 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
     final dx = end.dx - start.dx;
     final dy = end.dy - start.dy;
 
-    if (index == totalStrokes - 1 && (points.length < 3 || (end - start).distance < 240)) {
+    if (index == totalStrokes - 1 &&
+        (points.length < 3 || (end - start).distance < 240)) {
       return const HanziRuleInfo(
         ruleTitle: 'Titik Tambahan Terakhir',
-        ruleDesc: 'Goresan berupa titik kecil atau tambahan ditulis paling akhir',
+        ruleDesc:
+            'Goresan berupa titik kecil atau tambahan ditulis paling akhir',
       );
     }
 
@@ -602,6 +640,28 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
       points: points,
       totalStrokes: _guideStrokeCount,
     );
+  }
+
+  String _shortenStrokeRule(String rule) {
+    if (rule.contains('Dari kiri ke kanan')) return 'Kiri ke kanan';
+    if (rule.contains('Dari atas ke bawah')) return 'Atas ke bawah';
+    if (rule.contains('Miring kiri dulu')) return 'Miring kiri lalu kanan';
+    if (rule.contains('Dari luar ke dalam')) return 'Luar ke dalam';
+    return rule;
+  }
+
+  String _shortenStrokeDescription(String description) {
+    if (description.contains('Tarik')) {
+      return description
+          .replaceFirst(' dengan stabil', '')
+          .replaceFirst(' sebagai penopang dasar', '');
+    }
+    if (description.contains('Tulis bagian')) {
+      return description
+          .replaceFirst('Tulis bagian ', 'Mulai ')
+          .replaceFirst(' terlebih dahulu, kemudian ', ', lalu ');
+    }
+    return description;
   }
 
   @override
@@ -711,13 +771,18 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                 ),
               ),
               Text(
-                'Latih menulis hanzi, kuasai bahasa Mandarin!',
+                'Ikuti garis, lalu tulis perlahan.',
                 style: TextStyle(fontSize: 11, color: AppColors.textMuted),
               ),
             ],
           ),
         ),
-        const MascotWidget(size: 38, pose: MascotPose.celebrating),
+        Image.asset(
+          'assets/image/beranda/maskot_02_baca_buku.png',
+          width: 50,
+          height: 50,
+          fit: BoxFit.contain,
+        ),
         const SizedBox(width: 8),
         InkWell(
           onTap: _nextWord,
@@ -731,9 +796,16 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
             ),
             child: const Row(
               children: [
-                Icon(Icons.play_arrow_rounded, size: 16, color: AppColors.textDark),
+                Icon(
+                  Icons.play_arrow_rounded,
+                  size: 16,
+                  color: AppColors.textDark,
+                ),
                 SizedBox(width: 2),
-                Text('Lewati', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                Text(
+                  'Lewati',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
               ],
             ),
           ),
@@ -843,7 +915,10 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                     ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(8),
@@ -851,7 +926,11 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.bar_chart_rounded, size: 14, color: AppColors.textMuted),
+                          const Icon(
+                            Icons.bar_chart_rounded,
+                            size: 14,
+                            color: AppColors.textMuted,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '$_guideStrokeCount stroke standar • Karakter ${_characterIndex + 1}/${word.hanzi.runes.length}',
@@ -929,7 +1008,11 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                   color: Color(0xFFDCFCE7),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.edit_rounded, color: Color(0xFF15803D), size: 16),
+                child: const Icon(
+                  Icons.edit_rounded,
+                  color: Color(0xFF15803D),
+                  size: 16,
+                ),
               ),
               const SizedBox(width: 8),
               const Column(
@@ -944,7 +1027,7 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                     ),
                   ),
                   Text(
-                    'Ikuti langkah demi langkah untuk menulis karakter ini.',
+                    'Ikuti garis hijau di dalam kotak.',
                     style: TextStyle(fontSize: 11, color: AppColors.textMuted),
                   ),
                 ],
@@ -967,14 +1050,19 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                   alignment: Alignment.center,
                   children: [
                     // Garis Tianzige (田字格)
-                    CustomPaint(painter: _TianzigeGridPainter(), size: Size.infinite),
+                    CustomPaint(
+                      painter: _TianzigeGridPainter(),
+                      size: Size.infinite,
+                    ),
                     // Karakter Mandarin Asli Autentik (Watermark Bentuk Hanzi Persis 100%)
                     if (_strokeData != null)
                       CustomPaint(
                         painter: _AuthenticHanziWatermarkPainter(
                           strokeOutlines: _strokeData!.strokeOutlines,
                           fallbackStrokes: _strokeData!.strokes,
-                          activeStrokeIndex: _showActiveStepGuide ? _activeStrokeStep : -1,
+                          activeStrokeIndex: _showActiveStepGuide
+                              ? _activeStrokeStep
+                              : -1,
                         ),
                         size: Size.infinite,
                       ),
@@ -1017,32 +1105,53 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
             children: [
               TextButton.icon(
                 onPressed: _clearCanvas,
-                icon: const Icon(Icons.refresh_rounded, size: 16, color: AppColors.textDark),
+                icon: const Icon(
+                  Icons.refresh_rounded,
+                  size: 16,
+                  color: AppColors.textDark,
+                ),
                 label: const Text(
                   'Reset',
-                  style: TextStyle(fontSize: 12, color: AppColors.textDark, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               if (_strokeData != null && _strokeData!.strokes.isNotEmpty)
                 InkWell(
-                  onTap: () => setState(() => _showActiveStepGuide = !_showActiveStepGuide),
+                  onTap: () => setState(
+                    () => _showActiveStepGuide = !_showActiveStepGuide,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 4,
+                    ),
                     child: Row(
                       children: [
                         Icon(
-                          _showActiveStepGuide ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                          _showActiveStepGuide
+                              ? Icons.visibility_rounded
+                              : Icons.visibility_off_rounded,
                           size: 14,
-                          color: _showActiveStepGuide ? const Color(0xFF15803D) : AppColors.textMuted,
+                          color: _showActiveStepGuide
+                              ? const Color(0xFF15803D)
+                              : AppColors.textMuted,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          _showActiveStepGuide ? 'Panduan Tahap ${_activeStrokeStep + 1}' : 'Panduan Mati',
+                          _showActiveStepGuide
+                              ? 'Panduan Tahap ${_activeStrokeStep + 1}'
+                              : 'Panduan Mati',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: _showActiveStepGuide ? const Color(0xFF15803D) : AppColors.textMuted,
+                            color: _showActiveStepGuide
+                                ? const Color(0xFF15803D)
+                                : AppColors.textMuted,
                           ),
                         ),
                       ],
@@ -1058,10 +1167,14 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
               backgroundColor: const Color(0xFF15803D),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
               elevation: 2,
             ),
-            onPressed: _drawnStrokes.isNotEmpty && !_isLoadingStrokeData ? _checkWriting : null,
+            onPressed: _drawnStrokes.isNotEmpty && !_isLoadingStrokeData
+                ? _checkWriting
+                : null,
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1079,17 +1192,25 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: _evalResult!.isPassed ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7),
+                color: _evalResult!.isPassed
+                    ? const Color(0xFFDCFCE7)
+                    : const Color(0xFFFEF3C7),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: _evalResult!.isPassed ? AppColors.primaryGreen : Colors.orange,
+                  color: _evalResult!.isPassed
+                      ? AppColors.primaryGreen
+                      : Colors.orange,
                 ),
               ),
               child: Row(
                 children: [
                   Icon(
-                    _evalResult!.isPassed ? Icons.check_circle_rounded : Icons.info_outline_rounded,
-                    color: _evalResult!.isPassed ? AppColors.primaryGreen : Colors.orange,
+                    _evalResult!.isPassed
+                        ? Icons.check_circle_rounded
+                        : Icons.info_outline_rounded,
+                    color: _evalResult!.isPassed
+                        ? AppColors.primaryGreen
+                        : Colors.orange,
                     size: 18,
                   ),
                   const SizedBox(width: 8),
@@ -1099,7 +1220,9 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: _evalResult!.isPassed ? const Color(0xFF14532D) : const Color(0xFF92400E),
+                        color: _evalResult!.isPassed
+                            ? const Color(0xFF14532D)
+                            : const Color(0xFF92400E),
                       ),
                     ),
                   ),
@@ -1123,7 +1246,11 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
         ? _getStrokeInfo(_animStrokeIndex, strokes[_animStrokeIndex])
         : null;
     final ruleInfo = _animStrokeIndex < totalStrokes
-        ? _getStrokeRule(_animStrokeIndex, strokes[_animStrokeIndex], totalStrokes)
+        ? _getStrokeRule(
+            _animStrokeIndex,
+            strokes[_animStrokeIndex],
+            totalStrokes,
+          )
         : null;
 
     return Container(
@@ -1172,7 +1299,7 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                       ),
                     ),
                     Text(
-                      'Model Super Chinese • Putar & amati gerakan goresan',
+                      'Amati, lalu ikuti di kanvas.',
                       style: TextStyle(
                         fontSize: 10.5,
                         color: Colors.grey.shade600,
@@ -1186,7 +1313,10 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                 onTap: _toggleSpeed,
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(20),
@@ -1194,7 +1324,11 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.speed_rounded, size: 14, color: AppColors.textDark),
+                      const Icon(
+                        Icons.speed_rounded,
+                        size: 14,
+                        color: AppColors.textDark,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'x',
@@ -1255,7 +1389,10 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: _isAnimationComplete
                               ? const Color(0xFF15803D)
@@ -1274,13 +1411,13 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                           ],
                         ),
                         child: Text(
-                          _isAnimationComplete
-                              ? 'Selesai ✓'
-                              : 'Goresan  / ',
+                          _isAnimationComplete ? 'Selesai ✓' : 'Goresan  / ',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
-                            color: _isAnimationComplete ? Colors.white : AppColors.textDark,
+                            color: _isAnimationComplete
+                                ? Colors.white
+                                : AppColors.textDark,
                           ),
                         ),
                       ),
@@ -1298,7 +1435,8 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(totalStrokes, (idx) {
-                final isCurrent = idx == _animStrokeIndex && !_isAnimationComplete;
+                final isCurrent =
+                    idx == _animStrokeIndex && !_isAnimationComplete;
                 final isDone = idx < _animStrokeIndex || _isAnimationComplete;
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 3),
@@ -1306,20 +1444,23 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                     onTap: () => _selectStrokeStep(idx),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
                         color: isCurrent
                             ? const Color(0xFF15803D)
                             : isDone
-                                ? const Color(0xFFDCFCE7)
-                                : const Color(0xFFF1F5F9),
+                            ? const Color(0xFFDCFCE7)
+                            : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isCurrent
                               ? const Color(0xFF15803D)
                               : isDone
-                                  ? const Color(0xFF86EFAC)
-                                  : const Color(0xFFCBD5E1),
+                              ? const Color(0xFF86EFAC)
+                              : const Color(0xFFCBD5E1),
                           width: isCurrent ? 1.5 : 1.0,
                         ),
                       ),
@@ -1327,12 +1468,14 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                         '',
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
+                          fontWeight: isCurrent
+                              ? FontWeight.bold
+                              : FontWeight.w600,
                           color: isCurrent
                               ? Colors.white
                               : isDone
-                                  ? const Color(0xFF14532D)
-                                  : AppColors.textDark,
+                              ? const Color(0xFF14532D)
+                              : AppColors.textDark,
                         ),
                       ),
                     ),
@@ -1359,8 +1502,13 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF15803D),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   elevation: 1,
                 ),
                 onPressed: () {
@@ -1376,22 +1524,27 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                   _isAnimationComplete
                       ? Icons.replay_rounded
                       : _isPlayingAnimation
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
+                      ? Icons.pause_rounded
+                      : Icons.play_arrow_rounded,
                   size: 20,
                 ),
                 label: Text(
                   _isAnimationComplete
                       ? 'Ulangi'
                       : _isPlayingAnimation
-                          ? 'Jeda'
-                          : 'Putar',
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                      ? 'Jeda'
+                      : 'Putar',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               IconButton(
-                onPressed: _animStrokeIndex < totalStrokes - 1 ? _nextStrokeStep : null,
+                onPressed: _animStrokeIndex < totalStrokes - 1
+                    ? _nextStrokeStep
+                    : null,
                 icon: const Icon(Icons.skip_next_rounded),
                 color: const Color(0xFF15803D),
                 disabledColor: const Color(0xFFCBD5E1),
@@ -1448,7 +1601,10 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                             ),
                             const SizedBox(width: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFE0E7FF),
                                 borderRadius: BorderRadius.circular(6),
@@ -1519,7 +1675,6 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
     );
   }
 
-
   Widget _buildToolPaletteCard() {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -1543,15 +1698,29 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
             children: [
               const Text(
                 'Alat Gambar',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textDark),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: AppColors.textDark,
+                ),
               ),
               InkWell(
                 onTap: _clearCanvas,
                 child: const Row(
                   children: [
-                    Icon(Icons.refresh_rounded, size: 14, color: AppColors.textMuted),
+                    Icon(
+                      Icons.refresh_rounded,
+                      size: 14,
+                      color: AppColors.textMuted,
+                    ),
                     SizedBox(width: 4),
-                    Text('Reset', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                    Text(
+                      'Reset',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1568,20 +1737,28 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      color: !_isEraser ? const Color(0xFF15803D) : const Color(0xFFF1F5F9),
+                      color: !_isEraser
+                          ? const Color(0xFF15803D)
+                          : const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.edit_rounded, size: 15, color: !_isEraser ? Colors.white : AppColors.textDark),
+                        Icon(
+                          Icons.edit_rounded,
+                          size: 15,
+                          color: !_isEraser ? Colors.white : AppColors.textDark,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           'Pena',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: !_isEraser ? Colors.white : AppColors.textDark,
+                            color: !_isEraser
+                                ? Colors.white
+                                : AppColors.textDark,
                           ),
                         ),
                       ],
@@ -1597,20 +1774,28 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      color: _isEraser ? const Color(0xFFDC2626) : const Color(0xFFF1F5F9),
+                      color: _isEraser
+                          ? const Color(0xFFDC2626)
+                          : const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.auto_fix_high_rounded, size: 15, color: _isEraser ? Colors.white : AppColors.textDark),
+                        Icon(
+                          Icons.auto_fix_high_rounded,
+                          size: 15,
+                          color: _isEraser ? Colors.white : AppColors.textDark,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           'Hapus',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: _isEraser ? Colors.white : AppColors.textDark,
+                            color: _isEraser
+                                ? Colors.white
+                                : AppColors.textDark,
                           ),
                         ),
                       ],
@@ -1622,10 +1807,20 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
           ),
           const SizedBox(height: 12),
           // Ukuran Pena Slider
-          const Text('Ukuran Pena', style: TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
+          const Text(
+            'Ukuran Pena',
+            style: TextStyle(
+              fontSize: 11,
+              color: AppColors.textMuted,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           Row(
             children: [
-              const Text('―', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              const Text(
+                '―',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
               Expanded(
                 child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
@@ -1633,7 +1828,9 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                     inactiveTrackColor: const Color(0xFFDCFCE7),
                     thumbColor: const Color(0xFF15803D),
                     trackHeight: 3,
-                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                    thumbShape: const RoundSliderThumbShape(
+                      enabledThumbRadius: 6,
+                    ),
                   ),
                   child: Slider(
                     value: _strokeWidth,
@@ -1643,12 +1840,22 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
                   ),
                 ),
               ),
-              const Text('+', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              const Text(
+                '+',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           const SizedBox(height: 6),
           // Warna Pena
-          const Text('Warna Pena', style: TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
+          const Text(
+            'Warna Pena',
+            style: TextStyle(
+              fontSize: 11,
+              color: AppColors.textMuted,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -1688,17 +1895,21 @@ class _StrokeChallengeScreenState extends State<StrokeChallengeScreen>
           Builder(
             builder: (context) {
               final strokes = _strokeData?.strokes ?? [];
-              final activeInfo = strokes.isNotEmpty &&
+              final activeInfo =
+                  strokes.isNotEmpty &&
                       _activeStrokeStep >= 0 &&
                       _activeStrokeStep < strokes.length
-                  ? _getStrokeInfo(_activeStrokeStep, strokes[_activeStrokeStep])
+                  ? _getStrokeInfo(
+                      _activeStrokeStep,
+                      strokes[_activeStrokeStep],
+                    )
                   : null;
               final ruleTitle = activeInfo != null
-                  ? 'Kaidah Tahap ${_activeStrokeStep + 1}: ${activeInfo.rule}'
-                  : 'Tips Kaidah Bishun (笔顺)';
+                  ? 'Tahap ${_activeStrokeStep + 1}: ${_shortenStrokeRule(activeInfo.rule)}'
+                  : 'Tips menulis';
               final ruleDesc = activeInfo != null
-                  ? activeInfo.description
-                  : 'Tulis perlahan mengikuti bentuk karakter Mandarin yang benar.';
+                  ? _shortenStrokeDescription(activeInfo.description)
+                  : 'Ikuti garis hijau dan tulis perlahan.';
               return Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -1767,12 +1978,32 @@ class _TianzigeGridPainter extends CustomPainter {
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), borderPaint);
 
     // Cross lines
-    _drawDashedLine(canvas, Offset(0, size.height / 2), Offset(size.width, size.height / 2), dashPaint);
-    _drawDashedLine(canvas, Offset(size.width / 2, 0), Offset(size.width / 2, size.height), dashPaint);
+    _drawDashedLine(
+      canvas,
+      Offset(0, size.height / 2),
+      Offset(size.width, size.height / 2),
+      dashPaint,
+    );
+    _drawDashedLine(
+      canvas,
+      Offset(size.width / 2, 0),
+      Offset(size.width / 2, size.height),
+      dashPaint,
+    );
 
     // Diagonal lines
-    _drawDashedLine(canvas, Offset.zero, Offset(size.width, size.height), dashPaint);
-    _drawDashedLine(canvas, Offset(size.width, 0), Offset(0, size.height), dashPaint);
+    _drawDashedLine(
+      canvas,
+      Offset.zero,
+      Offset(size.width, size.height),
+      dashPaint,
+    );
+    _drawDashedLine(
+      canvas,
+      Offset(size.width, 0),
+      Offset(0, size.height),
+      dashPaint,
+    );
   }
 
   void _drawDashedLine(Canvas canvas, Offset p1, Offset p2, Paint paint) {
@@ -2147,7 +2378,9 @@ class _SuperChineseStrokeAnimatorPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _SuperChineseStrokeAnimatorPainter oldDelegate) => true;
+  bool shouldRepaint(
+    covariant _SuperChineseStrokeAnimatorPainter oldDelegate,
+  ) => true;
 }
 
 /// Overlay panduan visual tahap penulisan pada kanvas Tianzige utama

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_colors.dart';
 
 // FR-12 & PB-16: China Trip Budget Planner (旅行预算 · Lǚxíng yùsuàn) & Konversi 3 Mata Uang (IDR, CNY, USD)
-// Kurs acuan resmi PRD: 1 CNY ≈ 2.220 IDR, 1 USD ≈ 15.600 IDR, 1 USD ≈ 7.02 CNY
+// Kurs acuan mid-market: 1 CNY ≈ 2.721 IDR, 1 USD ≈ 18.144 IDR, 1 USD ≈ 6.667 CNY.
 
 enum CurrencyCode { idr, cny, usd }
 
@@ -29,7 +30,8 @@ class CurrencyConverterScreen extends StatefulWidget {
   const CurrencyConverterScreen({super.key});
 
   @override
-  State<CurrencyConverterScreen> createState() => _CurrencyConverterScreenState();
+  State<CurrencyConverterScreen> createState() =>
+      _CurrencyConverterScreenState();
 }
 
 class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
@@ -37,12 +39,24 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
   late TabController _tabController;
 
   // ─── Budget Planner State ──────────────────────────────────────────────────
-  final TextEditingController _budgetController =
-      TextEditingController(text: '2.000.000');
+  final TextEditingController _budgetController = TextEditingController(
+    text: '8.000.000',
+  );
+  final TextEditingController _destinationController = TextEditingController(
+    text: 'Shanghai',
+  );
   static const List<_TripOption> _transportOptions = [
     _TripOption('Metro + bus', 'Beijing · sekitar ¥25/orang/hari', 25),
-    _TripOption('Metro + sesekali DiDi', 'Beijing · sekitar ¥70/orang/hari', 70),
-    _TripOption('DiDi/taksi lebih sering', 'Beijing · sekitar ¥180/orang/hari', 180),
+    _TripOption(
+      'Metro + sesekali DiDi',
+      'Beijing · sekitar ¥70/orang/hari',
+      70,
+    ),
+    _TripOption(
+      'DiDi/taksi lebih sering',
+      'Beijing · sekitar ¥180/orang/hari',
+      180,
+    ),
   ];
   static const List<_TripOption> _hotelOptions = [
     _TripOption('Hostel (ranjang dorm)', 'Per orang · ¥120/malam', 120),
@@ -55,10 +69,26 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
     _TripOption('Restoran nyaman', '¥180/orang/hari', 180),
   ];
   static const List<_TripOption> _activityOptions = [
-    _TripOption('Gratis + taman kota', 'Contoh: Tiananmen area (reservasi), taman gratis · ¥0', 0),
-    _TripOption('Kota Terlarang', 'Tiket dewasa musim rendah ¥40 / tinggi ¥60', 60),
-    _TripOption('Kota Terlarang + taman', 'Tiket + estimasi transport lokal · ¥80/orang', 80),
-    _TripOption('Wisata berbayar lebih banyak', 'Estimasi tiket beberapa lokasi · ¥180/orang', 180),
+    _TripOption(
+      'Gratis + taman kota',
+      'Contoh: Tiananmen area (reservasi), taman gratis · ¥0',
+      0,
+    ),
+    _TripOption(
+      'Kota Terlarang',
+      'Tiket dewasa musim rendah ¥40 / tinggi ¥60',
+      60,
+    ),
+    _TripOption(
+      'Kota Terlarang + taman',
+      'Tiket + estimasi transport lokal · ¥80/orang',
+      80,
+    ),
+    _TripOption(
+      'Wisata berbayar lebih banyak',
+      'Estimasi tiket beberapa lokasi · ¥180/orang',
+      180,
+    ),
   ];
 
   int _tripDays = 3;
@@ -69,14 +99,17 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
   _TripOption _activity = _activityOptions[2];
 
   // ─── Quick Converter State ─────────────────────────────────────────────────
-  final TextEditingController _amountController =
-      TextEditingController(text: '100');
+  final TextEditingController _amountController = TextEditingController(
+    text: '100',
+  );
   CurrencyCode _fromCurrency = CurrencyCode.cny;
   CurrencyCode _toCurrency = CurrencyCode.idr;
 
   // Nilai kurs relatif terhadap 1 USD (Base USD)
-  static const double _rateUsdToIdr = 15600.0;
-  static const double _rateUsdToCny = 7.02;
+  // Kurs mid-market acuan terbaru yang dipakai oleh kalkulator.
+  // USD/IDR ≈ 18.143,58 dan CNY/IDR ≈ 2.721,31.
+  static const double _rateUsdToIdr = 18143.58;
+  static const double _rateUsdToCny = 6.66722277;
 
   final DateTime _lastUpdated = DateTime.now();
 
@@ -90,6 +123,7 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
   void dispose() {
     _tabController.dispose();
     _budgetController.dispose();
+    _destinationController.dispose();
     _amountController.dispose();
     super.dispose();
   }
@@ -137,7 +171,9 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
 
   String _formatNumber(double val, CurrencyCode code) {
     if (code == CurrencyCode.idr) {
-      return val.toStringAsFixed(0).replaceAllMapped(
+      return val
+          .toStringAsFixed(0)
+          .replaceAllMapped(
             RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
             (m) => '${m[1]}.',
           );
@@ -146,7 +182,9 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
   }
 
   String _formatIdrOnly(double val) {
-    return val.toStringAsFixed(0).replaceAllMapped(
+    return val
+        .toStringAsFixed(0)
+        .replaceAllMapped(
           RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
           (m) => '${m[1]}.',
         );
@@ -186,7 +224,10 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
           indicatorColor: AppColors.primaryGreen,
           labelColor: AppColors.primaryGreen,
           unselectedLabelColor: AppColors.textMuted,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
           tabs: const [
             Tab(
               icon: Icon(Icons.flight_takeoff_rounded, size: 20),
@@ -202,10 +243,7 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
       body: SafeArea(
         child: TabBarView(
           controller: _tabController,
-          children: [
-            _buildTripBudgetPlannerTab(),
-            _buildQuickConverterTab(),
-          ],
+          children: [_buildChinaTripDashboard(), _buildQuickConverterTab()],
         ),
       ),
     );
@@ -214,6 +252,857 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
   // ══════════════════════════════════════════════════════════════════════════════
   // TAB 1: CHINA TRIP BUDGET PLANNER (旅行预算)
   // ══════════════════════════════════════════════════════════════════════════════
+
+  Widget _buildChinaTripDashboard() {
+    const cream = AppColors.mintBackground;
+    const red = AppColors.primary;
+    const gold = AppColors.coinGold;
+    const ink = AppColors.textDark;
+    final budgetIdr = _parseBudgetIdr();
+    final destination = _destinationController.text.trim().isEmpty
+        ? 'Belum dipilih'
+        : _destinationController.text.trim();
+    final foodBudget = budgetIdr * .25;
+    final transportBudget = budgetIdr * .15;
+    final lodgingBudget = budgetIdr * .35;
+    final activityBudget = budgetIdr * .15;
+    final emergencyBudget = budgetIdr * .10;
+    final showFeatures = _tripDays < 0;
+
+    Widget metric(IconData icon, String label, String value, Color color) {
+      return Expanded(
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: .14),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Widget feature(
+      IconData icon,
+      String title,
+      String subtitle,
+      Color color,
+      VoidCallback onTap,
+    ) {
+      return Expanded(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xFFF1E4D0)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: .12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: color, size: 22),
+                ),
+                const SizedBox(height: 9),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: cream,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'MY TRAVEL PLANNER',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                  color: ink,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 18, 12, 12),
+                decoration: BoxDecoration(
+                  image: const DecorationImage(
+                    image: AssetImage('assets/image/beranda/bg_siang.png'),
+                    fit: BoxFit.cover,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '你好, Traveler!',
+                            style: TextStyle(
+                              color: AppColors.primaryDark,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            "Let's explore China together.",
+                            style: TextStyle(
+                              color: AppColors.forestGreen,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      width: 112,
+                      height: 112,
+                      child: Image.asset(
+                        'assets/image/beranda/maskot_01_bintang.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    Container(
+                      width: 0,
+                      height: 0,
+                      clipBehavior: Clip.hardEdge,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFFE4B5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Text('🐼', style: TextStyle(fontSize: 40)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Atur perjalananmu',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: ink,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _budgetController,
+                      keyboardType: TextInputType.number,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: 'Budget total (Rp)',
+                        prefixText: 'Rp ',
+                        prefixIcon: const Icon(
+                          Icons.account_balance_wallet_rounded,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _destinationController,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: 'Destination',
+                        prefixIcon: const Icon(Icons.location_on_rounded),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _numberStepper(
+                            label: 'Lama perjalanan',
+                            value: _tripDays,
+                            suffix: 'hari',
+                            onMinus: () => setState(
+                              () => _tripDays = (_tripDays - 1)
+                                  .clamp(1, 30)
+                                  .toInt(),
+                            ),
+                            onPlus: () => setState(
+                              () => _tripDays = (_tripDays + 1)
+                                  .clamp(1, 30)
+                                  .toInt(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _numberStepper(
+                            label: 'Jumlah orang',
+                            value: _travelerCount,
+                            suffix: 'orang',
+                            onMinus: () => setState(
+                              () => _travelerCount = (_travelerCount - 1)
+                                  .clamp(1, 20)
+                                  .toInt(),
+                            ),
+                            onPlus: () => setState(
+                              () => _travelerCount = (_travelerCount + 1)
+                                  .clamp(1, 20)
+                                  .toInt(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Perjalanan saya',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: ink,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Total trip budget',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Rp ${_formatIdrOnly(budgetIdr)}',
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.w800,
+                                color: red,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF8E1),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.account_balance_wallet_rounded,
+                            color: gold,
+                            size: 28,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: const LinearProgressIndicator(
+                        value: .35,
+                        minHeight: 9,
+                        backgroundColor: Color(0xFFF8EBD2),
+                        color: gold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Budget siap dibagi otomatis',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                        Text(
+                          '100% siap dibagi',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: gold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  metric(
+                    Icons.location_on_rounded,
+                    'Destination',
+                    destination,
+                    red,
+                  ),
+                  const SizedBox(width: 10),
+                  metric(
+                    Icons.calendar_month_rounded,
+                    'Duration',
+                    '$_tripDays Days',
+                    gold,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  metric(
+                    Icons.restaurant_rounded,
+                    'Food budget',
+                    'Rp ${_formatIdrOnly(foodBudget)}',
+                    const Color(0xFFE89B45),
+                  ),
+                  const SizedBox(width: 10),
+                  metric(
+                    Icons.train_rounded,
+                    'Transport',
+                    'Rp ${_formatIdrOnly(transportBudget)}',
+                    const Color(0xFF398A9A),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Pembagian budget otomatis',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: ink,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _allocationRow(
+                      Icons.hotel_rounded,
+                      'Penginapan',
+                      lodgingBudget,
+                      '35%',
+                      const Color(0xFF398A9A),
+                    ),
+                    _allocationRow(
+                      Icons.restaurant_rounded,
+                      'Makanan',
+                      foodBudget,
+                      '25%',
+                      const Color(0xFFE89B45),
+                    ),
+                    _allocationRow(
+                      Icons.train_rounded,
+                      'Transportasi',
+                      transportBudget,
+                      '15%',
+                      AppColors.primaryDark,
+                    ),
+                    _allocationRow(
+                      Icons.confirmation_num_rounded,
+                      'Tiket wisata',
+                      activityBudget,
+                      '15%',
+                      AppColors.coinGold,
+                    ),
+                    _allocationRow(
+                      Icons.health_and_safety_rounded,
+                      'Dana darurat',
+                      emergencyBudget,
+                      '10%',
+                      const Color(0xFF7B61A8),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildInlineCurrencyConverter(
+                budgetIdr: budgetIdr,
+                lodgingBudget: lodgingBudget,
+                foodBudget: foodBudget,
+                transportBudget: transportBudget,
+                activityBudget: activityBudget,
+                emergencyBudget: emergencyBudget,
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: red,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  onPressed: () => _showChinaTip(
+                    'Rencana trip diperbarui',
+                    'Budget dan konversi mata uang sudah dihitung dari data perjalananmu.',
+                  ),
+                  icon: const Icon(Icons.add_road_rounded),
+                  label: const Text(
+                    'Plan My Trip',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              if (showFeatures) ...[
+                const SizedBox(height: 26),
+                const Text(
+                  'Bikin perjalanan lebih mudah',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: ink,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    feature(
+                      Icons.currency_exchange_rounded,
+                      'IDR ↔ CNY',
+                      'Konversi cepat',
+                      red,
+                      () => _showChinaTip(
+                        'Konversi otomatis',
+                        'Lihat hasil konversi langsung pada kartu Konversi Mata Uang di halaman ini.',
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    feature(
+                      Icons.restaurant_menu_rounded,
+                      'Daily Cost',
+                      'Biaya makan',
+                      gold,
+                      () => _showChinaTip(
+                        'China Daily Cost',
+                        'Street food sekitar ¥50/hari\nRestoran lokal sekitar ¥90/hari\nRestoran premium mulai ¥180/hari',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    feature(
+                      Icons.directions_subway_rounded,
+                      'Transport',
+                      'Metro & kereta',
+                      const Color(0xFF5E7D8A),
+                      () => showModalBottomSheet<void>(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (_) => SizedBox(
+                          height: MediaQuery.of(context).size.height * .82,
+                          child: _buildTripBudgetPlannerTab(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    feature(
+                      Icons.translate_rounded,
+                      'Travel Helper',
+                      'Frasa Mandarin',
+                      const Color(0xFFE06B35),
+                      () => _showChinaTip(
+                        'Mandarin Travel Helper',
+                        '多少钱？\nDuōshǎo qián?\nBerapa harganya?',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 18),
+              InkWell(
+                onTap: () => _showChinaTip(
+                  'Budget Alert',
+                  'Pengeluaranmu baru 35% dari anggaran.\nMasih aman untuk melanjutkan perjalanan!',
+                ),
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3D8),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.notifications_active_rounded, color: red),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Budget Alert  •  Pengingat di 50%, 80%, dan 100%',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: ink,
+                          ),
+                        ),
+                      ),
+                      Icon(Icons.chevron_right_rounded, color: red),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Concept mockup · contoh angka untuk ilustrasi, bukan estimasi harga aktual',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showChinaTip(String title, String message) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Mengerti'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInlineCurrencyConverter({
+    required double budgetIdr,
+    required double lodgingBudget,
+    required double foodBudget,
+    required double transportBudget,
+    required double activityBudget,
+    required double emergencyBudget,
+  }) {
+    final budgetCny = budgetIdr * _getRate(CurrencyCode.idr, CurrencyCode.cny);
+    final toCny = (double amount) =>
+        amount * _getRate(CurrencyCode.idr, CurrencyCode.cny);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(
+                Icons.currency_exchange_rounded,
+                color: AppColors.primaryDark,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Konversi mata uang',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF3A2118),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Budget dan seluruh pembagiannya otomatis dikonversi ke Rupiah dan Yuan.',
+            style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Total budget',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
+              ),
+              Text(
+                'Rp ${_formatIdrOnly(budgetIdr)}  ≈  ¥ ${_formatNumber(budgetCny, CurrencyCode.cny)}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primaryDark,
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 22),
+          _convertedAllocationRow(
+            'Penginapan',
+            lodgingBudget,
+            toCny(lodgingBudget),
+          ),
+          _convertedAllocationRow('Makanan', foodBudget, toCny(foodBudget)),
+          _convertedAllocationRow(
+            'Transportasi',
+            transportBudget,
+            toCny(transportBudget),
+          ),
+          _convertedAllocationRow(
+            'Tiket wisata',
+            activityBudget,
+            toCny(activityBudget),
+          ),
+          _convertedAllocationRow(
+            'Dana darurat',
+            emergencyBudget,
+            toCny(emergencyBudget),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Kurs acuan: 1 CNY ≈ Rp2.721 dan 1 USD ≈ Rp18.144. Nilai dapat berubah saat digunakan.',
+            style: TextStyle(fontSize: 10, color: AppColors.textMuted),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _convertedAllocationRow(String label, double idr, double cny) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 12, color: AppColors.textDark),
+            ),
+          ),
+          Text(
+            'Rp ${_formatIdrOnly(idr)}',
+            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '¥ ${_formatNumber(cny, CurrencyCode.cny)}',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryDark,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _numberStepper({
+    required String label,
+    required int value,
+    required String suffix,
+    required VoidCallback onMinus,
+    required VoidCallback onPlus,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8EC),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+          ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: onMinus,
+                icon: const Icon(Icons.remove_circle_outline),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              Expanded(
+                child: Text(
+                  '$value $suffix',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: onPlus,
+                icon: const Icon(Icons.add_circle_outline),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _allocationRow(
+    IconData icon,
+    String label,
+    double amount,
+    String percentage,
+    Color color,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: .12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 18, color: color),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 12, color: AppColors.textDark),
+            ),
+          ),
+          Text(
+            percentage,
+            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Rp ${_formatIdrOnly(amount)}',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryDark,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildTripBudgetPlannerTab() {
     final budgetIdr = _parseBudgetIdr();
@@ -224,8 +1113,12 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
 
     final nights = _tripDays > 1 ? _tripDays - 1 : 1;
     final cnyTransport = _transport.priceCny * _tripDays * _travelerCount;
-    final cnyHotel = _hotel.priceCny * nights *
-        (_hotel.label.startsWith('Hostel') ? _travelerCount : (_travelerCount / 2).ceil());
+    final cnyHotel =
+        _hotel.priceCny *
+        nights *
+        (_hotel.label.startsWith('Hostel')
+            ? _travelerCount
+            : (_travelerCount / 2).ceil());
     final cnyFood = _food.priceCny * _tripDays * _travelerCount;
     final cnyActivity = _activity.priceCny * _travelerCount;
     final idrTransport = cnyTransport / rateIdrToCny;
@@ -338,7 +1231,9 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEF3C7),
                         borderRadius: BorderRadius.circular(8),
@@ -378,7 +1273,9 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                     hintText: 'Contoh: 2.000.000',
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     filled: true,
                     fillColor: const Color(0xFFF8FAFC),
                     border: OutlineInputBorder(
@@ -388,7 +1285,9 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: const BorderSide(
-                          color: AppColors.primaryGreen, width: 2),
+                        color: AppColors.primaryGreen,
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
@@ -404,7 +1303,10 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      _buildBudgetPresetChip('Rp 2.000.000 (Contoh)', '2.000.000'),
+                      _buildBudgetPresetChip(
+                        'Rp 2.000.000 (Contoh)',
+                        '2.000.000',
+                      ),
                       _buildBudgetPresetChip('Rp 5.000.000', '5.000.000'),
                       _buildBudgetPresetChip('Rp 10.000.000', '10.000.000'),
                       _buildBudgetPresetChip('Rp 20.000.000', '20.000.000'),
@@ -419,7 +1321,9 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF0FDF4),
                           borderRadius: BorderRadius.circular(14),
@@ -453,7 +1357,9 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                             const Text(
                               '人民币 (Rénmínbì)',
                               style: TextStyle(
-                                  fontSize: 10, color: AppColors.textMuted),
+                                fontSize: 10,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                           ],
                         ),
@@ -463,7 +1369,9 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFEFF6FF),
                           borderRadius: BorderRadius.circular(14),
@@ -497,7 +1405,9 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                             const Text(
                               '美元 (Měiyuán)',
                               style: TextStyle(
-                                  fontSize: 10, color: AppColors.textMuted),
+                                fontSize: 10,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                           ],
                         ),
@@ -507,8 +1417,11 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Kurs acuan: 1 CNY ≈ Rp 2.220 IDR | 1 USD ≈ Rp 15.600 IDR (${_lastUpdated.day}/${_lastUpdated.month}/${_lastUpdated.year})',
-                  style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
+                  'Kurs acuan: 1 CNY ≈ Rp 2.721 IDR | 1 USD ≈ Rp 18.144 IDR (${_lastUpdated.day}/${_lastUpdated.month}/${_lastUpdated.year})',
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ],
             ),
@@ -643,8 +1556,11 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.tips_and_updates_rounded,
-                        color: Color(0xFFF59E0B), size: 20),
+                    Icon(
+                      Icons.tips_and_updates_rounded,
+                      color: Color(0xFFF59E0B),
+                      size: 20,
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Tips Pembayaran & Transaksi di Tiongkok',
@@ -679,27 +1595,100 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
   Widget _buildTripSettingsCard() {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          const Expanded(child: Text('Lama perjalanan', style: TextStyle(fontWeight: FontWeight.w600))),
-          IconButton(onPressed: _tripDays > 1 ? () => setState(() => _tripDays--) : null, icon: const Icon(Icons.remove_circle_outline)),
-          Text('$_tripDays hari', style: const TextStyle(fontWeight: FontWeight.bold)),
-          IconButton(onPressed: _tripDays < 30 ? () => setState(() => _tripDays++) : null, icon: const Icon(Icons.add_circle_outline)),
-        ]),
-        Row(children: [
-          const Expanded(child: Text('Jumlah orang', style: TextStyle(fontWeight: FontWeight.w600))),
-          IconButton(onPressed: _travelerCount > 1 ? () => setState(() => _travelerCount--) : null, icon: const Icon(Icons.remove_circle_outline)),
-          Text('$_travelerCount', style: const TextStyle(fontWeight: FontWeight.bold)),
-          IconButton(onPressed: _travelerCount < 12 ? () => setState(() => _travelerCount++) : null, icon: const Icon(Icons.add_circle_outline)),
-        ]),
-        _buildOptionDropdown('Transportasi', _transport, _transportOptions, (value) => _transport = value),
-        _buildOptionDropdown('Penginapan', _hotel, _hotelOptions, (value) => _hotel = value),
-        _buildOptionDropdown('Makanan', _food, _foodOptions, (value) => _food = value),
-        _buildOptionDropdown('Aktivitas & wisata', _activity, _activityOptions, (value) => _activity = value),
-        const SizedBox(height: 4),
-        const Text('Asumsi: kamar hotel berbagi maksimal 2 orang. Acuan resmi Beijing: metro mulai ¥3 (tarif bertingkat menurut jarak); tiket Palace Museum ¥40 musim rendah / ¥60 musim tinggi. Tarif hotel, makan, dan DiDi di atas adalah kisaran perencanaan, bukan penawaran langsung; cek harga saat memesan.', style: TextStyle(fontSize: 11, color: AppColors.textMuted, height: 1.35)),
-      ]),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Lama perjalanan',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              IconButton(
+                onPressed: _tripDays > 1
+                    ? () => setState(() => _tripDays--)
+                    : null,
+                icon: const Icon(Icons.remove_circle_outline),
+              ),
+              Text(
+                '$_tripDays hari',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                onPressed: _tripDays < 30
+                    ? () => setState(() => _tripDays++)
+                    : null,
+                icon: const Icon(Icons.add_circle_outline),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Jumlah orang',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              IconButton(
+                onPressed: _travelerCount > 1
+                    ? () => setState(() => _travelerCount--)
+                    : null,
+                icon: const Icon(Icons.remove_circle_outline),
+              ),
+              Text(
+                '$_travelerCount',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                onPressed: _travelerCount < 12
+                    ? () => setState(() => _travelerCount++)
+                    : null,
+                icon: const Icon(Icons.add_circle_outline),
+              ),
+            ],
+          ),
+          _buildOptionDropdown(
+            'Transportasi',
+            _transport,
+            _transportOptions,
+            (value) => _transport = value,
+          ),
+          _buildOptionDropdown(
+            'Penginapan',
+            _hotel,
+            _hotelOptions,
+            (value) => _hotel = value,
+          ),
+          _buildOptionDropdown(
+            'Makanan',
+            _food,
+            _foodOptions,
+            (value) => _food = value,
+          ),
+          _buildOptionDropdown(
+            'Aktivitas & wisata',
+            _activity,
+            _activityOptions,
+            (value) => _activity = value,
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Asumsi: kamar hotel berbagi maksimal 2 orang. Acuan resmi Beijing: metro mulai ¥3 (tarif bertingkat menurut jarak); tiket Palace Museum ¥40 musim rendah / ¥60 musim tinggi. Tarif hotel, makan, dan DiDi di atas adalah kisaran perencanaan, bukan penawaran langsung; cek harga saat memesan.',
+            style: TextStyle(
+              fontSize: 11,
+              color: AppColors.textMuted,
+              height: 1.35,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -746,36 +1735,84 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
     );
   }
 
-  Widget _buildTripEstimateCard(double budgetCny, double plannedCny, double remainingCny) {
+  Widget _buildTripEstimateCard(
+    double budgetCny,
+    double plannedCny,
+    double remainingCny,
+  ) {
     final overBudget = remainingCny < 0;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: overBudget ? const Color(0xFFFFF7ED) : const Color(0xFFF0FDF4), borderRadius: BorderRadius.circular(16), border: Border.all(color: overBudget ? const Color(0xFFFED7AA) : const Color(0xFFBBF7D0))),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('Perkiraan biaya pilihanmu', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-        const SizedBox(height: 8),
-        _estimateRow('Transportasi', _transport.priceCny * _tripDays * _travelerCount),
-        _estimateRow('Hotel (${_tripDays > 1 ? _tripDays - 1 : 1} malam)', _hotel.priceCny * (_tripDays > 1 ? _tripDays - 1 : 1) * (_hotel.label.startsWith('Hostel') ? _travelerCount : (_travelerCount / 2).ceil())),
-        _estimateRow('Makanan', _food.priceCny * _tripDays * _travelerCount),
-        _estimateRow('Aktivitas', _activity.priceCny * _travelerCount),
-        const Divider(),
-        Text('Total: ¥ ${_formatNumber(plannedCny, CurrencyCode.cny)}  (≈ Rp ${_formatIdrOnly(plannedCny / _getRate(CurrencyCode.idr, CurrencyCode.cny))})', style: const TextStyle(fontWeight: FontWeight.bold)),
-        Text(overBudget ? 'Melebihi anggaran sekitar ¥ ${_formatNumber(-remainingCny, CurrencyCode.cny)}.' : 'Sisa anggaran: ¥ ${_formatNumber(remainingCny, CurrencyCode.cny)} dari ¥ ${_formatNumber(budgetCny, CurrencyCode.cny)}.', style: TextStyle(color: overBudget ? Colors.deepOrange : AppColors.primaryDark, fontWeight: FontWeight.w600)),
-      ]),
+      decoration: BoxDecoration(
+        color: overBudget ? const Color(0xFFFFF7ED) : const Color(0xFFF0FDF4),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: overBudget ? const Color(0xFFFED7AA) : const Color(0xFFBBF7D0),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Perkiraan biaya pilihanmu',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          _estimateRow(
+            'Transportasi',
+            _transport.priceCny * _tripDays * _travelerCount,
+          ),
+          _estimateRow(
+            'Hotel (${_tripDays > 1 ? _tripDays - 1 : 1} malam)',
+            _hotel.priceCny *
+                (_tripDays > 1 ? _tripDays - 1 : 1) *
+                (_hotel.label.startsWith('Hostel')
+                    ? _travelerCount
+                    : (_travelerCount / 2).ceil()),
+          ),
+          _estimateRow('Makanan', _food.priceCny * _tripDays * _travelerCount),
+          _estimateRow('Aktivitas', _activity.priceCny * _travelerCount),
+          const Divider(),
+          Text(
+            'Total: ¥ ${_formatNumber(plannedCny, CurrencyCode.cny)}  (≈ Rp ${_formatIdrOnly(plannedCny / _getRate(CurrencyCode.idr, CurrencyCode.cny))})',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(
+            overBudget
+                ? 'Melebihi anggaran sekitar ¥ ${_formatNumber(-remainingCny, CurrencyCode.cny)}.'
+                : 'Sisa anggaran: ¥ ${_formatNumber(remainingCny, CurrencyCode.cny)} dari ¥ ${_formatNumber(budgetCny, CurrencyCode.cny)}.',
+            style: TextStyle(
+              color: overBudget ? Colors.deepOrange : AppColors.primaryDark,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _estimateRow(String label, double value) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: const TextStyle(fontSize: 12)), Text('¥ ${_formatNumber(value, CurrencyCode.cny)}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))]),
-      );
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12)),
+        Text(
+          '¥ ${_formatNumber(value, CurrencyCode.cny)}',
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        ),
+      ],
+    ),
+  );
 
   Widget _buildBudgetPresetChip(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: ActionChip(
-        label: Text(label,
-            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+        label: Text(
+          label,
+          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         side: const BorderSide(color: Color(0xFFCBD5E1)),
         onPressed: () {
@@ -839,10 +1876,7 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
         ),
         subtitle: Text(
           titleZh,
-          style: const TextStyle(
-            fontSize: 11.5,
-            color: AppColors.textMuted,
-          ),
+          style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted),
         ),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         children: [
@@ -864,7 +1898,10 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                     children: [
                       const Text(
                         'Alokasi Rupiah:',
-                        style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textMuted,
+                        ),
                       ),
                       Text(
                         'Rp ${_formatIdrOnly(idrAmount)}',
@@ -889,7 +1926,10 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                     children: [
                       const Text(
                         'Perkiraan Yuan:',
-                        style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textMuted,
+                        ),
                       ),
                       Text(
                         '¥ ${_formatNumber(cnyAmount, CurrencyCode.cny)} 元',
@@ -920,29 +1960,34 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
             ),
           ),
           const SizedBox(height: 6),
-          ...estimates.map((est) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('• ',
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: colorAccent)),
-                    Expanded(
-                      child: Text(
-                        est,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: Colors.grey[800],
-                          height: 1.3,
-                        ),
+          ...estimates.map(
+            (est) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '• ',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: colorAccent,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      est,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: Colors.grey[800],
+                        height: 1.3,
                       ),
                     ),
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 8),
 
           // Frasa Mandarin Terkait
@@ -965,17 +2010,19 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                   ),
                 ),
                 const SizedBox(height: 4),
-                ...phrases.map((ph) => Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        '› $ph',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFF0F766E),
-                          fontWeight: FontWeight.w600,
-                        ),
+                ...phrases.map(
+                  (ph) => Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      '› $ph',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF0F766E),
+                        fontWeight: FontWeight.w600,
                       ),
-                    )),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -988,11 +2035,13 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
   // TAB 2: KALKULATOR KURS BEBAS (3 MATA UANG: CNY, IDR, USD)
   // ══════════════════════════════════════════════════════════════════════════════
 
+  // ignore: unused_element
   Widget _buildQuickConverterTab() {
     final inputVal =
         double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0.0;
     final convertedVal = _calculateConverted(inputVal);
     final unitRate = _getRate(_fromCurrency, _toCurrency);
+    final showPresetCosts = _amountController.text == '__show_preset_costs__';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -1003,25 +2052,25 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 6,
-                ),
-              ],
+              border: Border.all(color: AppColors.borderLight),
             ),
             child: Row(
               children: [
-                const Icon(Icons.sync_rounded,
-                    size: 16, color: AppColors.primaryGreen),
+                const Icon(
+                  Icons.sync_rounded,
+                  size: 16,
+                  color: AppColors.primaryGreen,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Kurs diperbarui: ${_lastUpdated.day}/${_lastUpdated.month}/${_lastUpdated.year} (Offline Cache)',
-                    style:
-                        const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
               ],
@@ -1035,13 +2084,7 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              border: Border.all(color: AppColors.borderLight),
             ),
             child: Column(
               children: [
@@ -1089,7 +2132,9 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                     Text(
                       '1 ${_fromCurrencyString()} =',
                       style: const TextStyle(
-                          fontSize: 13, color: AppColors.textMuted),
+                        fontSize: 13,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                     Text(
                       '${_formatNumber(unitRate, _toCurrency)} ${_toCurrencyString()}',
@@ -1106,33 +2151,35 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
           ),
           const SizedBox(height: 20),
 
-          // Preset Biaya Nyata Tempat (Toko Baju, Hotel, Resto/Kafe)
-          const Text(
-            'Preset Biaya Tempat Nyata di China',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
+          if (showPresetCosts) ...[
+            // Preset Biaya Nyata Tempat (Toko Baju, Hotel, Resto/Kafe)
+            const Text(
+              'Preset Biaya Tempat Nyata di China',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _buildPresetCategoryChip('👗 Kemeja Baju ¥120', 120),
-                _buildPresetCategoryChip('👗 Gaun / Dress ¥180', 180),
-                _buildPresetCategoryChip('👗 Jaket Tren ¥250', 250),
-                _buildPresetCategoryChip('🏨 Hotel Standar ¥220', 220),
-                _buildPresetCategoryChip('🏨 Hotel Deluxe ¥350', 350),
-                _buildPresetCategoryChip('☕ Kopi / Teh ¥25', 25),
-                _buildPresetCategoryChip('🍜 Makanan Khas ¥38', 38),
-                _buildPresetCategoryChip('🍲 Paket Makan Berdua ¥85', 85),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildPresetCategoryChip('👗 Kemeja Baju ¥120', 120),
+                  _buildPresetCategoryChip('👗 Gaun / Dress ¥180', 180),
+                  _buildPresetCategoryChip('👗 Jaket Tren ¥250', 250),
+                  _buildPresetCategoryChip('🏨 Hotel Standar ¥220', 220),
+                  _buildPresetCategoryChip('🏨 Hotel Deluxe ¥350', 350),
+                  _buildPresetCategoryChip('☕ Kopi / Teh ¥25', 25),
+                  _buildPresetCategoryChip('🍜 Makanan Khas ¥38', 38),
+                  _buildPresetCategoryChip('🍲 Paket Makan Berdua ¥85', 85),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
+            const SizedBox(height: 20),
+          ],
 
           // Quick Reference Table (Tabel Nilai Cepat CNY -> IDR)
           const Text(
@@ -1150,10 +2197,7 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
               color: Colors.white,
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 6,
-                ),
+                BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6),
               ],
             ),
             child: Material(
@@ -1167,14 +2211,16 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
                     leading: Text(
                       '¥ $cny',
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textDark),
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                      ),
                     ),
                     trailing: Text(
                       'Rp ${_formatNumber(idr, CurrencyCode.idr)}',
                       style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primaryGreen),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryGreen,
+                      ),
                     ),
                   );
                 }).toList(),
@@ -1191,8 +2237,10 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: ActionChip(
-        label: Text(label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        label: Text(
+          label,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         side: const BorderSide(color: Color(0xFFE2E8F0)),
         onPressed: () {
@@ -1220,14 +2268,17 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label,
-                style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+            ),
             Text(
               _getMandarinTerm(code),
               style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.primaryDark,
-                  fontWeight: FontWeight.bold),
+                fontSize: 12,
+                color: AppColors.primaryDark,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -1238,17 +2289,21 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
               flex: 3,
               child: TextField(
                 controller: controller,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onChanged: onChanged,
                 style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark),
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
                 decoration: InputDecoration(
                   isDense: true,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   filled: true,
                   fillColor: const Color(0xFFF8FAFC),
                   border: OutlineInputBorder(
@@ -1308,14 +2363,17 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label,
-                style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+            ),
             Text(
               _getMandarinTerm(code),
               style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.primaryDark,
-                  fontWeight: FontWeight.bold),
+                fontSize: 12,
+                color: AppColors.primaryDark,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -1325,8 +2383,10 @@ class _CurrencyConverterScreenState extends State<CurrencyConverterScreen>
             Expanded(
               flex: 3,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF0FDF4),
                   borderRadius: BorderRadius.circular(14),
