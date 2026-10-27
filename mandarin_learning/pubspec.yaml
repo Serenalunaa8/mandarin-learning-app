@@ -86,6 +86,11 @@ flutter:
     - Data/contoh_kalimat_hsk4.json
     - Data/contoh-kalimat-hsk5.json
     - Data/contoh_kalimat_hsk6.json
+    - data/mandarin_id.json
+    - data/contoh_kalimat_hsk1_3.json
+    - data/contoh_kalimat_hsk4.json
+    - data/contoh-kalimat-hsk5.json
+    - data/contoh_kalimat_hsk6.json
     - assets/image/landing_page/
     - assets/image/games/
     - assets/image/register/

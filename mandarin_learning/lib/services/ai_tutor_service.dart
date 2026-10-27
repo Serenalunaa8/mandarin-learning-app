@@ -176,12 +176,12 @@ class AiTutorService {
       'bahasa jerman', 'bahasa prancis',
     ];
     if (nonMandarinKeywords.any((k) => lower.contains(k))) {
-      return 'Halo! Sebagai Xiao Xiong AI Tutor, saya khusus membantu pembelajaran bahasa Mandarin dan fitur aplikasi ini (kosakata HSK, tata bahasa, pelafalan nada, kuis, peta, dan budget trip).\n\nSaya tidak dapat membahas topik di luar bahasa Mandarin. Yuk, tanyakan seputar percakapan, kosakata, festival, atau materi Mandarin! 🐼';
+      return 'Halo! Sebagai ZhiZhi AI Tutor, saya khusus membantu pembelajaran bahasa Mandarin dan fitur aplikasi ini (kosakata HSK, tata bahasa, pelafalan nada, kuis, peta, dan budget trip).\n\nSaya tidak dapat membahas topik di luar bahasa Mandarin. Yuk, tanyakan seputar percakapan, kosakata, festival, atau materi Mandarin! 🐼';
     }
 
     // 2. Salam & Sapaan
     if (RegExp(r'^(halo|hai|hi|hey|hei|pagi|siang|sore|malam|ni hao|nǐ hǎo|你好)', caseSensitive: false).hasMatch(lower) && lower.length < 25) {
-      return 'Nǐ hǎo (你好)! Halo! Aku Xiao Xiong, AI Tutor Mandarin pribadimu 🐼.\n\nAda festival budaya, percakapan, kosakata HSK, atau tata bahasa Mandarin yang ingin kamu pelajari hari ini?';
+      return 'Nǐ hǎo (你好)! Halo! Aku ZhiZhi, AI Tutor Mandarin pribadimu 🐼.\n\nAda festival budaya, percakapan, kosakata HSK, atau tata bahasa Mandarin yang ingin kamu pelajari hari ini?';
     }
 
     // 3. Budaya & Festival Tradisional Tiongkok
@@ -407,6 +407,6 @@ class AiTutorService {
       debugPrint('[AiTutorService] Vocab lookup error: $e');
     }
 
-    return 'Xiao Xiong siap membantumu belajar bahasa Mandarin! 🐼\n\nSilakan tanyakan seputar tradisi & festival Tiongkok (seperti Festival Kue Bulan atau Imlek), contoh percakapan situasional, arti kosakata HSK, atau tata bahasa Mandarin.';
+    return 'ZhiZhi siap membantumu belajar bahasa Mandarin! 🐼\n\nSilakan tanyakan seputar tradisi & festival Tiongkok (seperti Festival Kue Bulan atau Imlek), contoh percakapan situasional, arti kosakata HSK, atau tata bahasa Mandarin.';
   }
 }
