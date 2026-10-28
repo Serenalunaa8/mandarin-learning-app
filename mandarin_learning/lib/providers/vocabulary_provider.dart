@@ -8,6 +8,7 @@ import '../models/quiz_attempt_model.dart';
 import '../services/vocabulary_service.dart';
 import '../services/local_database_service.dart';
 import '../services/supabase_service.dart';
+import '../services/progress_blockchain_service.dart';
 
 class VocabularyProvider extends ChangeNotifier {
   bool _isLoading = false;
@@ -275,6 +276,7 @@ class VocabularyProvider extends ChangeNotifier {
         );
       }
     }
+
   }
 
   Future<void> _persistVocabularyProgress(
@@ -326,6 +328,15 @@ class VocabularyProvider extends ChangeNotifier {
         );
       }
     }
+
+    await ProgressBlockchainService.instance.appendProgress(
+      userId: _activeUserId,
+      vocabId: item.id,
+      hskLevel: level,
+      learned: learned,
+      quizMastered: mastered,
+      favorite: favorite,
+    );
   }
 
   double getLevelProgress(int level) {
