@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'supabase_service.dart';
 import 'vocabulary_service.dart';
@@ -45,9 +44,9 @@ class AiChatMessage {
 
 class AiTutorService {
   static final AiTutorService instance = AiTutorService._internal();
-  
+
   AiTutorService._internal();
-  
+
   Future<String> askAiTutor(
     String prompt, {
     AiTutorMode mode = AiTutorMode.appApi,
@@ -69,8 +68,6 @@ class AiTutorService {
         'Pertanyaan maksimal 4.000 karakter.',
       );
     }
-
-    
 
     final safeHistory = history
         .where(
@@ -118,7 +115,9 @@ class AiTutorService {
       }
       throw StateError('Layanan AI tidak mengembalikan jawaban.');
     } catch (error) {
-      debugPrint('[AiTutorService] Request backend gagal (${mode.id}), beralih ke database cerdas: $error');
+      debugPrint(
+        '[AiTutorService] Request backend gagal (${mode.id}), beralih ke database cerdas: $error',
+      );
       final localAnswer = await _generateDatabaseFallbackAnswer(trimmedPrompt);
       if (localAnswer != null && localAnswer.isNotEmpty) {
         return _cleanAnswer(localAnswer);
@@ -148,9 +147,15 @@ class AiTutorService {
       (m) => m.group(1) ?? '',
     );
     // 4. Ubah bullet points markdown (* / - / + di awal baris) menjadi bullet point bersih '• '
-    cleaned = cleaned.replaceAll(RegExp(r'^\s*[\*\-\+]\s+', multiLine: true), '• ');
+    cleaned = cleaned.replaceAll(
+      RegExp(r'^\s*[\*\-\+]\s+', multiLine: true),
+      '• ',
+    );
     // 5. Hapus header markdown seperti ### atau ## di awal baris
-    cleaned = cleaned.replaceAll(RegExp(r'^\s{0,3}#{1,6}\s*', multiLine: true), '');
+    cleaned = cleaned.replaceAll(
+      RegExp(r'^\s{0,3}#{1,6}\s*', multiLine: true),
+      '',
+    );
     // 6. Hapus backticks `
     cleaned = cleaned.replaceAll('`', '');
     // 7. Hapus sisa-sisa tanda bintang liar (*) yang masih tertinggal
@@ -160,33 +165,77 @@ class AiTutorService {
     return cleaned.trim();
   }
 
-      Future<String?> _generateDatabaseFallbackAnswer(String prompt) async {
+  Future<String?> _generateDatabaseFallbackAnswer(String prompt) async {
     final lower = prompt.toLowerCase().trim();
 
     // 1. Cek penolakan topik umum di luar konsep aplikasi dan Mandarin
     final nonMandarinKeywords = [
-      'presiden', 'politik', 'pemilu', 'pilpres', 'menteri', 'dpr',
-      'python', 'javascript', 'php', 'golang', 'c++', 'html', 'css',
-      'coding', 'program', 'flutter', 'react', 'database sql',
-      'sepak bola', 'liga champion', 'piala dunia', 'ronaldo', 'messi',
-      'saham', 'crypto', 'bitcoin', 'reksadana', 'investasi',
-      'cuaca hari ini', 'gempa', 'tsunami', 'ramalan', 'zodiak',
-      'resep rendang', 'resep soto', 'masak nasi',
-      'bahasa inggris', 'bahasa jepang', 'bahasa korea', 'bahasa arab',
-      'bahasa jerman', 'bahasa prancis',
+      'presiden',
+      'politik',
+      'pemilu',
+      'pilpres',
+      'menteri',
+      'dpr',
+      'python',
+      'javascript',
+      'php',
+      'golang',
+      'c++',
+      'html',
+      'css',
+      'coding',
+      'program',
+      'flutter',
+      'react',
+      'database sql',
+      'sepak bola',
+      'liga champion',
+      'piala dunia',
+      'ronaldo',
+      'messi',
+      'saham',
+      'crypto',
+      'bitcoin',
+      'reksadana',
+      'investasi',
+      'cuaca hari ini',
+      'gempa',
+      'tsunami',
+      'ramalan',
+      'zodiak',
+      'resep rendang',
+      'resep soto',
+      'masak nasi',
+      'bahasa inggris',
+      'bahasa jepang',
+      'bahasa korea',
+      'bahasa arab',
+      'bahasa jerman',
+      'bahasa prancis',
     ];
     if (nonMandarinKeywords.any((k) => lower.contains(k))) {
-      return 'Halo! Sebagai ZhiZhi AI Tutor, saya khusus membantu pembelajaran bahasa Mandarin dan fitur aplikasi ini (kosakata HSK, tata bahasa, pelafalan nada, kuis, peta, dan budget trip).\n\nSaya tidak dapat membahas topik di luar bahasa Mandarin. Yuk, tanyakan seputar percakapan, kosakata, festival, atau materi Mandarin! 🐼';
+      return 'Halo! Sebagai LingLing (玲玲) AI Tutor, saya khusus membantu pembelajaran bahasa Mandarin dan fitur aplikasi ini (kosakata HSK, tata bahasa, pelafalan nada, kuis, peta, dan budget trip).\n\nSaya tidak dapat membahas topik di luar bahasa Mandarin. Yuk, tanyakan seputar percakapan, kosakata, festival, atau materi Mandarin! 🐼';
     }
 
     // 2. Salam & Sapaan
-    if (RegExp(r'^(halo|hai|hi|hey|hei|pagi|siang|sore|malam|ni hao|nǐ hǎo|你好)', caseSensitive: false).hasMatch(lower) && lower.length < 25) {
-      return 'Nǐ hǎo (你好)! Halo! Aku ZhiZhi, AI Tutor Mandarin pribadimu 🐼.\n\nAda festival budaya, percakapan, kosakata HSK, atau tata bahasa Mandarin yang ingin kamu pelajari hari ini?';
+    if (RegExp(
+          r'^(halo|hai|hi|hey|hei|pagi|siang|sore|malam|ni hao|nǐ hǎo|你好)',
+          caseSensitive: false,
+        ).hasMatch(lower) &&
+        lower.length < 25) {
+      return 'Nǐ hǎo (你好)! Halo! Aku LingLing (玲玲), AI Tutor Mandarin pribadimu 🐼.\n\nAda festival budaya, percakapan, kosakata HSK, atau tata bahasa Mandarin yang ingin kamu pelajari hari ini?';
     }
 
     // 3. Budaya & Festival Tradisional Tiongkok
-    if (lower.contains('kue gelang') || lower.contains('kue bulan') || lower.contains('mid autumn') || lower.contains('zhongqiu') || lower.contains('festival')) {
-      if (lower.contains('kue gelang') || lower.contains('kue bulan') || lower.contains('bulan') || lower.contains('zhongqiu')) {
+    if (lower.contains('kue gelang') ||
+        lower.contains('kue bulan') ||
+        lower.contains('mid autumn') ||
+        lower.contains('zhongqiu') ||
+        lower.contains('festival')) {
+      if (lower.contains('kue gelang') ||
+          lower.contains('kue bulan') ||
+          lower.contains('bulan') ||
+          lower.contains('zhongqiu')) {
         return 'Festival Kue Bulan (中秋节 - Zhōngqiūjié), yang dalam tradisi peranakan sering diasosiasikan dengan kue bulan atau kue pia/gelang tradisional, adalah perayaan panen musim gugur terbesar kedua di Tiongkok setelah Tahun Baru Imlek. Dirayakan setiap tanggal 15 bulan 8 penanggalan Imlek saat bulan purnama bersinar paling terang dan bulat sempurna.\n\n'
             'Makna utama festival ini adalah "Reuni dan Keutuhan Keluarga" (团圆 - Tuányuán). Bentuk kue bulan yang bulat melambangkan kebersamaan keluarga yang utuh tanpa terputus. Tradisi yang dilakukan meliputi makan kue bulan bersama keluarga, menikmati pemandangan bulan purnama (赏月 - Shǎngyuè), dan menyalakan lampion.\n\n'
             'Kosakata Mandarin Terkait:\n'
@@ -197,7 +246,9 @@ class AiTutorService {
             '• 团圆 (tuányuán) : Berkumpul bersama / Reuni keluarga [HSK 4]\n'
             '• 节日 (jiérì) : Hari raya / Festival [HSK 3]';
       }
-      if (lower.contains('imlek') || lower.contains('tahun baru') || lower.contains('chunjie')) {
+      if (lower.contains('imlek') ||
+          lower.contains('tahun baru') ||
+          lower.contains('chunjie')) {
         return 'Tahun Baru Imlek atau Festival Musim Semi (春节 - Chūnjié) adalah perayaan terpenting bagi masyarakat Tionghoa yang menandai awal tahun baru dalam kalender lunar. Tradisinya meliputi membersihkan rumah, makan malam bersama keluarga (年夜饭), membagikan angpao (红包), dan menyalakan kembang api.\n\n'
             'Kosakata Mandarin Terkait:\n'
             '• 春节 (Chūnjié) : Tahun Baru Imlek [HSK 3]\n'
@@ -205,7 +256,9 @@ class AiTutorService {
             '• 红包 (hóngbāo) : Amplop merah / Angpao [HSK 3]\n'
             '• 饺子 (jiǎozi) : Pangsit [HSK 2]';
       }
-      if (lower.contains('perahu naga') || lower.contains('duanwu') || lower.contains('bakcang')) {
+      if (lower.contains('perahu naga') ||
+          lower.contains('duanwu') ||
+          lower.contains('bakcang')) {
         return 'Festival Perahu Naga (端午节 - Duānwǔjié) adalah festival tradisional Tiongkok yang diperingati setiap tanggal 5 bulan 5 kalender lunar untuk mengenang penyair patriotik Qu Yuan. Tradisi utamanya adalah perlombaan perahu naga (赛龙舟) dan memakan bakcang (粽子).\n\n'
             'Kosakata Mandarin Terkait:\n'
             '• 端午节 (Duānwǔjié) : Festival Perahu Naga [HSK 4]\n'
@@ -233,7 +286,10 @@ class AiTutorService {
           '• 米饭 (mǐfàn) : Nasi putih [HSK 1]';
     }
 
-    if (lower.contains('pesan makanan') || lower.contains('makan') || lower.contains('restoran') || lower.contains('menu')) {
+    if (lower.contains('pesan makanan') ||
+        lower.contains('makan') ||
+        lower.contains('restoran') ||
+        lower.contains('menu')) {
       return 'Berikut contoh percakapan memesan makanan di restoran (点餐 - Diǎncān):\n\n'
           '服务员 (Pelayan):\n'
           '您好，请问要点什么？\n'
@@ -253,7 +309,11 @@ class AiTutorService {
           '• 好吃 (hǎochī) : Enak / Lezat [HSK 1]';
     }
 
-    if (lower.contains('tanya jalan') || lower.contains('arah') || lower.contains('tersesat') || lower.contains('stasiun') || lower.contains('di mana')) {
+    if (lower.contains('tanya jalan') ||
+        lower.contains('arah') ||
+        lower.contains('tersesat') ||
+        lower.contains('stasiun') ||
+        lower.contains('di mana')) {
       return 'Berikut contoh percakapan menanyakan arah jalan (问路 - Wènlù):\n\n'
           '路人 (Pejalan Kaki):\n'
           '请问，地铁站在哪里？\n'
@@ -272,7 +332,10 @@ class AiTutorService {
           '• 往右拐 (wǎng yòu guǎi) : Belok kanan [HSK 3]';
     }
 
-    if (lower.contains('belanja') || lower.contains('harga') || lower.contains('menawar') || lower.contains('berapa harganya')) {
+    if (lower.contains('belanja') ||
+        lower.contains('harga') ||
+        lower.contains('menawar') ||
+        lower.contains('berapa harganya')) {
       return 'Berikut contoh percakapan berbelanja dan menawar harga (买东西 - Mǎi dōngxi):\n\n'
           '顾客 (Pembeli):\n'
           '老板，这件衣服多少钱？\n'
@@ -291,7 +354,9 @@ class AiTutorService {
           '• 多少钱 (duōshao qián) : Berapa harga [HSK 1]';
     }
 
-    if (lower.contains('perkenalan') || lower.contains('kenalan') || lower.contains('nama')) {
+    if (lower.contains('perkenalan') ||
+        lower.contains('kenalan') ||
+        lower.contains('nama')) {
       return 'Berikut contoh percakapan perkenalan diri (自我介绍 - Zìwǒ jièshào):\n\n'
           'A: 你好！你叫什么名字？\n'
           '(Nǐ hǎo! Nǐ jiào shénme míngzi? - Halo! Siapa namamu?)\n\n'
@@ -304,7 +369,10 @@ class AiTutorService {
     }
 
     // 5. Tips Menghafal Hanzi
-    if (lower.contains('tips') && (lower.contains('hanzi') || lower.contains('karakter') || lower.contains('menghafal'))) {
+    if (lower.contains('tips') &&
+        (lower.contains('hanzi') ||
+            lower.contains('karakter') ||
+            lower.contains('menghafal'))) {
       return 'Berikut 3 tips efektif menghafal karakter Hanzi (汉字):\n\n'
           '1. Kenali Radikal (部首 - Bùshǒu): Sebagian besar Hanzi tersusun dari radikal bermakna. Contoh radikal air (氵) selalu ada pada kata yang berhubungan dengan cairan: 水 (air), 河 (sungai), 海 (laut).\n\n'
           '2. Visualisasi Cerita: Hubungkan bentuk goresan dengan gambar nyata. Contoh: 木 (pohon), 林 (hutan kecil / 2 pohon), 森 (hutan rimba / 3 pohon).\n\n'
@@ -312,7 +380,9 @@ class AiTutorService {
     }
 
     // 6. Struktur Kalimat Dasar Mandarin
-    if (lower.contains('struktur kalimat') || lower.contains('tata bahasa dasar') || lower.contains('urutan kalimat')) {
+    if (lower.contains('struktur kalimat') ||
+        lower.contains('tata bahasa dasar') ||
+        lower.contains('urutan kalimat')) {
       return 'Struktur dasar kalimat bahasa Mandarin mengikuti pola:\n\n'
           'Subjek + Waktu + Tempat + Kata Kerja + Objek\n\n'
           'Contoh kalimat:\n'
@@ -364,7 +434,9 @@ class AiTutorService {
           'Contoh: 我可以坐这里吗？(Wǒ kěyǐ zuò zhèlǐ ma? - Bolehkah saya duduk di sini?).';
     }
 
-    if (lower.contains('nada 2') || lower.contains('nada 3') || lower.contains('membedakan nada')) {
+    if (lower.contains('nada 2') ||
+        lower.contains('nada 3') ||
+        lower.contains('membedakan nada')) {
       return 'Cara membedakan Nada 2 (阳平 - Yángpíng) dan Nada 3 (上声 - Shǎngshēng):\n\n'
           '• Nada 2 (/): Nada naik (dari sedang ke tinggi, seperti bertanya "Hah? / Apa?").\n'
           'Contoh: má (麻 - mati rasa), láo (劳 - bekerja keras).\n\n'
@@ -377,29 +449,62 @@ class AiTutorService {
     try {
       final vocabList = VocabularyService.instance.allVocabulary;
       if (vocabList.isNotEmpty) {
-        final rawWords = prompt.replaceAll(RegExp(r'[^a-zA-Z0-9]+'), ' ').split(' ')
+        final rawWords = prompt
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]+'), ' ')
+            .split(' ')
             .map((w) => w.trim().toLowerCase())
-            .where((w) => w.length > 1 && !['apa', 'arti', 'adalah', 'dari', 'yang', 'ini', 'itu', 'kosakata', 'kata', 'bagaimana', 'tolong'].contains(w))
+            .where(
+              (w) =>
+                  w.length > 1 &&
+                  ![
+                    'apa',
+                    'arti',
+                    'adalah',
+                    'dari',
+                    'yang',
+                    'ini',
+                    'itu',
+                    'kosakata',
+                    'kata',
+                    'bagaimana',
+                    'tolong',
+                  ].contains(w),
+            )
             .toList();
 
-        final matches = vocabList.where((item) {
-          final hanziMatch = prompt.contains(item.hanzi);
-          final pinyinMatch = rawWords.any((w) => item.pinyin.toLowerCase() == w);
-          final artiMatch = rawWords.any((w) => item.artiIndonesia.toLowerCase().contains(w));
-          return hanziMatch || pinyinMatch || artiMatch;
-        }).take(3).toList();
+        final matches = vocabList
+            .where((item) {
+              final hanziMatch = prompt.contains(item.hanzi);
+              final pinyinMatch = rawWords.any(
+                (w) => item.pinyin.toLowerCase() == w,
+              );
+              final artiMatch = rawWords.any(
+                (w) => item.artiIndonesia.toLowerCase().contains(w),
+              );
+              return hanziMatch || pinyinMatch || artiMatch;
+            })
+            .take(3)
+            .toList();
 
         if (matches.isNotEmpty) {
-          final buffer = StringBuffer('Berikut penjelasan makna dan kosakata terkait:\n\n');
+          final buffer = StringBuffer(
+            'Berikut penjelasan makna dan kosakata terkait:\n\n',
+          );
           for (final item in matches) {
-            buffer.writeln('• ${item.hanzi} (${item.pinyin}) artinya "${item.artiIndonesia}" [Tingkat HSK ${item.hskLevel}].');
+            buffer.writeln(
+              '• ${item.hanzi} (${item.pinyin}) artinya "${item.artiIndonesia}" [Tingkat HSK ${item.hskLevel}].',
+            );
             if (item.contohKalimat.isNotEmpty) {
               final ex = item.contohKalimat.first;
-              buffer.writeln('  Contoh penggunaan: ${ex.hanzi} (${ex.pinyin ?? ''})\n  Artinya: ${ex.arti}');
+              buffer.writeln(
+                '  Contoh penggunaan: ${ex.hanzi} (${ex.pinyin ?? ''})\n  Artinya: ${ex.arti}',
+              );
             }
             buffer.writeln();
           }
-          buffer.write('Kamu bisa mempraktikkan pelafalan kata ini di menu Latihan Pelafalan Suara! 🐼');
+          buffer.write(
+            'Kamu bisa mempraktikkan pelafalan kata ini di menu Latihan Pelafalan Suara! 🐼',
+          );
           return buffer.toString().trim();
         }
       }
@@ -407,6 +512,6 @@ class AiTutorService {
       debugPrint('[AiTutorService] Vocab lookup error: $e');
     }
 
-    return 'ZhiZhi siap membantumu belajar bahasa Mandarin! 🐼\n\nSilakan tanyakan seputar tradisi & festival Tiongkok (seperti Festival Kue Bulan atau Imlek), contoh percakapan situasional, arti kosakata HSK, atau tata bahasa Mandarin.';
+    return 'LingLing (玲玲) siap membantumu belajar bahasa Mandarin! 🐼\n\nSilakan tanyakan seputar tradisi & festival Tiongkok (seperti Festival Kue Bulan atau Imlek), contoh percakapan situasional, arti kosakata HSK, atau tata bahasa Mandarin.';
   }
 }

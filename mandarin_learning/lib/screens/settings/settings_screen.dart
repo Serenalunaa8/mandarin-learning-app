@@ -1,4 +1,5 @@
 import '../auth/landing_screen.dart';
+import '../profile/change_password_screen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -703,6 +704,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ],
 
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF1EE),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFFFD5CC)),
+                      ),
+                      child: Image.asset(
+                        'assets/image/beranda/ikon_perisai.png',
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => const Icon(
+                          Icons.key_rounded,
+                          color: Color(0xFFE0533C),
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    title: const Text(
+                      'Ubah Kata Sandi',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Perbarui kata sandi akun untuk perlindungan ekstra',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
+                      );
+                    },
+                  ),
                   const Divider(height: 1),
                   ListTile(
                     leading: Container(

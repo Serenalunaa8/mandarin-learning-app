@@ -68,7 +68,7 @@ class _MandarinLearningAppState extends State<MandarinLearningApp> {
     final auth = context.watch<AuthProvider>();
 
     return MaterialApp(
-      title: 'Mandarin Learning HSK 1-6',
+      title: 'Nihaoki',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: auth.isLoading
@@ -85,6 +85,15 @@ class _MandarinLearningAppState extends State<MandarinLearningApp> {
                       fit: BoxFit.contain,
                     ),
                     const SizedBox(height: 20),
+                    const Text(
+                      'Nihaoki',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF166534),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     const CircularProgressIndicator(color: Color(0xFF22C55E)),
                   ],
                 ),

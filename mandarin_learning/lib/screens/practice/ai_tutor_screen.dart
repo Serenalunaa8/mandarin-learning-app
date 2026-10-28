@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/constants/app_colors.dart';
 import '../../services/ai_tutor_service.dart';
 import '../../services/audio_service.dart';
 import '../../services/supabase_service.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/mascot_widget.dart';
 
 class AiTutorScreen extends StatefulWidget {
   const AiTutorScreen({super.key});
@@ -41,12 +39,12 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   }
 
   AiChatMessage _welcomeMessage() => AiChatMessage(
-        text: 'Halo! Aku ZhiZhi, AI Tutor Mandarin pribadimu 智智 🐼.\n\n'
+        text: 'Halo! Aku LingLing (玲玲), AI Tutor Mandarin pribadimu 🐼.\n\n'
             'Kamu bisa menanyakan apa saja seputar kosakata Mandarin, tata bahasa (grammar), pelafalan nada, hingga latihan percakapan sehari-hari!',
         isUser: false,
         timestamp: DateTime.now(),
         mode: AiTutorMode.appApi,
-        modelBadge: 'ZhiZhi • AI Tutor',
+        modelBadge: 'LingLing (玲玲) • AI Tutor',
       );
 
   Future<void> _startNewConversation() async {
@@ -112,7 +110,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 8, 12, 12),
                     child: Row(
                       children: [
-                        const Icon(Icons.history_rounded, color: Color(0xFF059669), size: 22),
+                        const Icon(Icons.history_rounded, color: Color(0xFFE0533C), size: 22),
                         const SizedBox(width: 8),
                         const Expanded(
                           child: Text(
@@ -129,16 +127,16 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                             Navigator.pop(sheetContext);
                             _startNewConversation();
                           },
-                          icon: const Icon(Icons.add_rounded, size: 18, color: Color(0xFF059669)),
+                          icon: const Icon(Icons.add_rounded, size: 18, color: Color(0xFFE0533C)),
                           label: const Text(
                             'Baru',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFE0533C)),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  const Divider(height: 1, color: Color(0xFFEFE8E1)),
                   Expanded(
                     child: rows.isEmpty
                         ? Center(
@@ -151,7 +149,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                                     'assets/image/beranda/maskot_02_baca_buku.png',
                                     width: 64,
                                     height: 64,
-                                    errorBuilder: (_, __, ___) => const Text('🐼', style: TextStyle(fontSize: 40)),
+                                    errorBuilder: (context, error, stackTrace) => const Text('🐼', style: TextStyle(fontSize: 40)),
                                   ),
                                   const SizedBox(height: 12),
                                   const Text(
@@ -169,7 +167,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                           )
                         : ListView.separated(
                             itemCount: rows.length,
-                            separatorBuilder: (_, _) => const Divider(height: 1, indent: 68, color: Color(0xFFF1F5F9)),
+                            separatorBuilder: (_, _) => const Divider(height: 1, indent: 68, color: Color(0xFFF8F5F2)),
                             itemBuilder: (context, index) {
                               final row = rows[index];
                               final messages = row['messages'] as List? ?? const [];
@@ -179,11 +177,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF0FDF4),
+                                    color: const Color(0xFFFFF1EE),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFFBBF7D0)),
+                                    border: Border.all(color: const Color(0xFFFFD5CC)),
                                   ),
-                                  child: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF059669), size: 20),
+                                  child: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFFE0533C), size: 20),
                                 ),
                                 title: Text(
                                   row['title']?.toString() ?? 'Percakapan',
@@ -229,7 +227,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
         isUser: isUser,
         timestamp: timestamp,
         mode: AiTutorMode.appApi,
-        modelBadge: isUser ? null : 'ZhiZhi • AI Tutor',
+        modelBadge: isUser ? null : 'LingLing (玲玲) • AI Tutor',
         audioText: isUser ? null : AudioService.instance.extractMandarinText(text),
       );
     }).toList();
@@ -338,7 +336,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           isUser: false,
           timestamp: DateTime.now(),
           mode: currentMode,
-          modelBadge: 'ZhiZhi • AI Tutor',
+          modelBadge: 'LingLing (玲玲) • AI Tutor',
           audioText: AudioService.instance.extractMandarinText(response),
         ),
       );
@@ -369,19 +367,67 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFFAF7F4),
       body: Stack(
         children: [
-          // Aksen dekorasi awan halus di latar belakang
+          // Latar belakang panorama Paviliun Danau Tiongkok klasik
           Positioned(
-            top: -20,
-            right: -30,
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 145,
             child: Opacity(
-              opacity: 0.14,
+              opacity: 0.18,
+              child: Image.asset(
+                'assets/image/background/02_chinese_lake_garden.png',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+              ),
+            ),
+          ),
+          // Lapisan gradasi halus di atas banner pemandangan
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 145,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFFFAF7F4).withValues(alpha: 0.45),
+                    const Color(0xFFFAF7F4).withValues(alpha: 0.85),
+                    const Color(0xFFFAF7F4),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Aksen awan tradisional di sudut kanan atas
+          Positioned(
+            top: 25,
+            right: -15,
+            child: Opacity(
+              opacity: 0.35,
               child: Image.asset(
                 'assets/image/beranda/awan_kecil.png',
-                width: 150,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                width: 72,
+                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+              ),
+            ),
+          ),
+          // Aksen kilau halus
+          Positioned(
+            top: 52,
+            left: 28,
+            child: Opacity(
+              opacity: 0.35,
+              child: Image.asset(
+                'assets/image/beranda/kilau_01.png',
+                width: 18,
+                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
               ),
             ),
           ),
@@ -403,8 +449,14 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   }
 
   Widget _buildAppBar() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.85),
+        border: const Border(
+          bottom: BorderSide(color: Color(0xFFEFE8E1), width: 1),
+        ),
+      ),
       child: Row(
         children: [
           // Tombol Kembali
@@ -416,7 +468,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                border: Border.all(color: const Color(0xFFEFE8E1), width: 1.5),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),
@@ -434,36 +486,43 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           ),
           const SizedBox(width: 10),
 
-          // Avatar Tutor & Status Online
+          // Avatar Tutor LingLing & Indikator Status
           Stack(
             clipBehavior: Clip.none,
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0FDF4),
+                  color: const Color(0xFFFFF1EE),
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFBBF7D0), width: 1.5),
+                  border: Border.all(color: const Color(0xFFFFD5CC), width: 1.8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFE0533C).withValues(alpha: 0.12),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Center(
                   child: Image.asset(
                     'assets/image/beranda/maskot_02_baca_buku.png',
-                    width: 30,
-                    height: 30,
+                    width: 32,
+                    height: 32,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Text('🐼', style: TextStyle(fontSize: 22)),
+                    errorBuilder: (context, error, stackTrace) => const Text('🐼', style: TextStyle(fontSize: 22)),
                   ),
                 ),
               ),
               Positioned(
-                bottom: 0,
-                right: 0,
+                bottom: 1,
+                right: 1,
                 child: Container(
-                  width: 11,
-                  height: 11,
+                  width: 12,
+                  height: 12,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF16A34A),
+                    color: const Color(0xFFF59E0B),
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                   ),
@@ -474,14 +533,14 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           const SizedBox(width: 10),
 
           // Info Tutor
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Text(
-                      'ZhiZhi AI',
+                    const Text(
+                      'LingLing (玲玲)',
                       style: TextStyle(
                         fontSize: 16.5,
                         fontWeight: FontWeight.w900,
@@ -489,17 +548,40 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                         letterSpacing: -0.2,
                       ),
                     ),
-                    SizedBox(width: 5),
-                    Text('🐼', style: TextStyle(fontSize: 14)),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF1EE),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFFFFD5CC)),
+                      ),
+                      child: const Text(
+                        'AI TUTOR',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFFE0533C),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                Text(
-                  'Tutor Mandarin • Online',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF059669),
-                  ),
+                const SizedBox(height: 2),
+                const Row(
+                  children: [
+                    Icon(Icons.circle, size: 7, color: Color(0xFFF59E0B)),
+                    SizedBox(width: 4),
+                    Text(
+                      'Tutor Mandarin Aktif • Siap Membantu 🌸',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFD97706),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -515,9 +597,15 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: const Color(0xFFEFE8E1)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 4,
+                  ),
+                ],
               ),
-              child: const Icon(Icons.add_comment_rounded, size: 18, color: Color(0xFF0F172A)),
+              child: const Icon(Icons.add_comment_rounded, size: 18, color: Color(0xFFE0533C)),
             ),
           ),
 
@@ -531,9 +619,15 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: const Color(0xFFEFE8E1)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 4,
+                  ),
+                ],
               ),
-              child: const Icon(Icons.history_rounded, size: 18, color: Color(0xFF0F172A)),
+              child: const Icon(Icons.history_rounded, size: 18, color: Color(0xFFE0533C)),
             ),
           ),
         ],
@@ -543,8 +637,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
 
   Widget _buildQuickSuggestions() {
     return Container(
-      height: 38,
-      margin: const EdgeInsets.only(bottom: 6),
+      height: 40,
+      margin: const EdgeInsets.only(top: 6, bottom: 8),
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
@@ -555,15 +649,16 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           return GestureDetector(
             onTap: () => _sendMessage(suggestion.replaceAll(RegExp(r'^[^\w\s]+\s*'), '')),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFFFD5CC)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
+                    color: const Color(0xFFE0533C).withValues(alpha: 0.05),
                     blurRadius: 4,
+                    offset: const Offset(0, 1),
                   ),
                 ],
               ),
@@ -571,7 +666,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 child: Text(
                   suggestion,
                   style: const TextStyle(
-                    fontSize: 11.5,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF334155),
                   ),
@@ -584,13 +679,143 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     );
   }
 
+  Widget _buildWelcomeBanner() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF7ED), Color(0xFFFFF1EE)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFFFD5CC)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFE0533C).withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              // Mascot Semangat + Nihao bubble
+              SizedBox(
+                width: 80,
+                height: 80,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      left: 0,
+                      bottom: 0,
+                      child: Image.asset(
+                        'assets/image/beranda/maskot_03_semangat.png',
+                        width: 70,
+                        height: 70,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => const Text('🐼', style: TextStyle(fontSize: 48)),
+                      ),
+                    ),
+                    Positioned(
+                      top: -4,
+                      right: -4,
+                      child: Image.asset(
+                        'assets/image/beranda/bubel_nihao.png',
+                        width: 38,
+                        height: 28,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '你好! Ni Hao!',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFFC53030),
+                          ),
+                        ),
+                        SizedBox(width: 6),
+                        Text('✨', style: TextStyle(fontSize: 14)),
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Aku LingLing, tutor pribadimu. Siap membimbingmu belajar kosakata, tata bahasa, dan percakapan Mandarin!',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF64748B),
+                        height: 1.4,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Feature pills in welcome banner
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              _buildFeatureTag('📖 Kosakata HSK', const Color(0xFFE0533C)),
+              _buildFeatureTag('⚖️ Tata Bahasa', const Color(0xFFD97706)),
+              _buildFeatureTag('🗣️ Pelafalan Nada', const Color(0xFFEA580C)),
+              _buildFeatureTag('🍜 Percakapan', const Color(0xFFB91C1C)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureTag(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
+    );
+  }
+
   Widget _buildMessagesList() {
+    final showWelcomeBanner = _messages.length <= 1;
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      itemCount: _messages.length,
+      itemCount: _messages.length + (showWelcomeBanner ? 1 : 0),
       itemBuilder: (context, index) {
-        final msg = _messages[index];
+        if (showWelcomeBanner && index == 0) {
+          return _buildWelcomeBanner();
+        }
+        final msg = _messages[showWelcomeBanner ? index - 1 : index];
         return _buildMessageBubble(msg);
       },
     );
@@ -603,20 +828,20 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
             decoration: BoxDecoration(
-              color: const Color(0xFFF0FDF4),
+              color: const Color(0xFFFFF1EE),
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFBBF7D0)),
+              border: Border.all(color: const Color(0xFFFFD5CC)),
             ),
             child: Center(
               child: Image.asset(
                 'assets/image/beranda/maskot_04_lup.png',
-                width: 22,
-                height: 22,
+                width: 24,
+                height: 24,
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Text('🐼', style: TextStyle(fontSize: 16)),
+                errorBuilder: (context, error, stackTrace) => const Text('🐼', style: TextStyle(fontSize: 16)),
               ),
             ),
           ),
@@ -631,10 +856,10 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 bottomLeft: Radius.circular(18),
                 bottomRight: Radius.circular(18),
               ),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: const Color(0xFFFFD5CC)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
+                  color: const Color(0xFFE0533C).withValues(alpha: 0.05),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -648,12 +873,12 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                   height: 12,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Color(0xFF059669),
+                    color: Color(0xFFE0533C),
                   ),
                 ),
                 SizedBox(width: 8),
                 Text(
-                  'ZhiZhi sedang memikirkan jawaban...',
+                  'LingLing (玲玲) sedang merangkai penjelasan...',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -683,7 +908,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF0F766E), Color(0xFF047857)],
+                    colors: [Color(0xFFE0533C), Color(0xFFC53030)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -695,9 +920,9 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Color(0x22047857),
-                      blurRadius: 6,
-                      offset: Offset(0, 2),
+                      color: Color(0x28E0533C),
+                      blurRadius: 8,
+                      offset: Offset(0, 3),
                     ),
                   ],
                 ),
@@ -722,7 +947,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       );
     }
 
-    // Balasan AI Tutor (ZhiZhi)
+    // Balasan AI Tutor (LingLing)
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -731,20 +956,20 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 34,
-              height: 34,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
-                color: const Color(0xFFF0FDF4),
+                color: const Color(0xFFFFF1EE),
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFBBF7D0)),
+                border: Border.all(color: const Color(0xFFFFD5CC)),
               ),
               child: Center(
                 child: Image.asset(
                   'assets/image/beranda/maskot_02_baca_buku.png',
-                  width: 24,
-                  height: 24,
+                  width: 26,
+                  height: 26,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Text('🐼', style: TextStyle(fontSize: 18)),
+                  errorBuilder: (context, error, stackTrace) => const Text('🐼', style: TextStyle(fontSize: 18)),
                 ),
               ),
             ),
@@ -763,7 +988,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                         bottomLeft: Radius.circular(20),
                         bottomRight: Radius.circular(20),
                       ),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: const Color(0xFFEFE8E1)),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.03),
@@ -782,21 +1007,21 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF0FDF4),
+                                color: const Color(0xFFFFF1EE),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFFBBF7D0)),
+                                border: Border.all(color: const Color(0xFFFFD5CC)),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.psychology_rounded, size: 12, color: Color(0xFF16A34A)),
+                                  const Icon(Icons.psychology_rounded, size: 12, color: Color(0xFFE0533C)),
                                   const SizedBox(width: 4),
                                   Text(
-                                    msg.modelBadge ?? 'ZhiZhi • AI Tutor',
+                                    msg.modelBadge ?? 'LingLing (玲玲) • AI Tutor',
                                     style: const TextStyle(
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.w800,
-                                      color: Color(0xFF15803D),
+                                      color: Color(0xFFC53030),
                                     ),
                                   ),
                                 ],
@@ -817,7 +1042,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF8FAFC),
+                                  color: const Color(0xFFFAF7F4),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: const Icon(Icons.copy_rounded, size: 14, color: Color(0xFF64748B)),
@@ -851,9 +1076,9 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF0FDF4),
+                                color: const Color(0xFFFFF7ED),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFFBBF7D0)),
+                                border: Border.all(color: const Color(0xFFFED7AA)),
                               ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -861,14 +1086,14 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                                   Icon(
                                     Icons.volume_up_rounded,
                                     size: 16,
-                                    color: Color(0xFF059669),
+                                    color: Color(0xFFEA580C),
                                   ),
                                   SizedBox(width: 6),
                                   Text(
                                     'Dengarkan Pelafalan Mandarin',
                                     style: TextStyle(
                                       fontSize: 11.5,
-                                      color: Color(0xFF15803D),
+                                      color: Color(0xFF9A3412),
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
@@ -902,7 +1127,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: const Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+        border: const Border(top: BorderSide(color: Color(0xFFEFE8E1))),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -916,9 +1141,9 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
+                color: const Color(0xFFFAF7F4),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: const Color(0xFFEFE8E1)),
               ),
               child: Row(
                 children: [
@@ -965,14 +1190,14 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
               height: 44,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF059669), Color(0xFF047857)],
+                  colors: [Color(0xFFE0533C), Color(0xFFC53030)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF059669).withValues(alpha: 0.3),
+                    color: const Color(0xFFE0533C).withValues(alpha: 0.32),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),

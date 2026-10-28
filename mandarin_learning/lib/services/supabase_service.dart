@@ -230,6 +230,26 @@ class SupabaseService {
     }
   }
 
+  /// Memperbarui kata sandi akun di database online Supabase (app_users)
+  Future<bool> updateAppUserPassword({
+    required String id,
+    required String newPasswordHash,
+  }) async {
+    if (!_isInitialized) return false;
+    try {
+      final updateData = <String, dynamic>{
+        'password_hash': newPasswordHash,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      };
+      await client.from('app_users').update(updateData).eq('id', id);
+      debugPrint('[SupabaseService] ✅ Password updated in app_users for id: ');
+      return true;
+    } catch (e) {
+      debugPrint('[SupabaseService] ❌ updateAppUserPassword error: ');
+      return false;
+    }
+  }
+
   // ===================== AUTH SUPABASE NATIVE (FALLBACK / COMPAT) =====================
 
   Future<AuthResponse> signUp({

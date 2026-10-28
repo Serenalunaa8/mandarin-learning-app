@@ -216,6 +216,28 @@ class LocalDatabaseService {
     }
   }
 
+  /// Memperbarui hash kata sandi pengguna berdasarkan ID
+  Future<bool> updateUserPassword({
+    required String id,
+    required String newPasswordHash,
+  }) async {
+    try {
+      final db = await database;
+      if (db == null) return false;
+
+      final values = <String, dynamic>{
+        'password_hash': newPasswordHash,
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      final count = await db.update('users', values, where: 'id = ?', whereArgs: [id]);
+      return count > 0;
+    } catch (e) {
+      debugPrint('[LocalDatabaseService] updateUserPassword error: ');
+      return false;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> fetchLearningProgress(
     String userId,
   ) async {

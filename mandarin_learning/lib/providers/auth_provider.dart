@@ -787,6 +787,110 @@ class AuthProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   /// Logout dan hapus sesi
+  /// Mengubah kata sandi pengguna terdaftar dengan verifikasi hash SHA-256
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    if (_profile == null || _isGuest) {
+      _errorMessage = 'Mode Tamu tidak dapat mengubah kata sandi. Silakan daftar akun terlebih dahulu.';
+      notifyListeners();
+      return false;
+    }
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final userId = _profile!.id;
+      final username = _profile!.username;
+
+      // 1. Ambil data akun dari database lokal SQLite terlebih dahulu
+      Map<String, dynamic>? userRecord =
+          await LocalDatabaseService.instance.getUserById(userId);
+
+      userRecord ??=
+          await LocalDatabaseService.instance.getUserByIdentifier(username);
+
+      // Jika belum ada di lokal, coba cari di online Supabase
+      if (userRecord == null || (userRecord['password_hash'] as String? ?? '').isEmpty) {
+        try {
+          userRecord = await SupabaseService.instance.getAppUserByUsername(username);
+        } catch (_) {}
+      }
+
+      final storedHash = userRecord?['password_hash'] as String? ?? '';
+      if (storedHash.isEmpty) {
+        _errorMessage = 'Data autentikasi akun tidak ditemukan. Silakan login ulang.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // 2. Verifikasi kata sandi saat ini
+      final isCurrentValid = SecurityService.verifyPassword(
+        currentPassword,
+        storedHash,
+      );
+      if (!isCurrentValid) {
+        _errorMessage = 'Kata sandi saat ini yang Anda masukkan salah.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // 3. Validasi kata sandi baru
+      if (currentPassword == newPassword) {
+        _errorMessage = 'Kata sandi baru tidak boleh sama dengan kata sandi saat ini.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      if (newPassword.trim().length < 6) {
+        _errorMessage = 'Kata sandi baru minimal harus 6 karakter.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // 4. Enkripsi hash SHA-256 + salt
+      final newHash = SecurityService.hashPassword(newPassword.trim());
+
+      // 5. Simpan ke database lokal SQLite
+      await LocalDatabaseService.instance.updateUserPassword(
+        id: userId,
+        newPasswordHash: newHash,
+      );
+
+      if (userRecord != null) {
+        userRecord['password_hash'] = newHash;
+        await LocalDatabaseService.instance.saveOrUpdateUser(userRecord);
+      }
+
+      // 6. Simpan ke Supabase online (jika tersambung)
+      try {
+        await SupabaseService.instance.updateAppUserPassword(
+          id: userId,
+          newPasswordHash: newHash,
+        );
+      } catch (e) {
+        debugPrint('[AuthProvider] Online updateAppUserPassword error: ');
+      }
+
+      _isLoading = false;
+      _errorMessage = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Gagal memperbarui kata sandi: ';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     await saveTodayActiveSeconds();
     _stopStudyTimer();

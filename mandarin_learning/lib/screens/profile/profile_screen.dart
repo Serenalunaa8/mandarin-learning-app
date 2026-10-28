@@ -13,6 +13,7 @@ import '../auth/register_screen.dart';
 import '../tools/feedback_screen.dart';
 import 'course_impression_screen.dart';
 import '../settings/settings_screen.dart';
+import 'change_password_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -646,6 +647,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
 
                   // Menu 4: Bantuan & FAQ
+                  // Menu: Keamanan & Ubah Kata Sandi
+                  _buildMenuCard(
+                    context,
+                    title: 'Keamanan & Ubah Kata Sandi',
+                    iconAsset: 'assets/image/beranda/ikon_perisai.png',
+                    fallbackIcon: Icons.lock_reset_rounded,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ChangePasswordScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
                   _buildMenuCard(
                     context,
                     title: 'Bantuan & FAQ',
