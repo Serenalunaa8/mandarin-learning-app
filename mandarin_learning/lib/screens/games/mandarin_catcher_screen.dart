@@ -11,6 +11,7 @@ import '../../models/vocabulary_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../../services/audio_service.dart';
+import '../../services/vocabulary_service.dart';
 
 /// FR-10: Mandarin Catcher Game
 /// Catcher Mascot:
@@ -128,7 +129,15 @@ class _MandarinCatcherScreenState extends State<MandarinCatcherScreen>
 
   Future<void> _init() async {
     final vocab = context.read<VocabularyProvider>();
-    _allWords = vocab.currentLevelVocabulary;
+    if (!VocabularyService.instance.isLoaded ||
+        VocabularyService.instance.allVocabulary.isEmpty) {
+      await VocabularyService.instance.loadVocabulary();
+    }
+    var words = vocab.currentLevelVocabulary;
+    if (words.length < 3) {
+      words = vocab.allVocabulary;
+    }
+    _allWords = words;
 
     if (_allWords.length < 3) {
       setState(() => _isLoading = false);

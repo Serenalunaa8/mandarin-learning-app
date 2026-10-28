@@ -46,7 +46,20 @@ class VocabularyService {
     for (final entry in assetsByLevel.entries) {
       if (result.containsKey(entry.key)) continue;
 
-      final jsonString = await rootBundle.loadString(entry.value);
+      String jsonString;
+      try {
+        jsonString = await rootBundle.loadString(entry.value);
+      } catch (_) {
+        final alt = entry.value.startsWith('Data/')
+            ? 'data/${entry.value.substring(5)}'
+            : 'Data/${entry.value.substring(5)}';
+        try {
+          jsonString = await rootBundle.loadString(alt);
+        } catch (e) {
+          debugPrint('[VocabularyService] Lewati contoh kalimat ${entry.value}: $e');
+          continue;
+        }
+      }
       final dynamic decoded = json.decode(jsonString);
       if (decoded is! Map) {
         throw FormatException(
@@ -142,7 +155,12 @@ class VocabularyService {
   }
 
   Future<List<VocabularyItem>> _loadBundledVocabularyItems() async {
-    final jsonString = await rootBundle.loadString('data/mandarin_id.json');
+    String jsonString;
+    try {
+      jsonString = await rootBundle.loadString('data/mandarin_id.json');
+    } catch (_) {
+      jsonString = await rootBundle.loadString('Data/mandarin_id.json');
+    }
     final decoded = json.decode(jsonString);
     if (decoded is! List) {
       throw const FormatException(
@@ -175,7 +193,12 @@ class VocabularyService {
   Future<void> loadVocabulary() async {
     if (_isLoaded && _allVocabulary.isNotEmpty) return;
 
-    final contohMap = await loadContohKalimatByLevel();
+    Map<int, Map<String, List<ExampleSentence>>> contohMap = {};
+    try {
+      contohMap = await loadContohKalimatByLevel();
+    } catch (e) {
+      debugPrint('[VocabularyService] Peringatan memuat contoh kalimat: $e');
+    }
     var bundledItems = <VocabularyItem>[];
 
     try {

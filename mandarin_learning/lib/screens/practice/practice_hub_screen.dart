@@ -182,7 +182,7 @@ class PracticeHubScreen extends StatelessWidget {
             // 4. AI Tutor
             _buildFeatureCard(
               context,
-              title: 'AI Tutor Mandarin (Xiao Xiong)',
+              title: 'AI Tutor Mandarin (ZhiZhi)',
               desc: 'Tanyakan tata bahasa, contoh percakapan, dan tips pelafalan kapan saja',
               emoji: '🤖',
               color: const Color(0xFFF5F3FF),

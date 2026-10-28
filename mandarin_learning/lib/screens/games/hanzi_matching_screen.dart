@@ -9,6 +9,7 @@ import '../../models/vocabulary_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vocabulary_provider.dart';
 import '../../services/audio_service.dart';
+import '../../services/vocabulary_service.dart';
 import '../../widgets/mascot_widget.dart';
 
 // FR-07: Hanzi Matching — 8 kartu (4 Bahasa Mandarin & 4 Bahasa Indonesia)
@@ -69,15 +70,46 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
   }
 
   Future<void> _loadAndDeal() async {
+    setState(() => _isLoading = true);
     final vocab = context.read<VocabularyProvider>();
-    final words = vocab.currentLevelVocabulary;
+
+    // 1. Pastikan vocabulary service telah memuat data
+    if (!VocabularyService.instance.isLoaded ||
+        VocabularyService.instance.allVocabulary.isEmpty) {
+      await VocabularyService.instance.loadVocabulary();
+    }
+
+    // 2. Ambil kosakata level aktif
+    var words = vocab.currentLevelVocabulary;
+
+    // 3. Jika provider masih inisialisasi, tunggu sebentar
+    if (words.length < _pairCount && vocab.isLoading) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      words = vocab.currentLevelVocabulary;
+    }
+
+    // 4. Jika kosakata level aktif masih kurang dari 4, fallback ke seluruh kosakata
     if (words.length < _pairCount) {
-      setState(() => _isLoading = false);
+      words = vocab.allVocabulary;
+    }
+
+    // 5. Coba panggil loadVocabulary sekali lagi jika masih kosong
+    if (words.length < _pairCount) {
+      await VocabularyService.instance.loadVocabulary();
+      words = vocab.currentLevelVocabulary;
+      if (words.length < _pairCount) {
+        words = vocab.allVocabulary;
+      }
+    }
+
+    if (words.length < _pairCount) {
+      if (mounted) setState(() => _isLoading = false);
       return;
     }
+
     _pool = words;
     _dealNewRound();
-    setState(() => _isLoading = false);
+    if (mounted) setState(() => _isLoading = false);
   }
 
   void _triggerMascotReaction({required bool isCorrect}) {
@@ -691,7 +723,7 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
           final availableHeight = constraints.maxHeight;
           final itemWidth = (availableWidth - spacing) / crossAxisCount;
           final itemHeight = (availableHeight - (rows - 1) * spacing) / rows;
-          final ratio = (itemWidth / itemHeight).clamp(0.9, 2.8);
+          final ratio = itemWidth / itemHeight;
 
           return GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
@@ -1181,17 +1213,24 @@ class _HanziMatchingScreenState extends State<HanziMatchingScreen>
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _loadAndDeal,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Muat Ulang Kosakata'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF059669),
                 foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: const Text('Kembali'),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Kembali', style: TextStyle(color: Color(0xFF64748B))),
             ),
           ],
         ),

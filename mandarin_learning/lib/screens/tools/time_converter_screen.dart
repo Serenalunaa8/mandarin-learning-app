@@ -24,13 +24,44 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
   String _targetZoneId = 'China';
 
   List<_TimeZoneOption> get _zones => [
-    _TimeZoneOption(id: 'WIB', name: 'WIB · Jakarta', offsetAt: (_) => 7),
-    _TimeZoneOption(id: 'WITA', name: 'WITA · Bali', offsetAt: (_) => 8),
-    _TimeZoneOption(id: 'WIT', name: 'WIT · Papua', offsetAt: (_) => 9),
-    _TimeZoneOption(id: 'China', name: 'China · Beijing', offsetAt: (_) => 8),
+    _TimeZoneOption(
+      id: 'WIB',
+      name: 'WIB · Jakarta',
+      subname: 'Jawa, Sumatra, Kalbar',
+      flag: '🇮🇩',
+      accentColor: const Color(0xFF0284C7),
+      offsetAt: (_) => 7,
+    ),
+    _TimeZoneOption(
+      id: 'WITA',
+      name: 'WITA · Bali',
+      subname: 'Bali, Sulawesi, NTT, NTB',
+      flag: '🇮🇩',
+      accentColor: const Color(0xFF0D9488),
+      offsetAt: (_) => 8,
+    ),
+    _TimeZoneOption(
+      id: 'WIT',
+      name: 'WIT · Papua',
+      subname: 'Maluku & Papua',
+      flag: '🇮🇩',
+      accentColor: const Color(0xFF7C3AED),
+      offsetAt: (_) => 9,
+    ),
+    _TimeZoneOption(
+      id: 'China',
+      name: 'CST · Beijing',
+      subname: 'Seluruh Wilayah Tiongkok',
+      flag: '🇨🇳',
+      accentColor: const Color(0xFFDC2626),
+      offsetAt: (_) => 8,
+    ),
     _TimeZoneOption(
       id: 'London',
       name: 'London · Inggris',
+      subname: 'Britania Raya (UK)',
+      flag: '🇬🇧',
+      accentColor: const Color(0xFFD97706),
       offsetAt: (utc) => _isLondonDst(utc) ? 1 : 0,
     ),
   ];
@@ -120,11 +151,25 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
   }
 
   String _getMandarinPeriod(int hour) {
-    if (hour >= 6 && hour < 12) return '早上 (Zǎoshang - Pagi)';
-    if (hour >= 12 && hour < 14) return '中午 (Zhōngwǔ - Siang)';
-    if (hour >= 14 && hour < 18) return '下午 (Xiàwǔ - Sore)';
-    if (hour >= 18 && hour < 24) return '晚上 (Wǎnshang - Malam)';
-    return '半夜 (Bànyè - Tengah Malam)';
+    if (hour >= 6 && hour < 12) return '早上 (Zǎoshang · Pagi)';
+    if (hour >= 12 && hour < 14) return '中午 (Zhōngwǔ · Siang)';
+    if (hour >= 14 && hour < 18) return '下午 (Xiàwǔ · Sore)';
+    if (hour >= 18 && hour < 24) return '晚上 (Wǎnshang · Malam)';
+    return '半夜 (Bànyè · Tengah Malam)';
+  }
+
+  String _getTimeDiffText(
+    _TimeZoneOption source,
+    _TimeZoneOption target,
+    DateTime utc,
+  ) {
+    final srcOffset = source.offsetAt(utc);
+    final tgtOffset = target.offsetAt(utc);
+    final diff = tgtOffset - srcOffset;
+
+    if (diff == 0) return 'Waktu sama persis';
+    if (diff > 0) return '$diff jam lebih cepat';
+    return '${diff.abs()} jam lebih lambat';
   }
 
   @override
@@ -132,27 +177,23 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
     final nowUtc = _currentTime.add(
       Duration(minutes: (_customHourOffset * 60).round()),
     );
-    final isDst = _isLondonDst(nowUtc);
-    final londonOffset = isDst ? 1 : 0;
-
-    final wibTime = _getTargetTime(7);
-    final witaTime = _getTargetTime(8);
-    final witTime = _getTargetTime(9);
-    final cstTime = _getTargetTime(8); // Beijing UTC+8
-    final londonTime = _getTargetTime(londonOffset);
-    final conversionUtc = _currentTime.add(
-      Duration(minutes: (_customHourOffset * 60).round()),
-    );
+    final conversionUtc = nowUtc;
     final sourceZone = _zone(_sourceZoneId);
     final targetZone = _zone(_targetZoneId);
     final sourceTime = _timeInZone(conversionUtc, sourceZone);
     final convertedTime = _timeInZone(conversionUtc, targetZone);
+    final isDst = _isLondonDst(nowUtc);
+    final londonOffset = isDst ? 1 : 0;
+
+    final cstTime = _getTargetTime(8); // Beijing UTC+8
+    final wibTime = _getTargetTime(7);
+    final witaTime = _getTargetTime(8);
+    final witTime = _getTargetTime(9);
+    final londonTime = _getTargetTime(londonOffset);
 
     return Scaffold(
       backgroundColor: AppColors.mintBackground,
-      appBar: AppBar(
-        title: const Text('Konversi Zona Waktu'),
-      ),
+      appBar: AppBar(title: const Text('Konversi Zona Waktu')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -229,10 +270,20 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${_formatDate(cstTime)} • ${_getMandarinPeriod(cstTime.hour)}',
+                      _formatDate(cstTime),
                       style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFFBBF7D0),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _getMandarinPeriod(cstTime.hour),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white70,
                       ),
                     ),
                   ],
@@ -343,7 +394,7 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildZoneDropdown(
+                          child: _buildZoneSelector(
                             label: 'Dari',
                             value: _sourceZoneId,
                             onChanged: (value) {
@@ -360,7 +411,7 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                           color: AppColors.primaryGreen,
                         ),
                         Expanded(
-                          child: _buildZoneDropdown(
+                          child: _buildZoneSelector(
                             label: 'Ke',
                             value: _targetZoneId,
                             onChanged: (value) {
@@ -420,6 +471,19 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                               fontWeight: FontWeight.w800,
                             ),
                           ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _getTimeDiffText(
+                              sourceZone,
+                              targetZone,
+                              conversionUtc,
+                            ),
+                            style: const TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -442,46 +506,50 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
               // 1. WIB
               _buildZoneCard(
                 flag: '🇮🇩',
-                title: 'WIB (Jakarta / Sumatra / Jawa)',
+                name: 'WIB · Jakarta',
+                subname: 'Jawa, Sumatra, Kalbar',
                 utcLabel: 'UTC+7',
                 diffFromCst: '-1 Jam dari Beijing',
                 time: wibTime,
-                color: const Color(0xFFEFF6FF),
+                accentColor: const Color(0xFF0284C7),
               ),
               const SizedBox(height: 10),
 
               // 2. WITA
               _buildZoneCard(
                 flag: '🇮🇩',
-                title: 'WITA (Bali / Makassar)',
+                name: 'WITA · Bali',
+                subname: 'Bali, Sulawesi, NTT, NTB',
                 utcLabel: 'UTC+8',
                 diffFromCst: 'Sama persis dengan Beijing',
                 time: witaTime,
-                color: const Color(0xFFF0FDF4),
+                accentColor: const Color(0xFF0D9488),
               ),
               const SizedBox(height: 10),
 
               // 3. WIT
               _buildZoneCard(
                 flag: '🇮🇩',
-                title: 'WIT (Maluku / Papua)',
+                name: 'WIT · Papua',
+                subname: 'Maluku & Papua',
                 utcLabel: 'UTC+9',
                 diffFromCst: '+1 Jam dari Beijing',
                 time: witTime,
-                color: const Color(0xFFFAF5FF),
+                accentColor: const Color(0xFF7C3AED),
               ),
               const SizedBox(height: 10),
 
               // 4. London
               _buildZoneCard(
                 flag: '🇬🇧',
-                title: 'London (Inggris)',
+                name: 'London · Inggris',
+                subname: 'Britania Raya (UK)',
                 utcLabel: isDst ? 'BST (UTC+1)' : 'GMT (UTC+0)',
                 diffFromCst: isDst
                     ? '-7 Jam dari Beijing (Summer Time)'
                     : '-8 Jam dari Beijing (Winter)',
                 time: londonTime,
-                color: const Color(0xFFFFFBEB),
+                accentColor: const Color(0xFFD97706),
                 badge: isDst ? 'Daylight Saving Aktif' : 'Standard Time',
               ),
               const SizedBox(height: 24),
@@ -492,62 +560,76 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
     );
   }
 
-  Widget _buildZoneDropdown({
+  Widget _buildZoneSelector({
     required String label,
     required String value,
     required ValueChanged<String?> onChanged,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: AppColors.textMuted,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFCBD5E1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF64748B),
+            ),
           ),
-        ),
-        DropdownButton<String>(
-          value: value,
-          isExpanded: true,
-          underline: const SizedBox.shrink(),
-          style: const TextStyle(
-            color: AppColors.textDark,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+          DropdownButton<String>(
+            value: value,
+            isExpanded: true,
+            isDense: true,
+            underline: const SizedBox.shrink(),
+            style: const TextStyle(
+              color: Color(0xFF0F172A),
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+            ),
+            items: _zones
+                .map(
+                  (zone) => DropdownMenuItem<String>(
+                    value: zone.id,
+                    child: Text(
+                      '${zone.flag} ${zone.id}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                )
+                .toList(),
+            onChanged: onChanged,
           ),
-          items: _zones
-              .map(
-                (zone) => DropdownMenuItem<String>(
-                  value: zone.id,
-                  child: Text(zone.name, overflow: TextOverflow.ellipsis),
-                ),
-              )
-              .toList(),
-          onChanged: onChanged,
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildZoneCard({
     required String flag,
-    required String title,
+    required String name,
+    required String subname,
     required String utcLabel,
     required String diffFromCst,
     required DateTime time,
-    required Color color,
+    required Color accentColor,
     String? badge,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -556,17 +638,17 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              color: color,
+              color: accentColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
-              child: Text(flag, style: const TextStyle(fontSize: 22)),
+              child: Text(flag, style: const TextStyle(fontSize: 20)),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -575,7 +657,7 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      title,
+                      name,
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -591,6 +673,14 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subname,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textMuted,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -610,7 +700,7 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
                   ),
                 ),
                 if (badge != null) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 6,
@@ -642,11 +732,17 @@ class _TimeConverterScreenState extends State<TimeConverterScreen> {
 class _TimeZoneOption {
   final String id;
   final String name;
+  final String subname;
+  final String flag;
+  final Color accentColor;
   final int Function(DateTime utc) offsetAt;
 
   const _TimeZoneOption({
     required this.id,
     required this.name,
+    required this.subname,
+    required this.flag,
+    required this.accentColor,
     required this.offsetAt,
   });
 }

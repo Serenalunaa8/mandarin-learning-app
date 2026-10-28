@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -22,17 +23,15 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   bool _isGenerating = false;
   String? _activeConversationId;
 
-  AiTutorMode _selectedMode = AiTutorMode.appApi;
-
   final List<String> _quickSuggestions = [
-    'Perbedaan 的, 得, 地',
-    'Cara membedakan Nada 2 dan Nada 3',
-    'Kapan pakai 不 vs 没?',
-    'Perbedaan 想 (xiǎng) vs 要 (yào)',
-    'Perbedaan 能, 会, 可以',
-    'Struktur kalimat dasar Mandarin',
-    'Percakapan pesan makanan',
-    'Tips menghafal Hanzi',
+    '💡 Perbedaan 的, 得, 地',
+    '🎯 Cara bedakan Nada 2 & 3',
+    '⚖️ Kapan pakai 不 vs 没?',
+    '🍜 Percakapan pesan makanan',
+    '🗣️ Perbedaan 想 vs 要',
+    '✨ Perbedaan 能, 会, 可以',
+    '📝 Struktur kalimat dasar',
+    '🧠 Tips menghafal Hanzi',
   ];
 
   @override
@@ -42,13 +41,12 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   }
 
   AiChatMessage _welcomeMessage() => AiChatMessage(
-        text: 'Halo! Aku Xiao Xiong, AI Tutor Mandarin pribadimu 🐼.\n\n'
-            'Aku terhubung langsung dengan database kosakata HSK 1-6 aplikasi ini. '
-            'Tanyakan apa saja seputar kosakata Mandarin, tata bahasa, pelafalan nada, kuis, atau fitur aplikasi!',
+        text: 'Halo! Aku ZhiZhi, AI Tutor Mandarin pribadimu 智智 🐼.\n\n'
+            'Kamu bisa menanyakan apa saja seputar kosakata Mandarin, tata bahasa (grammar), pelafalan nada, hingga latihan percakapan sehari-hari!',
         isUser: false,
         timestamp: DateTime.now(),
         mode: AiTutorMode.appApi,
-        modelBadge: 'Xiao Xiong • Database Terhubung',
+        modelBadge: 'ZhiZhi • AI Tutor',
       );
 
   Future<void> _startNewConversation() async {
@@ -66,7 +64,18 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     final userId = context.read<AuthProvider>().profile?.id;
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Masuk ke akun untuk menyimpan dan melihat riwayat percakapan.')),
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.info_outline_rounded, color: Colors.white, size: 18),
+              SizedBox(width: 8),
+              Expanded(child: Text('Masuk ke akun untuk menyimpan dan melihat riwayat percakapan.')),
+            ],
+          ),
+          backgroundColor: const Color(0xFF334155),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
       );
       return;
     }
@@ -76,39 +85,127 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       final selected = await showModalBottomSheet<Map<String, dynamic>>(
         context: context,
         isScrollControlled: true,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-        builder: (sheetContext) => SafeArea(
-          child: SizedBox(
-            height: MediaQuery.of(sheetContext).size.height * 0.7,
-            child: Column(children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
-                child: Row(children: [
-                  const Expanded(child: Text('Percakapan sebelumnya', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                  TextButton.icon(onPressed: () { Navigator.pop(sheetContext); _startNewConversation(); }, icon: const Icon(Icons.add), label: const Text('Baru')),
-                ]),
-              ),
-              const Divider(height: 1),
-              Expanded(
-                child: rows.isEmpty
-                    ? const Center(child: Text('Belum ada percakapan tersimpan.'))
-                    : ListView.separated(
-                        itemCount: rows.length,
-                        separatorBuilder: (_, _) => const Divider(height: 1, indent: 68),
-                        itemBuilder: (context, index) {
-                          final row = rows[index];
-                          final messages = row['messages'] as List? ?? const [];
-                          final lastText = messages.isEmpty ? '' : (messages.last as Map)['text']?.toString() ?? '';
-                          return ListTile(
-                            leading: const CircleAvatar(child: Icon(Icons.chat_bubble_outline)),
-                            title: Text(row['title']?.toString() ?? 'Percakapan', maxLines: 1, overflow: TextOverflow.ellipsis),
-                            subtitle: Text(lastText, maxLines: 1, overflow: TextOverflow.ellipsis),
-                            onTap: () => Navigator.pop(sheetContext, row),
-                          );
-                        },
+        backgroundColor: Colors.transparent,
+        builder: (sheetContext) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SafeArea(
+            child: SizedBox(
+              height: MediaQuery.of(sheetContext).size.height * 0.65,
+              child: Column(
+                children: [
+                  // Grab handle
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 10, bottom: 8),
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFCBD5E1),
+                        borderRadius: BorderRadius.circular(2),
                       ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 12, 12),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.history_rounded, color: Color(0xFF059669), size: 22),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            'Riwayat Percakapan',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () {
+                            Navigator.pop(sheetContext);
+                            _startNewConversation();
+                          },
+                          icon: const Icon(Icons.add_rounded, size: 18, color: Color(0xFF059669)),
+                          label: const Text(
+                            'Baru',
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF059669)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  Expanded(
+                    child: rows.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Image.asset(
+                                    'assets/image/beranda/maskot_02_baca_buku.png',
+                                    width: 64,
+                                    height: 64,
+                                    errorBuilder: (_, __, ___) => const Text('🐼', style: TextStyle(fontSize: 40)),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    'Belum ada percakapan tersimpan.',
+                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Mulai tanyakan materi Mandarin apa saja!',
+                                    style: TextStyle(fontSize: 11.5, color: Color(0xFF94A3B8)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : ListView.separated(
+                            itemCount: rows.length,
+                            separatorBuilder: (_, _) => const Divider(height: 1, indent: 68, color: Color(0xFFF1F5F9)),
+                            itemBuilder: (context, index) {
+                              final row = rows[index];
+                              final messages = row['messages'] as List? ?? const [];
+                              final lastText = messages.isEmpty ? '' : (messages.last as Map)['text']?.toString() ?? '';
+                              return ListTile(
+                                leading: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF0FDF4),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: const Color(0xFFBBF7D0)),
+                                  ),
+                                  child: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF059669), size: 20),
+                                ),
+                                title: Text(
+                                  row['title']?.toString() ?? 'Percakapan',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: Color(0xFF0F172A)),
+                                ),
+                                subtitle: Text(
+                                  lastText,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
+                                ),
+                                trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8), size: 20),
+                                onTap: () => Navigator.pop(sheetContext, row),
+                              );
+                            },
+                          ),
+                  ),
+                ],
               ),
-            ]),
+            ),
           ),
         ),
       );
@@ -116,7 +213,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Riwayat belum dapat dimuat. Jalankan migrasi database terlebih dahulu. ($error)')),
+        SnackBar(content: Text('Riwayat belum dapat dimuat: $error')),
       );
     }
   }
@@ -132,7 +229,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
         isUser: isUser,
         timestamp: timestamp,
         mode: AiTutorMode.appApi,
-        modelBadge: isUser ? null : 'Xiao Xiong • Database Terhubung',
+        modelBadge: isUser ? null : 'ZhiZhi • AI Tutor',
         audioText: isUser ? null : AudioService.instance.extractMandarinText(text),
       );
     }).toList();
@@ -149,7 +246,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     final userId = context.read<AuthProvider>().profile?.id;
     if (userId == null) return;
     final turns = _messages
-        .where((message) => !message.text.startsWith('Halo! Aku Xiao Xiong'))
+        .where((message) => !message.text.startsWith('Halo! Aku'))
         .map((message) => <String, dynamic>{
               'role': message.isUser ? 'user' : 'assistant',
               'text': message.text,
@@ -188,7 +285,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     final history = _messages
         .where(
           (message) =>
-              !message.text.startsWith('Halo! Aku Xiao Xiong') &&
+              !message.text.startsWith('Halo! Aku') &&
               !message.text.startsWith('Belum bisa mendapat jawaban:'),
         )
         .toList()
@@ -203,6 +300,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           },
         )
         .toList();
+
     setState(() {
       _messages.add(
         AiChatMessage(
@@ -216,7 +314,6 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     });
 
     await _persistConversation();
-
     _scrollToBottom();
 
     String response;
@@ -241,14 +338,13 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           isUser: false,
           timestamp: DateTime.now(),
           mode: currentMode,
-          modelBadge: 'Xiao Xiong • Database Terhubung',
+          modelBadge: 'ZhiZhi • AI Tutor',
           audioText: AudioService.instance.extractMandarinText(response),
         ),
       );
     });
 
     await _persistConversation();
-
     _scrollToBottom();
   }
 
@@ -264,300 +360,369 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     });
   }
 
+  String _formatTime(DateTime dt) {
+    final h = dt.hour.toString().padLeft(2, '0');
+    final m = dt.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.mintBackground,
-      appBar: AppBar(
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            MascotWidget(size: 30, pose: MascotPose.headOnly),
-            SizedBox(width: 8),
-            Text('AI Tutor Mandarin'),
-          ],
-        ),
-        actions: [
-          IconButton(tooltip: 'Percakapan baru', onPressed: _startNewConversation, icon: const Icon(Icons.add_comment_outlined)),
-          IconButton(tooltip: 'Riwayat percakapan', onPressed: _showConversationHistory, icon: const Icon(Icons.history_rounded)),
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: Stack(
+        children: [
+          // Aksen dekorasi awan halus di latar belakang
+          Positioned(
+            top: -20,
+            right: -30,
+            child: Opacity(
+              opacity: 0.14,
+              child: Image.asset(
+                'assets/image/beranda/awan_kecil.png',
+                width: 150,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            ),
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                _buildAppBar(),
+                _buildQuickSuggestions(),
+                Expanded(child: _buildMessagesList()),
+                if (_isGenerating) _buildGeneratingIndicator(),
+                _buildInputArea(),
+              ],
+            ),
+          ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Status info: Satu AI Tutor yang terhubung ke Database
-            Container(
-              margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    );
+  }
+
+  Widget _buildAppBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+      child: Row(
+        children: [
+          // Tombol Kembali
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFBBF7D0)),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 8,
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0FDF4),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.psychology_rounded,
-                      color: AppColors.primaryGreen,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Xiao Xiong AI Tutor',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Terhubung Database Kosakata HSK 1-6 • Khusus Mandarin',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFDCFCE7),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.check_circle_rounded,
-                          size: 12,
-                          color: Color(0xFF15803D),
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          'Database Aktif',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF15803D),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                color: Color(0xFF334155),
+                size: 20,
               ),
             ),
+          ),
+          const SizedBox(width: 10),
 
-            // Quick suggestions horizontal chips
-            Container(
-              height: 44,
-              margin: const EdgeInsets.symmetric(vertical: 4),
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                scrollDirection: Axis.horizontal,
-                itemCount: _quickSuggestions.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final suggestion = _quickSuggestions[index];
-                  return ActionChip(
-                    label: Text(suggestion),
-                    labelStyle: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.primaryDark,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(color: Color(0xFFBBF7D0)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    onPressed: () => _sendMessage(suggestion),
-                  );
-                },
-              ),
-            ),
-
-            // Message list
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+          // Avatar Tutor & Status Online
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFBBF7D0), width: 1.5),
                 ),
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final msg = _messages[index];
-                  return _buildMessageBubble(msg);
-                },
+                child: Center(
+                  child: Image.asset(
+                    'assets/image/beranda/maskot_02_baca_buku.png',
+                    width: 30,
+                    height: 30,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Text('🐼', style: TextStyle(fontSize: 22)),
+                  ),
+                ),
               ),
-            ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  width: 11,
+                  height: 11,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF16A34A),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 10),
 
-            // Generating indicator
-            if (_isGenerating)
-              Padding(
-                padding: const EdgeInsets.only(left: 20, bottom: 8),
-                child: Row(
+          // Info Tutor
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    const MascotWidget(size: 26, pose: MascotPose.headOnly),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black12, blurRadius: 4),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.primaryGreen,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Xiao Xiong sedang mencari di database kosakata...',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textMuted,
-                            ),
-                          ),
-                        ],
+                    Text(
+                      'ZhiZhi AI',
+                      style: TextStyle(
+                        fontSize: 16.5,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.2,
                       ),
                     ),
+                    SizedBox(width: 5),
+                    Text('🐼', style: TextStyle(fontSize: 14)),
                   ],
                 ),
-              ),
+                Text(
+                  'Tutor Mandarin • Online',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF059669),
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-            // Input field & Send button
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          // Tombol Obrolan Baru
+          IconButton(
+            tooltip: 'Percakapan baru',
+            onPressed: _startNewConversation,
+            icon: Container(
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: const Icon(Icons.add_comment_rounded, size: 18, color: Color(0xFF0F172A)),
+            ),
+          ),
+
+          // Tombol Riwayat
+          IconButton(
+            tooltip: 'Riwayat percakapan',
+            onPressed: _showConversationHistory,
+            icon: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: const Icon(Icons.history_rounded, size: 18, color: Color(0xFF0F172A)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickSuggestions() {
+    return Container(
+      height: 38,
+      margin: const EdgeInsets.only(bottom: 6),
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: _quickSuggestions.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final suggestion = _quickSuggestions[index];
+          return GestureDetector(
+            onTap: () => _sendMessage(suggestion.replaceAll(RegExp(r'^[^\w\s]+\s*'), '')),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -3),
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 4,
                   ),
                 ],
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _textController,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: _sendMessage,
-                      decoration: InputDecoration(
-                        hintText: 'Tanyakan seputar kosakata atau materi Mandarin...',
-                        hintStyle: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textLight,
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xFFF1F5F9),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
+              child: Center(
+                child: Text(
+                  suggestion,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF334155),
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: AppColors.primaryGreen,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.send_rounded,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      onPressed: () => _sendMessage(_textController.text),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ],
-        ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMessagesList() {
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      itemCount: _messages.length,
+      itemBuilder: (context, index) {
+        final msg = _messages[index];
+        return _buildMessageBubble(msg);
+      },
+    );
+  }
+
+  Widget _buildGeneratingIndicator() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0FDF4),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFBBF7D0)),
+            ),
+            child: Center(
+              child: Image.asset(
+                'assets/image/beranda/maskot_04_lup.png',
+                width: 22,
+                height: 22,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const Text('🐼', style: TextStyle(fontSize: 16)),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(4),
+                topRight: Radius.circular(18),
+                bottomLeft: Radius.circular(18),
+                bottomRight: Radius.circular(18),
+              ),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF059669),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'ZhiZhi sedang memikirkan jawaban...',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildMessageBubble(AiChatMessage msg) {
+    final timeStr = _formatTime(msg.timestamp);
+
     if (msg.isUser) {
       return Align(
         alignment: Alignment.centerRight,
         child: Container(
           margin: const EdgeInsets.only(bottom: 12, left: 48),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: const BoxDecoration(
-            color: AppColors.primaryDark,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(4),
-            ),
-          ),
-          child: Text(
-            msg.text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              height: 1.35,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF0F766E), Color(0xFF047857)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(4),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x22047857),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  msg.text,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    height: 1.4,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                timeStr,
+                style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600),
+              ),
+            ],
           ),
         ),
       );
     }
 
-    const badgeBg = Color(0xFFF0FDF4);
-    const badgeText = Color(0xFF15803D);
-    const badgeIcon = Icons.psychology_rounded;
-
+    // Balasan AI Tutor (ZhiZhi)
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -565,75 +730,117 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const MascotWidget(size: 34, pose: MascotPose.headOnly),
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFBBF7D0)),
+              ),
+              child: Center(
+                child: Image.asset(
+                  'assets/image/beranda/maskot_02_baca_buku.png',
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Text('🐼', style: TextStyle(fontSize: 18)),
+                ),
+              ),
+            ),
             const SizedBox(width: 8),
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(4),
-                    topRight: Radius.circular(20),
-                    bottomLeft: Radius.circular(20),
-                    bottomRight: Radius.circular(20),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(4),
+                        topRight: Radius.circular(20),
+                        bottomLeft: Radius.circular(20),
+                        bottomRight: Radius.circular(20),
+                      ),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (msg.modelBadge != null || msg.mode != null) ...[
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: badgeBg,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: badgeText.withValues(alpha: 0.25),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header balasan: Model badge & tombol salin
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(badgeIcon, size: 13, color: badgeText),
-                            const SizedBox(width: 5),
-                            Text(
-                              msg.modelBadge ?? 'Xiao Xiong • Database Terhubung',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: badgeText,
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF0FDF4),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFFBBF7D0)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.psychology_rounded, size: 12, color: Color(0xFF16A34A)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    msg.modelBadge ?? 'ZhiZhi • AI Tutor',
+                                    style: const TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF15803D),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(text: msg.text));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Teks disalin ke papan klip!'),
+                                    duration: const Duration(seconds: 1),
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Icon(Icons.copy_rounded, size: 14, color: Color(0xFF64748B)),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                    Text(
-                      msg.text,
-                      style: const TextStyle(
-                        color: AppColors.textDark,
-                        fontSize: 14,
-                        height: 1.45,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Action toolbar: Audio TTS if text contains Chinese
-                    if (msg.audioText?.isNotEmpty ?? false)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
+                        const SizedBox(height: 10),
+
+                        // Teks Penjelasan AI
+                        SelectableText(
+                          msg.text,
+                          style: const TextStyle(
+                            color: Color(0xFF1E293B),
+                            fontSize: 14,
+                            height: 1.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+
+                        // Tombol Audio TTS jika terdapat teks Mandarin
+                        if (msg.audioText?.isNotEmpty ?? false) ...[
+                          const SizedBox(height: 12),
                           GestureDetector(
                             onTap: () {
                               final mandarinText = msg.audioText ?? '';
@@ -642,13 +849,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                               }
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryLight,
-                                borderRadius: BorderRadius.circular(10),
+                                color: const Color(0xFFF0FDF4),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFFBBF7D0)),
                               ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -656,15 +861,15 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                                   Icon(
                                     Icons.volume_up_rounded,
                                     size: 16,
-                                    color: AppColors.primaryDark,
+                                    color: Color(0xFF059669),
                                   ),
-                                  SizedBox(width: 4),
+                                  SizedBox(width: 6),
                                   Text(
-                                    'Dengar',
+                                    'Dengarkan Pelafalan Mandarin',
                                     style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.primaryDark,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11.5,
+                                      color: Color(0xFF15803D),
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                 ],
@@ -672,9 +877,18 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                             ),
                           ),
                         ],
-                      ),
-                  ],
-                ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Text(
+                      timeStr,
+                      style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -682,57 +896,98 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       ),
     );
   }
-}
 
-class _ModeButton extends StatelessWidget {
-  const _ModeButton({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.color,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-        decoration: BoxDecoration(
-          color: selected ? color : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 17,
-              color: selected ? Colors.white : AppColors.textDark,
+  Widget _buildInputArea() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: const Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(left: 14),
+                    child: Icon(Icons.chat_bubble_outline_rounded, size: 18, color: Color(0xFF94A3B8)),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _textController,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: _sendMessage,
+                      decoration: const InputDecoration(
+                        hintText: 'Tanyakan kosakata, grammar, atau hanzi...',
+                        hintStyle: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  if (_textController.text.isNotEmpty)
+                    GestureDetector(
+                      onTap: () {
+                        setState(() => _textController.clear());
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.only(right: 10),
+                        child: Icon(Icons.close_rounded, size: 16, color: Color(0xFF94A3B8)),
+                      ),
+                    ),
+                ],
+              ),
             ),
-            const SizedBox(width: 5),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: selected ? Colors.white : AppColors.textDark,
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: _isGenerating ? null : () => _sendMessage(_textController.text),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF059669), Color(0xFF047857)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF059669).withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.arrow_upward_rounded,
+                  color: Colors.white,
+                  size: 22,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
