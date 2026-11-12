@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/services/audio_service.dart';
+import 'package:nihaoki/services/audio_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

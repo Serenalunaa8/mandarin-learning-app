@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/models/user_profile_model.dart';
-import 'package:mandarin_learning/providers/auth_provider.dart';
-import 'package:mandarin_learning/services/security_service.dart';
-import 'package:mandarin_learning/services/session_service.dart';
+import 'package:nihaoki/models/user_profile_model.dart';
+import 'package:nihaoki/providers/auth_provider.dart';
+import 'package:nihaoki/services/security_service.dart';
+import 'package:nihaoki/services/session_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

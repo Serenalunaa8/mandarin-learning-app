@@ -32,19 +32,19 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => VocabularyProvider()),
       ],
-      child: const MandarinLearningApp(),
+      child: const NihaokiApp(),
     ),
   );
 }
 
-class MandarinLearningApp extends StatefulWidget {
-  const MandarinLearningApp({super.key});
+class NihaokiApp extends StatefulWidget {
+  const NihaokiApp({super.key});
 
   @override
-  State<MandarinLearningApp> createState() => _MandarinLearningAppState();
+  State<NihaokiApp> createState() => _NihaokiAppState();
 }
 
-class _MandarinLearningAppState extends State<MandarinLearningApp> {
+class _NihaokiAppState extends State<NihaokiApp> {
   @override
   void initState() {
     super.initState();

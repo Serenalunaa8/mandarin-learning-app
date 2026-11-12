@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "mandarin_learning" "\0"
+            VALUE "FileDescription", "Nihaoki" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "mandarin_learning" "\0"
+            VALUE "InternalName", "Nihaoki" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "mandarin_learning.exe" "\0"
-            VALUE "ProductName", "mandarin_learning" "\0"
+            VALUE "OriginalFilename", "nihaoki.exe" "\0"
+            VALUE "ProductName", "Nihaoki" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

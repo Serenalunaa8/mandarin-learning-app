@@ -1,12 +1,11 @@
 {
-    "name": "mandarin_learning",
-    "short_name": "mandarin_learning",
+    "name": "Nihaoki",
+    "short_name": "Nihaoki",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#F1F8F4",
+    "theme_color": "#166534",
+    "description": "Nihaoki - aplikasi belajar bahasa Mandarin.",
     "prefer_related_applications": false,
     "icons": [
         {

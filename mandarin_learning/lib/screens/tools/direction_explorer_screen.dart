@@ -13,8 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/audio_service.dart';
 import '../../services/compass_heading_service.dart';
-
-// import '../../services/nearby_places_query.dart';
+import '../../services/nearby_places_query.dart';
 
 // FR-11 & FR-12: Direction Explorer dengan GPS Real Device, In-Map Compass,
 // Pencarian Tempat Pintar, Kompas Mata Angin, dan Navigasi Rute
@@ -47,9 +46,6 @@ class PlaceItem {
   final int osmId;
   final String? description;
   final List<RelatedVocab> relatedVocab;
-  final double minPriceCny;
-  final double maxPriceCny;
-
   const PlaceItem({
     required this.nameId,
     this.nameZh,
@@ -64,8 +60,6 @@ class PlaceItem {
     required this.osmId,
     this.description,
     this.relatedVocab = const [],
-    this.minPriceCny = 20.0,
-    this.maxPriceCny = 80.0,
   });
 }
 
@@ -77,7 +71,8 @@ class DirectionExplorerScreen extends StatefulWidget {
       _DirectionExplorerScreenState();
 }
 
-class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
+class _DirectionExplorerScreenState extends State<DirectionExplorerScreen>
+    with WidgetsBindingObserver {
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
 
@@ -88,6 +83,7 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
   bool _isLocationPermissionDenied = false;
   String? _locationErrorMessage;
   bool _isLoadingNearbyPlaces = false;
+  bool _isResolvingLocation = false;
   String? _placesErrorMessage;
 
   // Sensor Kompas (Magnetometer + Accelerometer)
@@ -116,15 +112,49 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
 
   bool _isMapReady = false;
   _ActiveSubView _activeSubView = _ActiveSubView.home;
+  int _nearbyRequestId = 0;
+  Position? _lastNearbyQueryPosition;
+  bool _hasReceivedLiveLocation = false;
+
+  static const _nearbyRadiusMeters = 3000;
+  static const _overpassEndpoints = [
+    'overpass-api.de',
+    'overpass.kumi.systems',
+    'overpass.nchc.org.tw',
+  ];
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initLocationAndCompass();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_refreshLocationAfterResume());
+    }
+  }
+
+  Future<void> _refreshLocationAfterResume() async {
+    try {
+      if (!await Geolocator.isLocationServiceEnabled()) return;
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        await _loadCurrentLocation();
+      }
+    } catch (error) {
+      debugPrint(
+        '[DirectionExplorer] Gagal memperbarui GPS saat aktif kembali: $error',
+      );
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _magnetometerSub?.cancel();
     _accelerometerSub?.cancel();
     _locationSub?.cancel();
@@ -191,7 +221,10 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
   }
 
   Future<void> _loadCurrentLocation() async {
-    if (!mounted) return;
+    if (!mounted || _isResolvingLocation) return;
+    _isResolvingLocation = true;
+    _lastNearbyQueryPosition = null;
+    _hasReceivedLiveLocation = false;
     setState(() {
       _locationErrorMessage = null;
       _placesErrorMessage = null;
@@ -260,8 +293,11 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
           ).listen(
             (pos) {
               if (!mounted) return;
+              final forceNearbyRefresh = !_hasReceivedLiveLocation;
+              _hasReceivedLiveLocation = true;
               final previous = _currentPosition;
-              if (previous == null ||
+              if (forceNearbyRefresh ||
+                  previous == null ||
                   _calculateDistance(
                         previous.latitude,
                         previous.longitude,
@@ -269,18 +305,25 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
                         pos.longitude,
                       ) >=
                       15) {
-                _applyLocation(pos, 'Lokasi Real-Time');
+                _applyLocation(
+                  pos,
+                  'Lokasi Real-Time',
+                  forceNearbyRefresh: forceNearbyRefresh,
+                );
               } else {
                 setState(() => _currentPosition = pos);
               }
             },
             onError: (err) {
+              _locationSub = null;
               debugPrint('[DirectionExplorer] Location stream error: $err');
             },
+            onDone: () => _locationSub = null,
           );
 
       // 3. Ambil posisi GPS real-time akurasi tinggi dengan fallback cepat
       Position? position;
+      Object? locationError;
       try {
         position = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
@@ -288,7 +331,8 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
             timeLimit: Duration(seconds: 5),
           ),
         );
-      } catch (_) {
+      } catch (error) {
+        locationError = error;
         try {
           position = await Geolocator.getCurrentPosition(
             locationSettings: const LocationSettings(
@@ -296,364 +340,117 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
               timeLimit: Duration(seconds: 4),
             ),
           );
-        } catch (_) {}
+        } catch (error) {
+          locationError = error;
+        }
       }
 
       if (position != null && mounted) {
-        _applyLocation(position, 'Lokasi GPS Akurat');
+        _hasReceivedLiveLocation = true;
+        _applyLocation(
+          position,
+          'Lokasi GPS Akurat',
+          forceNearbyRefresh: true,
+        );
       } else if (lastKnown == null && mounted && _currentPosition == null) {
         setState(() {
           _locationErrorMessage =
-              'Menunggu sinyal GPS perangkat... Pastikan GPS HP aktif.';
+              'Lokasi belum tersedia. Pastikan GPS aktif dan coba lagi.';
           _isLoadingNearbyPlaces = false;
+        });
+      } else if (locationError != null && mounted) {
+        setState(() {
+          _locationErrorMessage = 'GPS akurat belum tersedia; menampilkan koordinat terakhir yang tersimpan.';
         });
       }
     } catch (e) {
       debugPrint('[DirectionExplorer] GPS error: $e');
+      if (mounted) {
+        setState(() {
+          _locationErrorMessage = 'Gagal membaca lokasi perangkat. Coba lagi.';
+          _isLoadingNearbyPlaces = false;
+        });
+      }
+    } finally {
+      _isResolvingLocation = false;
     }
   }
 
-  void _applyLocation(Position position, String label) {
+  void _applyLocation(
+    Position position,
+    String label, {
+    bool forceNearbyRefresh = false,
+  }) {
     if (!mounted) return;
-    final defaultPlaces = _generateNearbyContextualPlaces(
-      position.latitude,
-      position.longitude,
-    );
     setState(() {
       _currentPosition = position;
       _currentLocationName =
-          '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)} ($label)';
+          '${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)} (±${position.accuracy.round()} m, $label)';
       _locationErrorMessage = null;
       _isLocationServiceDisabled = false;
       _isLocationPermissionDenied = false;
-      if (_nearbyPlaces.isEmpty) {
-        _nearbyPlaces = defaultPlaces;
-        _selectedPlace ??= defaultPlaces.first;
-      }
     });
 
     if (_isMapReady) {
       _mapController.move(LatLng(position.latitude, position.longitude), 15.5);
     }
-    _loadNearbyPlaces(position);
-  }
-
-  // Menghasilkan tempat awal kontekstual di sekitar koordinat nyata pengguna
-  List<PlaceItem> _generateNearbyContextualPlaces(double lat, double lon) {
-    return [
-      PlaceItem(
-        nameId: 'Kedai Kopi & Teh Nusantara',
-        nameZh: '休闲咖啡馆',
-        hanzi: '咖啡馆',
-        pinyin: 'Kāfēiguǎn',
-        arti: 'Kafe Kopi & Teh',
-        category: 'Kafe',
-        iconEmoji: '☕',
-        latitude: lat + 0.0016,
-        longitude: lon + 0.0014,
-        osmType: 'node',
-        osmId: 101,
-        minPriceCny: 15.0,
-        maxPriceCny: 45.0,
-        description: 'Kedai kopi dan teh santai terdekat dengan aneka kopi artisan, teh melati, dan camilan.',
-        relatedVocab: const [
-          RelatedVocab(
-            hanzi: '咖啡',
-            pinyin: 'kāfēi',
-            arti: 'Kopi',
-            iconEmoji: '☕',
-          ),
-          RelatedVocab(hanzi: '茶', pinyin: 'chá', arti: 'Teh', iconEmoji: '🍵'),
-          RelatedVocab(
-            hanzi: '点心',
-            pinyin: 'diǎnxīn',
-            arti: 'Camilan',
-            iconEmoji: '🥐',
-          ),
-        ],
-      ),
-      PlaceItem(
-        nameId: 'Butik Busana & Toko Baju Tren',
-        nameZh: '时尚服装精品店',
-        hanzi: '服装店',
-        pinyin: 'Fúzhuāngdiàn',
-        arti: 'Toko Busana / Butik',
-        category: 'Toko Baju',
-        iconEmoji: '👗',
-        latitude: lat + 0.0022,
-        longitude: lon - 0.0018,
-        osmType: 'node',
-        osmId: 102,
-        minPriceCny: 80.0,
-        maxPriceCny: 350.0,
-        description: 'Butik pakaian menyediakan kemeja kasual, dress gaun, celana, dan jaket tren terkini.',
-        relatedVocab: const [
-          RelatedVocab(
-            hanzi: '衣服',
-            pinyin: 'yīfu',
-            arti: 'Pakaian / Baju',
-            iconEmoji: '👕',
-          ),
-          RelatedVocab(
-            hanzi: '衬衫',
-            pinyin: 'chènshān',
-            arti: 'Kemeja',
-            iconEmoji: '👔',
-          ),
-          RelatedVocab(
-            hanzi: '裙子',
-            pinyin: 'qúnzi',
-            arti: 'Rok / Gaun',
-            iconEmoji: '👗',
-          ),
-        ],
-      ),
-      PlaceItem(
-        nameId: 'Hotel Wisatawan Nyaman',
-        nameZh: '舒适快捷酒店',
-        hanzi: '酒店',
-        pinyin: 'Jiǔdiàn',
-        arti: 'Hotel / Akomodasi',
-        category: 'Hotel',
-        iconEmoji: '🏨',
-        latitude: lat - 0.0020,
-        longitude: lon + 0.0025,
-        osmType: 'node',
-        osmId: 103,
-        minPriceCny: 200.0,
-        maxPriceCny: 650.0,
-        description: 'Hotel penginapan bersih dengan fasilitas lengkap, sarapan, dan kamar ber-AC.',
-        relatedVocab: const [
-          RelatedVocab(
-            hanzi: '酒店',
-            pinyin: 'jiǔdiàn',
-            arti: 'Hotel',
-            iconEmoji: '🏨',
-          ),
-          RelatedVocab(
-            hanzi: '房间',
-            pinyin: 'fángjiān',
-            arti: 'Kamar',
-            iconEmoji: '🛏️',
-          ),
-          RelatedVocab(
-            hanzi: '预订',
-            pinyin: 'yùdìng',
-            arti: 'Pesan / Booking',
-            iconEmoji: '📅',
-          ),
-        ],
-      ),
-      PlaceItem(
-        nameId: 'Restoran Masakan Khas & Kuliner Lezat',
-        nameZh: '特色风味餐厅',
-        hanzi: '餐厅',
-        pinyin: 'Cāntīng',
-        arti: 'Restoran Kuliner',
-        category: 'Restoran',
-        iconEmoji: '🍽️',
-        latitude: lat - 0.0018,
-        longitude: lon - 0.0022,
-        osmType: 'node',
-        osmId: 104,
-        minPriceCny: 30.0,
-        maxPriceCny: 120.0,
-        description: 'Restoran masakan hangat dengan aneka hidangan khas gurih, daging, ayam, dan kuah spesial.',
-        relatedVocab: const [
-          RelatedVocab(
-            hanzi: '面条',
-            pinyin: 'miàntiáo',
-            arti: 'Mie',
-            iconEmoji: '🍜',
-          ),
-          RelatedVocab(
-            hanzi: '牛肉',
-            pinyin: 'niúròu',
-            arti: 'Daging sapi',
-            iconEmoji: '🥩',
-          ),
-          RelatedVocab(
-            hanzi: '好吃',
-            pinyin: 'hǎochī',
-            arti: 'Enak / Lezat',
-            iconEmoji: '😋',
-          ),
-        ],
-      ),
-      PlaceItem(
-        nameId: 'Halte & Stasiun Transportasi',
-        nameZh: '城市公共交通车站',
-        hanzi: '车站',
-        pinyin: 'Chēzhàn',
-        arti: 'Stasiun / Halte Transportasi',
-        category: 'Transportasi',
-        iconEmoji: '🚆',
-        latitude: lat + 0.0019,
-        longitude: lon - 0.0015,
-        osmType: 'node',
-        osmId: 106,
-        description: 'Titik transportasi publik lokal (halte bus / stasiun kereta) untuk mobilitas harian.',
-        relatedVocab: const [
-          RelatedVocab(
-            hanzi: '车站',
-            pinyin: 'chēzhàn',
-            arti: 'Stasiun / Halte',
-            iconEmoji: '🚆',
-          ),
-          RelatedVocab(
-            hanzi: '公交车',
-            pinyin: 'gōngjiāochē',
-            arti: 'Bus umum',
-            iconEmoji: '🚌',
-          ),
-          RelatedVocab(
-            hanzi: '地铁',
-            pinyin: 'dìtiě',
-            arti: 'Kereta bawah tanah (Metro)',
-            iconEmoji: '🚇',
-          ),
-          RelatedVocab(
-            hanzi: '买票',
-            pinyin: 'mǎi piào',
-            arti: 'Beli tiket',
-            iconEmoji: '🎟️',
-          ),
-        ],
-      ),
-      PlaceItem(
-        nameId: 'Taman Terbuka Rekreasi Asri',
-        nameZh: '城市绿色公园',
-        hanzi: '公园',
-        pinyin: 'Gōngyuán',
-        arti: 'Taman Terbuka Hijau',
-        category: 'Taman',
-        iconEmoji: '🌳',
-        latitude: lat + 0.0030,
-        longitude: lon + 0.0032,
-        osmType: 'node',
-        osmId: 105,
-        minPriceCny: 10.0,
-        maxPriceCny: 50.0,
-        description: 'Taman kota asri untuk jalan santai pagi, menghirup udara segar, dan olahraga ringan.',
-        relatedVocab: const [
-          RelatedVocab(
-            hanzi: '公园',
-            pinyin: 'gōngyuán',
-            arti: 'Taman kota',
-            iconEmoji: '🌳',
-          ),
-          RelatedVocab(
-            hanzi: '散步',
-            pinyin: 'sànbù',
-            arti: 'Jalan santai',
-            iconEmoji: '🚶',
-          ),
-          RelatedVocab(
-            hanzi: '树木',
-            pinyin: 'shùmù',
-            arti: 'Pepohonan',
-            iconEmoji: '🌲',
-          ),
-        ],
-      ),
-    ];
+    final lastQueryPosition = _lastNearbyQueryPosition;
+    if (forceNearbyRefresh ||
+        lastQueryPosition == null ||
+        _calculateDistance(
+              lastQueryPosition.latitude,
+              lastQueryPosition.longitude,
+              position.latitude,
+              position.longitude,
+            ) >=
+            250) {
+      _lastNearbyQueryPosition = position;
+      _loadNearbyPlaces(position);
+    }
   }
 
   Future<void> _loadNearbyPlaces(Position position) async {
     if (!mounted) return;
+    final requestId = ++_nearbyRequestId;
 
     setState(() {
       _isLoadingNearbyPlaces = true;
       _placesErrorMessage = null;
     });
 
-    final realPlaces = <PlaceItem>[];
-
-    // 1. Ambil tempat-tempat nyata terdekat via Nominatim bounding box di sekitar GPS perangkat
     try {
-      final minLon = position.longitude - 0.055;
-      final maxLat = position.latitude + 0.055;
-      final maxLon = position.longitude + 0.055;
-      final minLat = position.latitude - 0.055;
+      final response = await _requestNearbyPlaces(position);
 
-      final categoriesToFetch = [
-        ('stasiun', 'Transportasi', '车站', 'Chēzhàn', '🚆', 5.0, 25.0),
-        ('cafe', 'Kafe', '咖啡馆', 'Kāfēiguǎn', '☕', 15.0, 45.0),
-        ('restaurant', 'Restoran', '餐厅', 'Cāntīng', '🍽️', 30.0, 120.0),
-        ('hotel', 'Hotel', '酒店', 'Jiǔdiàn', '🏨', 200.0, 650.0),
-        ('clothes', 'Toko Baju', '服装店', 'Fúzhuāngdiàn', '👗', 80.0, 350.0),
-      ];
-
-      for (final cat in categoriesToFetch) {
-        final uri = Uri.https('nominatim.openstreetmap.org', '/search', {
-          'format': 'json',
-          'q': cat.$1,
-          'viewbox': '$minLon,$maxLat,$maxLon,$minLat',
-          'bounded': '1',
-          'limit': '5',
-          'addressdetails': '1',
-        });
-        final res = await http
-            .get(
-              uri,
-              headers: {
-                'User-Agent': 'MandarinLearningApp/1.0',
-                'Accept-Language': 'id,en',
-              },
-            )
-            .timeout(const Duration(seconds: 4));
-
-        if (res.statusCode == 200) {
-          final decoded = jsonDecode(res.body);
-          if (decoded is List) {
-            for (final item in decoded) {
-              if (item is! Map<String, dynamic>) continue;
-              final name =
-                  item['display_name']?.toString().split(',')[0].trim() ?? '';
-              final lat = double.tryParse(item['lat']?.toString() ?? '');
-              final lon = double.tryParse(item['lon']?.toString() ?? '');
-              if (name.isEmpty || lat == null || lon == null) continue;
-
-              if (!realPlaces.any(
-                (p) => p.nameId.toLowerCase() == name.toLowerCase(),
-              )) {
-                realPlaces.add(
-                  PlaceItem(
-                    nameId: name,
-                    hanzi: cat.$3,
-                    pinyin: cat.$4,
-                    arti: cat.$2,
-                    category: cat.$2,
-                    iconEmoji: cat.$5,
-                    latitude: lat,
-                    longitude: lon,
-                    osmType: 'node',
-                    osmId:
-                        DateTime.now().millisecondsSinceEpoch +
-                        realPlaces.length,
-                    minPriceCny: cat.$6,
-                    maxPriceCny: cat.$7,
-                    relatedVocab: [
-                      RelatedVocab(
-                        hanzi: cat.$3,
-                        pinyin: cat.$4,
-                        arti: cat.$2,
-                        iconEmoji: cat.$5,
-                      ),
-                    ],
-                  ),
-                );
-              }
-            }
-          }
-        }
+      if (response.statusCode != 200) {
+        throw StateError('Overpass API mengembalikan ${response.statusCode}.');
       }
-    } catch (e) {
-      debugPrint('[DirectionExplorer] Error loading Nominatim nearby: $e');
-    }
 
-    if (realPlaces.isNotEmpty) {
-      realPlaces.sort(
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map || decoded['elements'] is! List) {
+        throw const FormatException(
+          'Format data tempat OpenStreetMap tidak valid.',
+        );
+      }
+
+      final places = <PlaceItem>[];
+      final seenIds = <String>{};
+      for (final element in decoded['elements'] as List) {
+        if (element is! Map) continue;
+        final place = _placeFromOsmElement(Map<String, dynamic>.from(element));
+        if (place == null) continue;
+        final distance = _calculateDistance(
+          position.latitude,
+          position.longitude,
+          place.latitude,
+          place.longitude,
+        );
+        if (distance > _nearbyRadiusMeters) continue;
+
+        final key = '${place.osmType}/${place.osmId}';
+        if (seenIds.add(key)) places.add(place);
+      }
+
+      places.sort(
         (a, b) =>
             _calculateDistance(
               position.latitude,
@@ -669,24 +466,181 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
               ),
             ),
       );
-    }
 
-    if (mounted) {
-      setState(() {
-        _nearbyPlaces = realPlaces.isNotEmpty
-            ? realPlaces
-            : _generateNearbyContextualPlaces(
-                position.latitude,
-                position.longitude,
-              );
-        _isLoadingNearbyPlaces = false;
-      });
+      if (mounted && requestId == _nearbyRequestId) {
+        setState(() {
+          _nearbyPlaces = places;
+          if (_selectedPlace != null &&
+              !places.any(
+                (place) =>
+                    place.osmType == _selectedPlace!.osmType &&
+                    place.osmId == _selectedPlace!.osmId,
+              )) {
+            _selectedPlace = null;
+          }
+          _isLoadingNearbyPlaces = false;
+        });
+      }
+    } catch (error) {
+      debugPrint('[DirectionExplorer] Gagal memuat tempat sekitar: $error');
+      if (mounted && requestId == _nearbyRequestId) {
+        setState(() {
+          _nearbyPlaces = [];
+          _selectedPlace = null;
+          _placesErrorMessage = 'Data tempat sekitar gagal dimuat. Periksa koneksi lalu coba lagi.';
+          _isLoadingNearbyPlaces = false;
+        });
+      }
     }
   }
 
-  // Pencarian Cerdas Tempat Sekitar & Rekomendasi
+  Future<http.Response> _requestNearbyPlaces(Position position) async {
+    final query = buildNearbyPlacesQuery(
+      radiusMeters: _nearbyRadiusMeters,
+      latitude: position.latitude,
+      longitude: position.longitude,
+    );
+    Object? lastError;
+
+    for (final host in _overpassEndpoints) {
+      try {
+        final response = await http
+            .post(
+              Uri.https(host, '/api/interpreter'),
+              headers: const {
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent':
+                    'Nihaoki/1.0 (OpenStreetMap nearby places client)',
+              },
+              body: {'data': query},
+            )
+            .timeout(const Duration(seconds: 20));
+        if (response.statusCode == 200) return response;
+
+        lastError = StateError(
+          'Overpass $host mengembalikan ${response.statusCode}.',
+        );
+        debugPrint('[DirectionExplorer] $lastError');
+        if (response.statusCode != 429 && response.statusCode < 500) break;
+      } catch (error) {
+        lastError = error;
+        debugPrint('[DirectionExplorer] Overpass $host gagal: $error');
+      }
+    }
+
+    if (lastError != null) {
+      Error.throwWithStackTrace(lastError, StackTrace.current);
+    }
+    throw StateError('Tidak ada layanan pencarian tempat yang tersedia.');
+  }
+
+  PlaceItem? _placeFromOsmElement(Map<String, dynamic> element) {
+    final rawTags = element['tags'];
+    final rawId = element['id'];
+    if (rawTags is! Map || rawId is! num) return null;
+
+    final tags = Map<String, dynamic>.from(rawTags);
+    final name = tags['name']?.toString().trim() ?? '';
+    final center = element['center'];
+    final centerMap = center is Map ? center : const <String, dynamic>{};
+    final latitude = double.tryParse(
+      (element['lat'] ?? centerMap['lat'])?.toString() ?? '',
+    );
+    final longitude = double.tryParse(
+      (element['lon'] ?? centerMap['lon'])?.toString() ?? '',
+    );
+    if (name.isEmpty ||
+        latitude == null ||
+        longitude == null ||
+        !latitude.isFinite ||
+        !longitude.isFinite ||
+        latitude < -90 ||
+        latitude > 90 ||
+        longitude < -180 ||
+        longitude > 180) {
+      return null;
+    }
+
+    final amenity = tags['amenity']?.toString();
+    final shop = tags['shop']?.toString();
+    final tourism = tags['tourism']?.toString();
+    final leisure = tags['leisure']?.toString();
+    final railway = tags['railway']?.toString();
+
+    var category = 'Tempat Umum';
+    var hanzi = '地点';
+    var pinyin = 'Dìdiǎn';
+    var icon = '📍';
+    if (tags.containsKey('public_transport') ||
+        ['station', 'halt', 'tram_stop'].contains(railway) ||
+        tags['highway'] == 'bus_stop' ||
+        ['bus_station', 'ferry_terminal', 'taxi'].contains(amenity)) {
+      category = 'Transportasi';
+      hanzi = '车站';
+      pinyin = 'Chēzhàn';
+      icon = '🚆';
+    } else if (['cafe', 'bar', 'tea'].contains(amenity)) {
+      category = 'Kafe';
+      hanzi = '咖啡馆';
+      pinyin = 'Kāfēiguǎn';
+      icon = '☕';
+    } else if ([
+      'restaurant',
+      'fast_food',
+      'food_court',
+      'ice_cream',
+    ].contains(amenity)) {
+      category = 'Restoran';
+      hanzi = '餐厅';
+      pinyin = 'Cāntīng';
+      icon = '🍽️';
+    } else if (['hotel', 'hostel', 'guest_house', 'motel'].contains(tourism)) {
+      category = 'Hotel';
+      hanzi = '酒店';
+      pinyin = 'Jiǔdiàn';
+      icon = '🏨';
+    } else if (['clothes', 'fashion', 'shoes'].contains(shop)) {
+      category = 'Toko Baju';
+      hanzi = '服装店';
+      pinyin = 'Fúzhuāngdiàn';
+      icon = '👗';
+    } else if (['park', 'garden'].contains(leisure)) {
+      category = 'Taman';
+      hanzi = '公园';
+      pinyin = 'Gōngyuán';
+      icon = '🌳';
+    }
+
+    return PlaceItem(
+      nameId: name,
+      nameZh: (tags['name:zh'] ?? tags['name:zh-Hans'])?.toString(),
+      hanzi: hanzi,
+      pinyin: pinyin,
+      arti: category,
+      category: category,
+      iconEmoji: icon,
+      latitude: latitude,
+      longitude: longitude,
+      osmType: element['type']?.toString() ?? 'node',
+      osmId: rawId.toInt(),
+      description: tags['description']?.toString(),
+      relatedVocab: [
+        RelatedVocab(
+          hanzi: hanzi,
+          pinyin: pinyin,
+          arti: category,
+          iconEmoji: icon,
+        ),
+      ],
+    );
+  }
+
+  // Pencarian dilakukan hanya pada hasil nyata dalam radius yang dimuat.
   Future<void> _performSearch(String query) async {
-    final trimmed = query.trim();
+    final trimmed = query.trim().toLowerCase();
+    if (!mounted) return;
+
     if (trimmed.isEmpty) {
       setState(() {
         _searchResults = [];
@@ -695,302 +649,28 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
       return;
     }
 
-    final userPos = _currentPosition;
     setState(() => _isSearching = true);
+    final userPosition = _currentPosition;
+    final results = _nearbyPlaces.where((place) {
+      return place.nameId.toLowerCase().contains(trimmed) ||
+          (place.nameZh?.toLowerCase().contains(trimmed) ?? false) ||
+          place.category.toLowerCase().contains(trimmed) ||
+          place.hanzi.contains(query.trim()) ||
+          place.pinyin.toLowerCase().contains(trimmed);
+    }).toList();
 
-    final results = <PlaceItem>[];
-    final lowerQ = trimmed.toLowerCase();
-
-    // 1. Cocokkan dari data tempat sekitar yang sudah dimuat
-    for (final p in _nearbyPlaces) {
-      if (p.nameId.toLowerCase().contains(lowerQ) ||
-          p.category.toLowerCase().contains(lowerQ) ||
-          p.hanzi.contains(trimmed) ||
-          p.pinyin.toLowerCase().contains(lowerQ)) {
-        if (!results.any(
-          (r) => r.nameId.toLowerCase() == p.nameId.toLowerCase(),
-        )) {
-          results.add(p);
-        }
-      }
-    }
-
-    // 2. Query Nominatim OpenStreetMap (Universal Search seperti Google Maps)
-    if (userPos != null) {
-      try {
-        // Tentukan kata kunci pencarian Nominatim (mendukung transportasi & bebas)
-        String nominatimQ = trimmed;
-        if (lowerQ.contains('transport') || lowerQ.contains('transportasi')) {
-          nominatimQ = 'stasiun halte terminal';
-        }
-
-        // Cari pertama kali dalam radius pengguna
-        final uriBounded = Uri.https('nominatim.openstreetmap.org', '/search', {
-          'format': 'json',
-          'q': nominatimQ,
-          'viewbox':
-              '${userPos.longitude - 0.15},${userPos.latitude + 0.15},${userPos.longitude + 0.15},${userPos.latitude - 0.15}',
-          'bounded': '1',
-          'limit': '15',
-          'addressdetails': '1',
-        });
-
-        var res = await http
-            .get(
-              uriBounded,
-              headers: {
-                'User-Agent': 'MandarinLearningApp/1.0',
-                'Accept-Language': 'id,en',
-              },
-            )
-            .timeout(const Duration(seconds: 5));
-
-        var decoded = res.statusCode == 200 ? jsonDecode(res.body) : null;
-
-        // Fallback jika pencarian lokal kosong: cari lebih luas tanpa bounded
-        if (decoded == null || (decoded is List && decoded.isEmpty)) {
-          final uriUnbounded = Uri.https(
-            'nominatim.openstreetmap.org',
-            '/search',
-            {
-              'format': 'json',
-              'q': nominatimQ,
-              'limit': '10',
-              'addressdetails': '1',
-            },
-          );
-          res = await http
-              .get(
-                uriUnbounded,
-                headers: {
-                  'User-Agent': 'MandarinLearningApp/1.0',
-                  'Accept-Language': 'id,en',
-                },
-              )
-              .timeout(const Duration(seconds: 5));
-          if (res.statusCode == 200) {
-            decoded = jsonDecode(res.body);
-          }
-        }
-
-        if (decoded is List) {
-          for (final item in decoded) {
-            if (item is! Map<String, dynamic>) continue;
-            final name =
-                item['display_name']?.toString().split(',')[0].trim() ??
-                trimmed;
-            final lat = double.tryParse(item['lat']?.toString() ?? '');
-            final lon = double.tryParse(item['lon']?.toString() ?? '');
-            if (lat == null || lon == null || name.isEmpty) continue;
-
-            final type = item['type']?.toString().toLowerCase() ?? '';
-            final cls = item['class']?.toString().toLowerCase() ?? '';
-            final itemLower = name.toLowerCase();
-
-            // Klasifikasi kategori & kosakata Mandarin secara universal
-            String cat = 'Tempat Umum';
-            String icon = '📍';
-            String hanzi = '地点';
-            String pinyin = 'Dìdiǎn';
-            String arti = 'Tempat Umum';
-
-            if (lowerQ.contains('transport') ||
-                itemLower.contains('stasiun') ||
-                itemLower.contains('halte') ||
-                itemLower.contains('terminal') ||
-                itemLower.contains('bandara') ||
-                cls.contains('railway') ||
-                cls.contains('highway') ||
-                type.contains('station') ||
-                type.contains('bus_stop')) {
-              cat = 'Transportasi';
-              icon = '🚆';
-              hanzi = '车站';
-              pinyin = 'Chēzhàn';
-              arti = 'Stasiun / Transportasi';
-            } else if (lowerQ.contains('cafe') ||
-                lowerQ.contains('kafe') ||
-                lowerQ.contains('kopi') ||
-                type.contains('cafe')) {
-              cat = 'Kafe';
-              icon = '☕';
-              hanzi = '咖啡馆';
-              pinyin = 'Kāfēiguǎn';
-              arti = 'Kafe';
-            } else if (lowerQ.contains('hotel') ||
-                lowerQ.contains('penginapan') ||
-                cls.contains('tourism')) {
-              cat = 'Hotel';
-              icon = '🏨';
-              hanzi = '酒店';
-              pinyin = 'Jiǔdiàn';
-              arti = 'Hotel';
-            } else if (lowerQ.contains('baju') ||
-                lowerQ.contains('fashion') ||
-                lowerQ.contains('clothing') ||
-                cls.contains('shop')) {
-              cat = 'Toko Baju';
-              icon = '👗';
-              hanzi = '服装店';
-              pinyin = 'Fúzhuāngdiàn';
-              arti = 'Toko Baju';
-            } else if (lowerQ.contains('resto') ||
-                lowerQ.contains('makan') ||
-                type.contains('restaurant')) {
-              cat = 'Restoran';
-              icon = '🍽️';
-              hanzi = '餐厅';
-              pinyin = 'Cāntīng';
-              arti = 'Restoran';
-            } else if (lowerQ.contains('taman') || type.contains('park')) {
-              cat = 'Taman';
-              icon = '🌲';
-              hanzi = '公园';
-              pinyin = 'Gōngyuán';
-              arti = 'Taman';
-            } else if (itemLower.contains('masjid') ||
-                itemLower.contains('gereja') ||
-                cls.contains('amenity') && type.contains('place_of_worship')) {
-              cat = 'Tempat Ibadah';
-              icon = '🕌';
-              hanzi = '宗教场所';
-              pinyin = 'Zōngjiào chǎngsuǒ';
-              arti = 'Tempat Ibadah';
-            } else if (itemLower.contains('sekolah') ||
-                itemLower.contains('universitas') ||
-                itemLower.contains('kampus')) {
-              cat = 'Pendidikan';
-              icon = '🏫';
-              hanzi = '学校';
-              pinyin = 'Xuéxiào';
-              arti = 'Sekolah / Kampus';
-            } else if (itemLower.contains('rumah sakit') ||
-                itemLower.contains('apotek') ||
-                itemLower.contains('klinik')) {
-              cat = 'Kesehatan';
-              icon = '🏥';
-              hanzi = '医院';
-              pinyin = 'Yīyuàn';
-              arti = 'Rumah Sakit';
-            }
-
-            final newItem = PlaceItem(
-              nameId: name,
-              hanzi: hanzi,
-              pinyin: pinyin,
-              arti: arti,
-              category: cat,
-              iconEmoji: icon,
-              latitude: lat,
-              longitude: lon,
-              osmType: 'node',
-              osmId: DateTime.now().millisecondsSinceEpoch + results.length,
-              relatedVocab: [
-                RelatedVocab(
-                  hanzi: hanzi,
-                  pinyin: pinyin,
-                  arti: arti,
-                  iconEmoji: icon,
-                ),
-              ],
-            );
-
-            if (!results.any(
-              (r) => r.nameId.toLowerCase() == name.toLowerCase(),
-            )) {
-              results.add(newItem);
-            }
-          }
-        }
-      } catch (e) {
-        debugPrint('[DirectionExplorer] Universal search error: $e');
-      }
-    }
-
-    // Jika pencarian transportasi masih kosong, tambahkan rekomendasi kontekstual cerdas
-    if (results.isEmpty && userPos != null) {
-      if (lowerQ.contains('transport') ||
-          lowerQ.contains('stasiun') ||
-          lowerQ.contains('halte')) {
-        results.addAll([
-          PlaceItem(
-            nameId: 'Stasiun Kereta & Transportasi Publik',
-            nameZh: '城市公共交通总站',
-            hanzi: '车站',
-            pinyin: 'Chēzhàn',
-            arti: 'Stasiun / Halte Transportasi',
-            category: 'Transportasi',
-            iconEmoji: '🚆',
-            latitude: userPos.latitude + 0.0019,
-            longitude: userPos.longitude - 0.0015,
-            osmType: 'node',
-            osmId: 310,
-            description: 'Titik transportasi umum terdekat untuk bus kota dan kereta api.',
-            relatedVocab: const [
-              RelatedVocab(
-                hanzi: '车站',
-                pinyin: 'chēzhàn',
-                arti: 'Stasiun / Halte',
-                iconEmoji: '🚆',
-              ),
-              RelatedVocab(
-                hanzi: '公交车',
-                pinyin: 'gōngjiāochē',
-                arti: 'Bus kota',
-                iconEmoji: '🚌',
-              ),
-              RelatedVocab(
-                hanzi: '地铁',
-                pinyin: 'dìtiě',
-                arti: 'Subway / Metro',
-                iconEmoji: '🚇',
-              ),
-            ],
-          ),
-          PlaceItem(
-            nameId: 'Halte Transit Bus Kota',
-            nameZh: '公交巴士中转站',
-            hanzi: '公交车站',
-            pinyin: 'Gōngjiāochē zhàn',
-            arti: 'Halte Transit Bus',
-            category: 'Transportasi',
-            iconEmoji: '🚌',
-            latitude: userPos.latitude - 0.0014,
-            longitude: userPos.longitude + 0.0018,
-            osmType: 'node',
-            osmId: 311,
-            description: 'Halte bus terdekat dengan rute transit antarmoda.',
-            relatedVocab: const [
-              RelatedVocab(
-                hanzi: '买票',
-                pinyin: 'mǎi piào',
-                arti: 'Beli tiket',
-                iconEmoji: '🎟️',
-              ),
-              RelatedVocab(
-                hanzi: '到站',
-                pinyin: 'dàozhàn',
-                arti: 'Tiba di stasiun',
-                iconEmoji: '📍',
-              ),
-            ],
-          ),
-        ]);
-      }
-    }
-
-    if (userPos != null) {
+    if (userPosition != null) {
       results.sort(
         (a, b) =>
             _calculateDistance(
-              userPos.latitude,
-              userPos.longitude,
+              userPosition.latitude,
+              userPosition.longitude,
               a.latitude,
               a.longitude,
             ).compareTo(
               _calculateDistance(
-                userPos.latitude,
-                userPos.longitude,
+                userPosition.latitude,
+                userPosition.longitude,
                 b.latitude,
                 b.longitude,
               ),
@@ -1149,7 +829,7 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
 
     try {
       final response = await http
-          .get(url, headers: {'User-Agent': 'MandarinLearningApp/1.0'})
+          .get(url, headers: {'User-Agent': 'Nihaoki/1.0'})
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -1341,7 +1021,8 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
       'Taman',
     ];
 
-    final activePlaces = _searchResults.isNotEmpty
+    final hasSearchQuery = _searchController.text.trim().isNotEmpty;
+    final activePlaces = hasSearchQuery
         ? _searchResults
         : (_selectedCategory == 'Semua'
               ? _nearbyPlaces
@@ -1359,8 +1040,10 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
         backgroundColor: AppColors.mintBackground,
         elevation: 0,
         title: const Text(
-          'Mandarin Direction Explorer',
-          style: TextStyle(fontWeight: FontWeight.w800),
+          'Jelajah Sekitar Nihaoki',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
         ),
         actions: [
           IconButton(
@@ -1401,42 +1084,53 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: AppColors.borderLight),
                 ),
-                child: Row(
-                  children: [
-                    const Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Jelajahi sekitar',
-                            style: TextStyle(
-                              fontSize: 21,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.forestGreen,
-                            ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final mascotSize = constraints.maxWidth < 360
+                        ? 72.0
+                        : 122.0;
+                    return Row(
+                      children: [
+                        const Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Jelajahi sekitar',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 21,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.forestGreen,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                'Temukan tempat dan belajar kosakata Mandarin di perjalananmu.',
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  height: 1.25,
+                                  color: AppColors.primaryDark,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 5),
-                          Text(
-                            'Temukan tempat dan belajar kosakata Mandarin di perjalananmu.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              height: 1.25,
-                              color: AppColors.primaryDark,
-                            ),
+                        ),
+                        SizedBox(
+                          width: mascotSize,
+                          height: mascotSize,
+                          child: Image.asset(
+                            'assets/image/beranda/maskot_04_lup.png',
+                            fit: BoxFit.contain,
                           ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      width: 122,
-                      height: 122,
-                      child: Image.asset(
-                        'assets/image/beranda/maskot_04_lup.png',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 14),
@@ -1699,34 +1393,43 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
                   height: 270,
                   child: Stack(
                     children: [
-                      FlutterMap(
-                        mapController: _mapController,
-                        options: MapOptions(
-                          initialCenter:
-                              userCenter ?? const LatLng(-6.2088, 106.8456),
-                          initialZoom: userCenter != null ? 15.5 : 12.0,
-                          minZoom: 3,
-                          maxZoom: 19,
-                          onMapReady: () {
-                            _isMapReady = true;
-                            final current = _currentPosition;
-                            if (current != null) {
-                              _mapController.move(
-                                LatLng(current.latitude, current.longitude),
-                                15.5,
-                              );
-                            }
-                          },
-                        ),
-                        children: [
-                          TileLayer(
-                            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                            userAgentPackageName:
-                                'com.example.mandarin_learning',
+                      if (userCenter == null)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(24),
+                            child: Text(
+                              'Aktifkan izin lokasi untuk menampilkan peta di sekitar Anda.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: AppColors.textMuted),
+                            ),
                           ),
-                          MarkerLayer(
-                            markers: [
-                              if (userCenter != null)
+                        )
+                      else
+                        FlutterMap(
+                          mapController: _mapController,
+                          options: MapOptions(
+                            initialCenter: userCenter,
+                            initialZoom: 15.5,
+                            minZoom: 3,
+                            maxZoom: 19,
+                            onMapReady: () {
+                              _isMapReady = true;
+                              final current = _currentPosition;
+                              if (current != null) {
+                                _mapController.move(
+                                  LatLng(current.latitude, current.longitude),
+                                  15.5,
+                                );
+                              }
+                            },
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              userAgentPackageName: 'com.nihaoki.app',
+                            ),
+                            MarkerLayer(
+                              markers: [
                                 Marker(
                                   point: userCenter,
                                   width: 36,
@@ -1755,127 +1458,134 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
                                     ),
                                   ),
                                 ),
-                              ...activePlaces.map((place) {
-                                final isSelected =
-                                    _selectedPlace?.nameId == place.nameId;
-                                final iconData = _getCategoryIcon(
-                                  place.category,
-                                );
-                                final color = _getCategoryColor(place.category);
-                                return Marker(
-                                  point: LatLng(
-                                    place.latitude,
-                                    place.longitude,
-                                  ),
-                                  width: 140,
-                                  height: 68,
-                                  alignment: Alignment.center,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedPlace = place;
-                                      });
-                                      if (_isMapReady) {
-                                        _mapController.move(
-                                          LatLng(
-                                            place.latitude,
-                                            place.longitude,
-                                          ),
-                                          16.0,
-                                        );
-                                      }
-                                      _openPlaceBottomSheet(place);
-                                    },
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          width: 36,
-                                          height: 36,
-                                          decoration: BoxDecoration(
-                                            color: isSelected
-                                                ? const Color(0xFFDC2626)
-                                                : color,
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.white,
-                                              width: 2.5,
-                                            ),
-                                            boxShadow: const [
-                                              BoxShadow(
-                                                color: Colors.black26,
-                                                blurRadius: 5,
-                                              ),
-                                            ],
-                                          ),
-                                          child: Center(
-                                            child: Icon(
-                                              iconData,
-                                              color: Colors.white,
-                                              size: 19,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Container(
-                                          constraints: const BoxConstraints(
-                                            maxWidth: 136,
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                            border: Border.all(
-                                              color: isSelected
-                                                  ? const Color(0xFFDC2626)
-                                                  : Colors.transparent,
-                                              width: 1,
-                                            ),
-                                            boxShadow: const [
-                                              BoxShadow(
-                                                color: Colors.black26,
-                                                blurRadius: 3,
-                                              ),
-                                            ],
-                                          ),
-                                          child: Text(
-                                            place.nameId,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: isSelected
-                                                  ? FontWeight.bold
-                                                  : FontWeight.w600,
-                                              color: isSelected
-                                                  ? const Color(0xFFDC2626)
-                                                  : AppColors.textDark,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                ...activePlaces.map((place) {
+                                  final isSelected =
+                                      _selectedPlace?.nameId == place.nameId;
+                                  final iconData = _getCategoryIcon(
+                                    place.category,
+                                  );
+                                  final color = _getCategoryColor(
+                                    place.category,
+                                  );
+                                  return Marker(
+                                    point: LatLng(
+                                      place.latitude,
+                                      place.longitude,
                                     ),
-                                  ),
-                                );
-                              }),
-                            ],
-                          ),
-                          RichAttributionWidget(
-                            attributions: [
-                              TextSourceAttribution(
-                                '© OpenStreetMap',
-                                onTap: () {},
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                                    width: 140,
+                                    height: 68,
+                                    alignment: Alignment.center,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedPlace = place;
+                                        });
+                                        if (_isMapReady) {
+                                          _mapController.move(
+                                            LatLng(
+                                              place.latitude,
+                                              place.longitude,
+                                            ),
+                                            16.0,
+                                          );
+                                        }
+                                        _openPlaceBottomSheet(place);
+                                      },
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: isSelected
+                                                  ? const Color(0xFFDC2626)
+                                                  : color,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: Colors.white,
+                                                width: 2.5,
+                                              ),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: Colors.black26,
+                                                  blurRadius: 5,
+                                                ),
+                                              ],
+                                            ),
+                                            child: Center(
+                                              child: Icon(
+                                                iconData,
+                                                color: Colors.white,
+                                                size: 19,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Container(
+                                            constraints: const BoxConstraints(
+                                              maxWidth: 136,
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              border: Border.all(
+                                                color: isSelected
+                                                    ? const Color(0xFFDC2626)
+                                                    : Colors.transparent,
+                                                width: 1,
+                                              ),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: Colors.black26,
+                                                  blurRadius: 3,
+                                                ),
+                                              ],
+                                            ),
+                                            child: Text(
+                                              place.nameId,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.w600,
+                                                color: isSelected
+                                                    ? const Color(0xFFDC2626)
+                                                    : AppColors.textDark,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ),
+                            RichAttributionWidget(
+                              attributions: [
+                                TextSourceAttribution(
+                                  '© OpenStreetMap contributors',
+                                ),
+                              ],
+                            ),
+                            RichAttributionWidget(
+                              attributions: [
+                                TextSourceAttribution(
+                                  '© OpenStreetMap contributors',
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
 
                       // Indikator Loading GPS Riil Perangkat
                       if (userCenter == null)
@@ -2137,9 +1847,9 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _searchResults.isNotEmpty
+                    hasSearchQuery
                         ? 'Hasil Pencarian Tempat'
-                        : 'Tempat Nyata Sekitar Koordinat Anda',
+                        : 'Tempat di Sekitar Anda',
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
@@ -2174,16 +1884,27 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Center(
-                    child: Text(
-                      _placesErrorMessage ??
-                          (_searchResults.isNotEmpty
-                              ? 'Tidak menemukan tempat dengan kata kunci "${_searchController.text}". Coba kata kunci lain.'
-                              : 'Sedang mendeteksi tempat sekitar titik koordinat Anda...'),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textMuted,
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _placesErrorMessage ??
+                              (hasSearchQuery
+                                  ? 'Tidak menemukan tempat dengan kata kunci "${_searchController.text}". Coba kata kunci lain.'
+                                  : 'Tidak ada tempat bernama dalam radius 3 km pada OpenStreetMap.'),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                        if (!hasSearchQuery)
+                          TextButton.icon(
+                            onPressed: _loadCurrentLocation,
+                            icon: const Icon(Icons.refresh_rounded, size: 18),
+                            label: const Text('Muat ulang tempat sekitar'),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -2358,7 +2079,7 @@ class _DirectionExplorerScreenState extends State<DirectionExplorerScreen> {
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.mandarin_learning',
+                userAgentPackageName: 'com.nihaoki.app',
               ),
               PolylineLayer(
                 polylines: [

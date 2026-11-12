@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/services/compass_heading_service.dart';
+import 'package:nihaoki/services/compass_heading_service.dart';
 
 void main() {
   group('calculateCompassHeading', () {

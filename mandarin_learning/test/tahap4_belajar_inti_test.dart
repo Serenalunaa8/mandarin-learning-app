@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/models/quiz_attempt_model.dart';
-import 'package:mandarin_learning/models/vocabulary_model.dart';
+import 'package:nihaoki/models/quiz_attempt_model.dart';
+import 'package:nihaoki/models/vocabulary_model.dart';
 
 void main() {
   group('Tahap 4: Belajar Inti - Kuis Utama (PB-03, FR-03, FR-17, FR-19)', () {

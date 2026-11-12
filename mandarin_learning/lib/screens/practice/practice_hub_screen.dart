@@ -60,7 +60,10 @@ class PracticeHubScreen extends StatelessWidget {
             if (isGuest) ...[
               Container(
                 margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFF7ED),
                   borderRadius: BorderRadius.circular(16),
@@ -68,7 +71,11 @@ class PracticeHubScreen extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline_rounded, color: Color(0xFFEA580C), size: 20),
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      color: Color(0xFFEA580C),
+                      size: 20,
+                    ),
                     const SizedBox(width: 10),
                     const Expanded(
                       child: Text(
@@ -84,7 +91,9 @@ class PracticeHubScreen extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const RegisterScreen(),
+                          ),
                         );
                       },
                       child: const Text(
@@ -304,7 +313,8 @@ class PracticeHubScreen extends StatelessWidget {
             _buildFeatureCard(
               context,
               title: 'Saldo & Riwayat Koin',
-              desc: 'Lihat saldo, reward, dan koin yang digunakan untuk bantuan',
+              desc:
+                  'Lihat saldo, reward, dan koin yang digunakan untuk bantuan',
               emoji: '🪙',
               color: const Color(0xFFFFF7ED),
               tag: 'Reward Koin',
@@ -348,7 +358,9 @@ class PracticeHubScreen extends StatelessWidget {
                 }
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const DirectionExplorerScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const DirectionExplorerScreen(),
+                  ),
                 );
               },
             ),
@@ -370,7 +382,9 @@ class PracticeHubScreen extends StatelessWidget {
                 }
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const CurrencyConverterScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const CurrencyConverterScreen(),
+                  ),
                 );
               },
             ),
@@ -392,7 +406,9 @@ class PracticeHubScreen extends StatelessWidget {
                 }
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const TimeConverterScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const TimeConverterScreen(),
+                  ),
                 );
               },
             ),
@@ -469,7 +485,11 @@ class PracticeHubScreen extends StatelessWidget {
                     ),
                     child: Center(
                       child: locked
-                          ? const Icon(Icons.lock_rounded, color: Color(0xFF94A3B8), size: 24)
+                          ? const Icon(
+                              Icons.lock_rounded,
+                              color: Color(0xFF94A3B8),
+                              size: 24,
+                            )
                           : Text(emoji, style: const TextStyle(fontSize: 24)),
                     ),
                   ),
@@ -486,7 +506,9 @@ class PracticeHubScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
-                                color: locked ? const Color(0xFF94A3B8) : AppColors.primaryDark,
+                                color: locked
+                                    ? const Color(0xFF94A3B8)
+                                    : AppColors.primaryDark,
                               ),
                             ),
                             if (isComingSoon)
@@ -516,7 +538,9 @@ class PracticeHubScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            color: locked ? const Color(0xFF94A3B8) : AppColors.textDark,
+                            color: locked
+                                ? const Color(0xFF94A3B8)
+                                : AppColors.textDark,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -535,7 +559,9 @@ class PracticeHubScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Icon(
-                    locked ? Icons.lock_outline_rounded : Icons.chevron_right_rounded,
+                    locked
+                        ? Icons.lock_outline_rounded
+                        : Icons.chevron_right_rounded,
                     color: AppColors.textLight,
                   ),
                 ],

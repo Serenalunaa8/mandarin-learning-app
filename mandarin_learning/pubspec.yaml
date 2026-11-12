@@ -1,5 +1,5 @@
-name: mandarin_learning
-description: "A new Flutter project."
+name: nihaoki
+description: "Nihaoki - aplikasi belajar Mandarin."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -86,11 +86,6 @@ flutter:
     - Data/contoh_kalimat_hsk4.json
     - Data/contoh-kalimat-hsk5.json
     - Data/contoh_kalimat_hsk6.json
-    - data/mandarin_id.json
-    - data/contoh_kalimat_hsk1_3.json
-    - data/contoh_kalimat_hsk4.json
-    - data/contoh-kalimat-hsk5.json
-    - data/contoh_kalimat_hsk6.json
     - assets/image/landing_page/
     - assets/image/games/
     - assets/image/register/

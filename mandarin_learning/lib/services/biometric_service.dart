@@ -7,7 +7,7 @@ class BiometricService {
   BiometricService._internal();
 
   static const MethodChannel _settingsChannel = MethodChannel(
-    'com.example.mandarin_learning/biometric_settings',
+    'com.nihaoki.app/biometric_settings',
   );
   final LocalAuthentication _auth = LocalAuthentication();
 
@@ -47,7 +47,9 @@ class BiometricService {
     if (kIsWeb) return false;
     if (defaultTargetPlatform == TargetPlatform.android) {
       try {
-        final result = await _settingsChannel.invokeMethod<bool?>('hasFingerprint');
+        final result = await _settingsChannel.invokeMethod<bool?>(
+          'hasFingerprint',
+        );
         if (result != null) return result;
       } catch (e) {
         debugPrint('[BiometricService] hasFingerprint channel error: $e');
@@ -55,7 +57,7 @@ class BiometricService {
     }
     final types = await getAvailableBiometrics();
     return types.contains(BiometricType.fingerprint) ||
-           types.contains(BiometricType.strong);
+        types.contains(BiometricType.strong);
   }
 
   /// Cek apakah perangkat mendukung pengenalan wajah (Face ID / Face Recognition)
@@ -63,7 +65,9 @@ class BiometricService {
     if (kIsWeb) return false;
     if (defaultTargetPlatform == TargetPlatform.android) {
       try {
-        final result = await _settingsChannel.invokeMethod<bool?>('hasFaceRecognition');
+        final result = await _settingsChannel.invokeMethod<bool?>(
+          'hasFaceRecognition',
+        );
         if (result != null) return result;
       } catch (e) {
         debugPrint('[BiometricService] hasFaceRecognition channel error: $e');
@@ -71,7 +75,7 @@ class BiometricService {
     }
     final types = await getAvailableBiometrics();
     return types.contains(BiometricType.face) ||
-           types.contains(BiometricType.weak);
+        types.contains(BiometricType.weak);
   }
 
   /// Cek apakah perangkat mendukung iris

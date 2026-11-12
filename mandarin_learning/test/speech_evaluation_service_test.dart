@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/services/speech_evaluation_service.dart';
+import 'package:nihaoki/services/speech_evaluation_service.dart';
 
 void main() {
   test('ignores transcript whitespace and punctuation', () {

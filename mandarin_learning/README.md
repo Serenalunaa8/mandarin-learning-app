@@ -1,17 +1,18 @@
-# mandarin_learning
+# Nihaoki
 
-A new Flutter project.
+Nihaoki is a Flutter app for learning Mandarin, with lessons, vocabulary,
+practice, games, progress tracking, and location-based nearby-place discovery.
 
-## Getting Started
+## Run locally
 
-This project is a starting point for a Flutter application.
+```powershell
+flutter pub get
+flutter run
+```
 
-A few resources to get you started if this is your first Flutter project:
+The app's AI assistant uses a Supabase Edge Function. Configure it using
+[supabase/AI_TUTOR_SETUP.md](./supabase/AI_TUTOR_SETUP.md).
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Nearby places are retrieved from OpenStreetMap's Overpass API and displayed on
+OpenStreetMap tiles. Results are limited to a 3 km radius from the device's
+current location; they are not Google Maps data.

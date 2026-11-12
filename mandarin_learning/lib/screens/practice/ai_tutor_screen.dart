@@ -19,7 +19,10 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<AiChatMessage> _messages = [];
   bool _isGenerating = false;
+  AiTutorMode _selectedMode = AiTutorMode.appApi;
   String? _activeConversationId;
+  int _conversationGeneration = 0;
+  Future<void> _conversationSaveQueue = Future<void>.value();
 
   final List<String> _quickSuggestions = [
     '💡 Perbedaan 的, 得, 地',
@@ -39,17 +42,28 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
   }
 
   AiChatMessage _welcomeMessage() => AiChatMessage(
-        text: 'Halo! Aku LingLing (玲玲), AI Tutor Mandarin pribadimu 🐼.\n\n'
-            'Kamu bisa menanyakan apa saja seputar kosakata Mandarin, tata bahasa (grammar), pelafalan nada, hingga latihan percakapan sehari-hari!',
-        isUser: false,
-        timestamp: DateTime.now(),
-        mode: AiTutorMode.appApi,
-        modelBadge: 'LingLing (玲玲) • AI Tutor',
-      );
+    text:
+        'Halo! Aku LingLing (玲玲), AI Tutor Mandarin pribadimu 🐼.\n\n'
+        'Kamu bisa bertanya tentang materi dan fitur Nihaoki, atau pilih Gemini untuk pertanyaan umum.',
+    isUser: false,
+    timestamp: DateTime.now(),
+    mode: _selectedMode,
+    modelBadge: _selectedMode.label,
+  );
+
+  void _selectMode(AiTutorMode mode) {
+    setState(() {
+      _selectedMode = mode;
+      if (_messages.length == 1 && !_messages.first.isUser) {
+        _messages[0] = _welcomeMessage();
+      }
+    });
+  }
 
   Future<void> _startNewConversation() async {
     if (_isGenerating) return;
     setState(() {
+      _conversationGeneration++;
       _activeConversationId = null;
       _messages
         ..clear()
@@ -67,12 +81,18 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             children: [
               Icon(Icons.info_outline_rounded, color: Colors.white, size: 18),
               SizedBox(width: 8),
-              Expanded(child: Text('Masuk ke akun untuk menyimpan dan melihat riwayat percakapan.')),
+              Expanded(
+                child: Text(
+                  'Masuk ke akun untuk menyimpan dan melihat riwayat percakapan.',
+                ),
+              ),
             ],
           ),
           backgroundColor: const Color(0xFF334155),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
       return;
@@ -110,7 +130,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 8, 12, 12),
                     child: Row(
                       children: [
-                        const Icon(Icons.history_rounded, color: Color(0xFFE0533C), size: 22),
+                        const Icon(
+                          Icons.history_rounded,
+                          color: Color(0xFFE0533C),
+                          size: 22,
+                        ),
                         const SizedBox(width: 8),
                         const Expanded(
                           child: Text(
@@ -127,10 +151,17 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                             Navigator.pop(sheetContext);
                             _startNewConversation();
                           },
-                          icon: const Icon(Icons.add_rounded, size: 18, color: Color(0xFFE0533C)),
+                          icon: const Icon(
+                            Icons.add_rounded,
+                            size: 18,
+                            color: Color(0xFFE0533C),
+                          ),
                           label: const Text(
                             'Baru',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFE0533C)),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFE0533C),
+                            ),
                           ),
                         ),
                       ],
@@ -149,17 +180,29 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                                     'assets/image/beranda/maskot_02_baca_buku.png',
                                     width: 64,
                                     height: 64,
-                                    errorBuilder: (context, error, stackTrace) => const Text('🐼', style: TextStyle(fontSize: 40)),
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Text(
+                                              '🐼',
+                                              style: TextStyle(fontSize: 40),
+                                            ),
                                   ),
                                   const SizedBox(height: 12),
                                   const Text(
                                     'Belum ada percakapan tersimpan.',
-                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF64748B)),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF64748B),
+                                    ),
                                   ),
                                   const SizedBox(height: 4),
                                   const Text(
-                                    'Mulai tanyakan materi Mandarin apa saja!',
-                                    style: TextStyle(fontSize: 11.5, color: Color(0xFF94A3B8)),
+                                    'Mulai percakapan dengan LingLing atau Gemini.',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: Color(0xFF94A3B8),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -167,11 +210,20 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                           )
                         : ListView.separated(
                             itemCount: rows.length,
-                            separatorBuilder: (_, _) => const Divider(height: 1, indent: 68, color: Color(0xFFF8F5F2)),
+                            separatorBuilder: (_, _) => const Divider(
+                              height: 1,
+                              indent: 68,
+                              color: Color(0xFFF8F5F2),
+                            ),
                             itemBuilder: (context, index) {
                               final row = rows[index];
-                              final messages = row['messages'] as List? ?? const [];
-                              final lastText = messages.isEmpty ? '' : (messages.last as Map)['text']?.toString() ?? '';
+                              final messages =
+                                  row['messages'] as List? ?? const [];
+                              final lastText = messages.isEmpty
+                                  ? ''
+                                  : (messages.last as Map)['text']
+                                            ?.toString() ??
+                                        '';
                               return ListTile(
                                 leading: Container(
                                   width: 40,
@@ -179,23 +231,40 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFFFF1EE),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFFFFD5CC)),
+                                    border: Border.all(
+                                      color: const Color(0xFFFFD5CC),
+                                    ),
                                   ),
-                                  child: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFFE0533C), size: 20),
+                                  child: const Icon(
+                                    Icons.chat_bubble_outline_rounded,
+                                    color: Color(0xFFE0533C),
+                                    size: 20,
+                                  ),
                                 ),
                                 title: Text(
                                   row['title']?.toString() ?? 'Percakapan',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: Color(0xFF0F172A)),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 13.5,
+                                    color: Color(0xFF0F172A),
+                                  ),
                                 ),
                                 subtitle: Text(
                                   lastText,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    color: Color(0xFF64748B),
+                                  ),
                                 ),
-                                trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8), size: 20),
+                                trailing: const Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: Color(0xFF94A3B8),
+                                  size: 20,
+                                ),
                                 onTap: () => Navigator.pop(sheetContext, row),
                               );
                             },
@@ -221,18 +290,30 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     final loaded = storedMessages.whereType<Map>().map((item) {
       final isUser = item['role'] == 'user';
       final text = item['text']?.toString() ?? '';
-      final timestamp = DateTime.tryParse(item['timestamp']?.toString() ?? '') ?? DateTime.now();
+      final timestamp =
+          DateTime.tryParse(item['timestamp']?.toString() ?? '') ??
+          DateTime.now();
+      final mode = AiTutorMode.values.firstWhere(
+        (candidate) => candidate.id == item['mode'],
+        orElse: () => AiTutorMode.appApi,
+      );
       return AiChatMessage(
         text: text,
         isUser: isUser,
         timestamp: timestamp,
-        mode: AiTutorMode.appApi,
-        modelBadge: isUser ? null : 'LingLing (玲玲) • AI Tutor',
-        audioText: isUser ? null : AudioService.instance.extractMandarinText(text),
+        mode: mode,
+        modelBadge: isUser ? null : mode.label,
+        audioText: isUser
+            ? null
+            : AudioService.instance.extractMandarinText(text),
       );
     }).toList();
     setState(() {
+      _conversationGeneration++;
       _activeConversationId = row['id'].toString();
+      _selectedMode = loaded.isEmpty
+          ? AiTutorMode.appApi
+          : loaded.last.mode ?? AiTutorMode.appApi;
       _messages
         ..clear()
         ..addAll(loaded);
@@ -240,20 +321,42 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     _scrollToBottom();
   }
 
-  Future<void> _persistConversation() async {
+  void _queueConversationPersistence() {
     final userId = context.read<AuthProvider>().profile?.id;
     if (userId == null) return;
-    final turns = _messages
+    final generation = _conversationGeneration;
+    final snapshot = List<AiChatMessage>.of(_messages);
+    _conversationSaveQueue = _conversationSaveQueue.then(
+      (_) => _persistConversation(
+        userId: userId,
+        generation: generation,
+        messages: snapshot,
+      ),
+    );
+  }
+
+  Future<void> _persistConversation({
+    required String userId,
+    required int generation,
+    required List<AiChatMessage> messages,
+  }) async {
+    if (generation != _conversationGeneration) return;
+    final turns = messages
         .where((message) => !message.text.startsWith('Halo! Aku'))
-        .map((message) => <String, dynamic>{
-              'role': message.isUser ? 'user' : 'assistant',
-              'text': message.text,
-              'timestamp': message.timestamp.toUtc().toIso8601String(),
-            })
+        .map(
+          (message) => <String, dynamic>{
+            'role': message.isUser ? 'user' : 'assistant',
+            'text': message.text,
+            'mode': message.mode?.id ?? AiTutorMode.appApi.id,
+            'timestamp': message.timestamp.toUtc().toIso8601String(),
+          },
+        )
         .toList();
     if (turns.isEmpty) return;
     final firstPrompt = turns.first['text'] as String;
-    final title = firstPrompt.length > 60 ? '${firstPrompt.substring(0, 57)}…' : firstPrompt;
+    final title = firstPrompt.length > 60
+        ? '${firstPrompt.substring(0, 57)}…'
+        : firstPrompt;
     try {
       final id = await SupabaseService.instance.saveAiConversation(
         userId: userId,
@@ -261,7 +364,9 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
         title: title,
         messages: turns,
       );
-      if (mounted) setState(() => _activeConversationId = id);
+      if (mounted && generation == _conversationGeneration) {
+        setState(() => _activeConversationId = id);
+      }
     } catch (error) {
       debugPrint('[AiTutorScreen] Gagal menyimpan riwayat chat: $error');
     }
@@ -279,11 +384,12 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
     if (trimmed.isEmpty || _isGenerating) return;
 
     _textController.clear();
-    const currentMode = AiTutorMode.appApi;
+    final currentMode = _selectedMode;
     final history = _messages
         .where(
           (message) =>
-              !message.text.startsWith('Halo! Aku') &&
+              message.mode == currentMode &&
+              !message.text.startsWith('Halo!') &&
               !message.text.startsWith('Belum bisa mendapat jawaban:'),
         )
         .toList()
@@ -311,7 +417,6 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       _isGenerating = true;
     });
 
-    await _persistConversation();
     _scrollToBottom();
 
     String response;
@@ -336,13 +441,13 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           isUser: false,
           timestamp: DateTime.now(),
           mode: currentMode,
-          modelBadge: 'LingLing (玲玲) • AI Tutor',
+          modelBadge: currentMode.label,
           audioText: AudioService.instance.extractMandarinText(response),
         ),
       );
     });
 
-    await _persistConversation();
+    _queueConversationPersistence();
     _scrollToBottom();
   }
 
@@ -366,6 +471,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
+
     return Scaffold(
       backgroundColor: const Color(0xFFFAF7F4),
       body: Stack(
@@ -381,7 +488,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
               child: Image.asset(
                 'assets/image/background/02_chinese_lake_garden.png',
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox.shrink(),
               ),
             ),
           ),
@@ -414,7 +522,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
               child: Image.asset(
                 'assets/image/beranda/awan_kecil.png',
                 width: 72,
-                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox.shrink(),
               ),
             ),
           ),
@@ -427,7 +536,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
               child: Image.asset(
                 'assets/image/beranda/kilau_01.png',
                 width: 18,
-                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox.shrink(),
               ),
             ),
           ),
@@ -436,7 +546,10 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             child: Column(
               children: [
                 _buildAppBar(),
-                _buildQuickSuggestions(),
+                if (!keyboardVisible) ...[
+                  _buildQuickSuggestions(),
+                  _buildModeSelector(),
+                ],
                 Expanded(child: _buildMessagesList()),
                 if (_isGenerating) _buildGeneratingIndicator(),
                 _buildInputArea(),
@@ -496,7 +609,10 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFF1EE),
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFFFD5CC), width: 1.8),
+                  border: Border.all(
+                    color: const Color(0xFFFFD5CC),
+                    width: 1.8,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: const Color(0xFFE0533C).withValues(alpha: 0.12),
@@ -511,7 +627,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                     width: 32,
                     height: 32,
                     fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const Text('🐼', style: TextStyle(fontSize: 22)),
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Text('🐼', style: TextStyle(fontSize: 22)),
                   ),
                 ),
               ),
@@ -550,7 +667,10 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                     ),
                     const SizedBox(width: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1.5,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFF1EE),
                         borderRadius: BorderRadius.circular(6),
@@ -569,16 +689,22 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                   ],
                 ),
                 const SizedBox(height: 2),
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.circle, size: 7, color: Color(0xFFF59E0B)),
-                    SizedBox(width: 4),
-                    Text(
-                      'Tutor Mandarin Aktif • Siap Membantu 🌸',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFFD97706),
+                    const Icon(Icons.circle, size: 7, color: Color(0xFFF59E0B)),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        _selectedMode == AiTutorMode.appApi
+                            ? 'Tutor Nihaoki Aktif • Siap Membantu 🌸'
+                            : 'Gemini • Asisten Umum',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFD97706),
+                        ),
                       ),
                     ),
                   ],
@@ -605,7 +731,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                   ),
                 ],
               ),
-              child: const Icon(Icons.add_comment_rounded, size: 18, color: Color(0xFFE0533C)),
+              child: const Icon(
+                Icons.add_comment_rounded,
+                size: 18,
+                color: Color(0xFFE0533C),
+              ),
             ),
           ),
 
@@ -627,7 +757,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                   ),
                 ],
               ),
-              child: const Icon(Icons.history_rounded, size: 18, color: Color(0xFFE0533C)),
+              child: const Icon(
+                Icons.history_rounded,
+                size: 18,
+                color: Color(0xFFE0533C),
+              ),
             ),
           ),
         ],
@@ -647,7 +781,9 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
         itemBuilder: (context, index) {
           final suggestion = _quickSuggestions[index];
           return GestureDetector(
-            onTap: () => _sendMessage(suggestion.replaceAll(RegExp(r'^[^\w\s]+\s*'), '')),
+            onTap: () => _sendMessage(
+              suggestion.replaceAll(RegExp(r'^[^\w\s]+\s*'), ''),
+            ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
@@ -675,6 +811,57 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildModeSelector() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Row(
+        children: AiTutorMode.values.map((mode) {
+          final isSelected = _selectedMode == mode;
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: mode == AiTutorMode.appApi ? 6 : 0,
+              ),
+              child: Semantics(
+                button: true,
+                selected: isSelected,
+                label: mode.label,
+                child: OutlinedButton(
+                  onPressed: _isGenerating ? null : () => _selectMode(mode),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: isSelected
+                        ? const Color(0xFFFFF1EE)
+                        : Colors.white,
+                    foregroundColor: isSelected
+                        ? const Color(0xFFC53030)
+                        : const Color(0xFF475569),
+                    side: BorderSide(
+                      color: isSelected
+                          ? const Color(0xFFFFB4A7)
+                          : const Color(0xFFE2E8F0),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 9),
+                    minimumSize: const Size(0, 38),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: Text(
+                    mode.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -718,7 +905,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                         width: 70,
                         height: 70,
                         fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => const Text('🐼', style: TextStyle(fontSize: 48)),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Text('🐼', style: TextStyle(fontSize: 48)),
                       ),
                     ),
                     Positioned(
@@ -729,7 +917,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                         width: 38,
                         height: 28,
                         fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const SizedBox.shrink(),
                       ),
                     ),
                   ],
@@ -841,7 +1030,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 width: 24,
                 height: 24,
                 fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => const Text('🐼', style: TextStyle(fontSize: 16)),
+                errorBuilder: (context, error, stackTrace) =>
+                    const Text('🐼', style: TextStyle(fontSize: 16)),
               ),
             ),
           ),
@@ -865,7 +1055,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 ),
               ],
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
@@ -878,7 +1068,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 ),
                 SizedBox(width: 8),
                 Text(
-                  'LingLing (玲玲) sedang merangkai penjelasan...',
+                  '${_selectedMode == AiTutorMode.appApi ? 'LingLing' : 'Gemini'} sedang menyiapkan jawaban...',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -905,7 +1095,10 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Color(0xFFE0533C), Color(0xFFC53030)],
@@ -939,7 +1132,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
               const SizedBox(height: 3),
               Text(
                 timeStr,
-                style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Color(0xFF94A3B8),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -947,7 +1144,7 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
       );
     }
 
-    // Balasan AI Tutor (LingLing)
+    // Balasan AI
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -969,7 +1166,8 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                   width: 26,
                   height: 26,
                   fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const Text('🐼', style: TextStyle(fontSize: 18)),
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Text('🐼', style: TextStyle(fontSize: 18)),
                 ),
               ),
             ),
@@ -1005,19 +1203,30 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFFFF1EE),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFFFFD5CC)),
+                                border: Border.all(
+                                  color: const Color(0xFFFFD5CC),
+                                ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.psychology_rounded, size: 12, color: Color(0xFFE0533C)),
+                                  const Icon(
+                                    Icons.psychology_rounded,
+                                    size: 12,
+                                    color: Color(0xFFE0533C),
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    msg.modelBadge ?? 'LingLing (玲玲) • AI Tutor',
+                                    msg.modelBadge ??
+                                        msg.mode?.label ??
+                                        'LingLing',
                                     style: const TextStyle(
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.w800,
@@ -1029,13 +1238,19 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                Clipboard.setData(ClipboardData(text: msg.text));
+                                Clipboard.setData(
+                                  ClipboardData(text: msg.text),
+                                );
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: const Text('Teks disalin ke papan klip!'),
+                                    content: const Text(
+                                      'Teks disalin ke papan klip!',
+                                    ),
                                     duration: const Duration(seconds: 1),
                                     behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
                                 );
                               },
@@ -1045,7 +1260,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                                   color: const Color(0xFFFAF7F4),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
-                                child: const Icon(Icons.copy_rounded, size: 14, color: Color(0xFF64748B)),
+                                child: const Icon(
+                                  Icons.copy_rounded,
+                                  size: 14,
+                                  color: Color(0xFF64748B),
+                                ),
                               ),
                             ),
                           ],
@@ -1074,11 +1293,16 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                               }
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFFFF7ED),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFFFED7AA)),
+                                border: Border.all(
+                                  color: const Color(0xFFFED7AA),
+                                ),
                               ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -1110,7 +1334,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
                       timeStr,
-                      style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF94A3B8),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -1149,21 +1377,31 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(left: 14),
-                    child: Icon(Icons.chat_bubble_outline_rounded, size: 18, color: Color(0xFF94A3B8)),
+                    child: Icon(
+                      Icons.chat_bubble_outline_rounded,
+                      size: 18,
+                      color: Color(0xFF94A3B8),
+                    ),
                   ),
                   Expanded(
                     child: TextField(
                       controller: _textController,
                       textInputAction: TextInputAction.send,
                       onSubmitted: _sendMessage,
-                      decoration: const InputDecoration(
-                        hintText: 'Tanyakan kosakata, grammar, atau hanzi...',
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        hintText: _selectedMode == AiTutorMode.appApi
+                            ? 'Tanya fitur atau materi di Nihaoki...'
+                            : 'Tanyakan apa saja...',
                         hintStyle: TextStyle(
                           fontSize: 13,
                           color: Color(0xFF94A3B8),
                           fontWeight: FontWeight.w500,
                         ),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
                         border: InputBorder.none,
                       ),
                     ),
@@ -1175,7 +1413,11 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
                       },
                       child: const Padding(
                         padding: EdgeInsets.only(right: 10),
-                        child: Icon(Icons.close_rounded, size: 16, color: Color(0xFF94A3B8)),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: Color(0xFF94A3B8),
+                        ),
                       ),
                     ),
                 ],
@@ -1184,7 +1426,9 @@ class _AiTutorScreenState extends State<AiTutorScreen> {
           ),
           const SizedBox(width: 8),
           GestureDetector(
-            onTap: _isGenerating ? null : () => _sendMessage(_textController.text),
+            onTap: _isGenerating
+                ? null
+                : () => _sendMessage(_textController.text),
             child: Container(
               width: 44,
               height: 44,

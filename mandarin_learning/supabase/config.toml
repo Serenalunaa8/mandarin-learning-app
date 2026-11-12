@@ -3,3 +3,9 @@ project_id = "mgtavxglowfkjmxsosvc"
 [functions.ai-tutor]
 # The app uses its own local session instead of Supabase Auth JWTs.
 verify_jwt = false
+
+[functions.lingling-ai]
+verify_jwt = false
+
+[functions.gemini-ai]
+verify_jwt = false

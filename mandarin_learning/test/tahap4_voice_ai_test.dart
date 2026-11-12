@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/services/tone_analysis_service.dart';
-import 'package:mandarin_learning/services/ai_tutor_service.dart';
-import 'package:mandarin_learning/services/speech_evaluation_service.dart';
+import 'package:nihaoki/services/tone_analysis_service.dart';
+import 'package:nihaoki/services/ai_tutor_service.dart';
+import 'package:nihaoki/services/speech_evaluation_service.dart';
 
 void main() {
   group('Tahap 4 (Suara & Analisis Nada - FR-04 & FR-05)', () {
@@ -64,6 +64,10 @@ void main() {
       );
       expect(AiTutorMode.appApi.id, 'app_api');
       expect(AiTutorMode.gemini.id, 'gemini');
+      expect(AiTutorMode.appApi.label, 'LingLing (玲玲)');
+      expect(AiTutorMode.gemini.label, 'Gemini');
+      expect(AiTutorMode.appApi.endpoint, 'lingling-ai');
+      expect(AiTutorMode.gemini.endpoint, 'gemini-ai');
     });
   });
 

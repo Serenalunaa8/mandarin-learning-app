@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 class SpeechRecognitionSettingsService {
   static const MethodChannel _settingsChannel = MethodChannel(
-    'com.example.mandarin_learning/biometric_settings',
+    'com.nihaoki.app/biometric_settings',
   );
 
   static Future<bool> openSettings() async {

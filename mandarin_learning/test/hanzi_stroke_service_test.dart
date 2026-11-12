@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/services/hanzi_stroke_service.dart';
+import 'package:nihaoki/services/hanzi_stroke_service.dart';
 
 void main() {
   group('HanziStrokeData', () {

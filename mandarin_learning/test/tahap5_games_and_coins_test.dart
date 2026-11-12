@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/models/coin_transaction_model.dart';
+import 'package:nihaoki/models/coin_transaction_model.dart';
 
 void main() {
   group('Tahap 5: Reward Koin & Ledger (PB-12, FR-17, FR-18, FR-19, FR-20, PBI-045 s.d. PBI-050)', () {

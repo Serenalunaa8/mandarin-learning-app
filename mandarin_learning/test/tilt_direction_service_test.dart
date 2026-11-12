@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/services/tilt_direction_service.dart';
+import 'package:nihaoki/services/tilt_direction_service.dart';
 
 void main() {
   group('Pemetaan arah Tilt to Answer', () {

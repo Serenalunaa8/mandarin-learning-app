@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/models/vocabulary_model.dart';
-import 'package:mandarin_learning/services/vocabulary_service.dart';
+import 'package:nihaoki/models/vocabulary_model.dart';
+import 'package:nihaoki/services/vocabulary_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

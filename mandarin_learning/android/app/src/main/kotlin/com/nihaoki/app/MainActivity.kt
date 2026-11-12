@@ -1,4 +1,4 @@
-package com.example.mandarin_learning
+package com.nihaoki.app
 
 import android.content.Intent
 import android.os.Build
@@ -15,7 +15,7 @@ class MainActivity : FlutterFragmentActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            "com.example.mandarin_learning/biometric_settings",
+            "com.nihaoki.app/biometric_settings",
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "canAuthenticate" -> {

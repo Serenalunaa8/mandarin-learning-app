@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:mandarin_learning/providers/auth_provider.dart';
-import 'package:mandarin_learning/providers/vocabulary_provider.dart';
-import 'package:mandarin_learning/screens/auth/welcome_screen.dart';
+import 'package:nihaoki/providers/auth_provider.dart';
+import 'package:nihaoki/providers/vocabulary_provider.dart';
+import 'package:nihaoki/screens/auth/welcome_screen.dart';
 
 void main() {
   testWidgets('WelcomeScreen renders title, mascot, and buttons according to mockup design', (WidgetTester tester) async {

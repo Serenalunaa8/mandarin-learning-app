@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/services/nearby_places_query.dart';
+import 'package:nihaoki/services/nearby_places_query.dart';
 
 void main() {
   group('Kueri tempat sekitar', () {
@@ -16,7 +16,7 @@ void main() {
         expect(query, contains('["name"]["amenity"]'));
         expect(query, contains('["name"]["shop"]'));
         expect(query, contains('["name"]["tourism"]'));
-        expect(query, isNot(contains('"highway"="bus_stop"')));
+        expect(query, contains('"highway"="bus_stop"'));
       },
     );
 
@@ -28,6 +28,8 @@ void main() {
       );
 
       expect(query, contains('["name"]["public_transport"]'));
+      expect(query, contains('["name"]["railway"~"station|halt|tram_stop"]'));
+      expect(query, contains('["name"]["highway"="bus_stop"]'));
     });
 
     test('Tidak membatasi jumlah data tempat hasil pencarian', () {

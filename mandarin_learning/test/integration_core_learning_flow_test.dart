@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/models/vocabulary_model.dart';
-import 'package:mandarin_learning/models/quiz_attempt_model.dart';
-import 'package:mandarin_learning/models/coin_transaction_model.dart';
-import 'package:mandarin_learning/services/tone_analysis_service.dart';
-import 'package:mandarin_learning/services/speech_evaluation_service.dart';
+import 'package:nihaoki/models/vocabulary_model.dart';
+import 'package:nihaoki/models/quiz_attempt_model.dart';
+import 'package:nihaoki/models/coin_transaction_model.dart';
+import 'package:nihaoki/services/tone_analysis_service.dart';
+import 'package:nihaoki/services/speech_evaluation_service.dart';
 
 // PBI-070: Integration Testing Alur Utama (Materi ➔ Kuis ➔ Pelafalan ➔ Reward Koin)
 // Sesuai PRD 8.1 Alur Utama Pembelajaran & DoD Sprint 7

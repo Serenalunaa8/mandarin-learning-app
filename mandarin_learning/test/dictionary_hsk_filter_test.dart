@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/models/vocabulary_model.dart';
-import 'package:mandarin_learning/screens/practice/dictionary_screen.dart';
+import 'package:nihaoki/models/vocabulary_model.dart';
+import 'package:nihaoki/screens/practice/dictionary_screen.dart';
 
 void main() {
   final vocabulary = [

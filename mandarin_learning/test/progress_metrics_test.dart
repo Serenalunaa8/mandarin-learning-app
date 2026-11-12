@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/models/quiz_attempt_model.dart';
-import 'package:mandarin_learning/providers/vocabulary_provider.dart';
+import 'package:nihaoki/models/quiz_attempt_model.dart';
+import 'package:nihaoki/providers/vocabulary_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

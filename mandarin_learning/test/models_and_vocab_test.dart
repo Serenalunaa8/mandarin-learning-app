@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mandarin_learning/models/vocabulary_model.dart';
-import 'package:mandarin_learning/models/user_profile_model.dart';
-import 'package:mandarin_learning/models/coin_transaction_model.dart';
+import 'package:nihaoki/models/vocabulary_model.dart';
+import 'package:nihaoki/models/user_profile_model.dart';
+import 'package:nihaoki/models/coin_transaction_model.dart';
 
 void main() {
   group('PBI-002 & PBI-006: UserProfile Model & Coin Logic Tests', () {
